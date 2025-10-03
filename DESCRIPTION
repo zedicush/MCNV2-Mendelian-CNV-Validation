@@ -1,0 +1,31 @@
+Package: MCNV2
+Type: Package
+Title: MCNV2 – Mendelian CNV Validation
+Version: 0.1.0
+Authors@R: c(
+    person(
+      "Jane", "Doe",
+      email = "jane@example.com",
+      role = c("aut", "cre")
+    )
+  )
+Description: More about what it does (maybe more than one line).
+    Continuation lines should be indented.
+License: MIT + file LICENSE
+Encoding: UTF-8
+Roxygen: list(markdown = TRUE)
+LazyData: true
+Imports:
+        shiny,
+        shinydashboard,
+        shinyjs,
+        fresh,
+        readr,
+        DT,
+        ggplot2,
+        dplyr,
+        tidyr,
+        stringr,
+        biomaRt,
+        patchwork
+RoxygenNote: 7.3.2

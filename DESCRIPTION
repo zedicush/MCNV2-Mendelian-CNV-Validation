@@ -19,6 +19,7 @@ Imports:
         shiny,
         shinydashboard,
         shinyjs,
+        shinyBS,
         fresh,
         readr,
         DT,

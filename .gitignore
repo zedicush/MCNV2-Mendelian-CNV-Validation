@@ -1,0 +1,13 @@
+.Rhistory
+.Rapp.history
+.RData
+.Ruserdata
+.Rproj.user/
+*.Rproj
+.DS_Store
+Thumbs.db
+*_cache/
+*.utf8.md
+.Rcheck/
+.Renviron
+.env

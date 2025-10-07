@@ -9,6 +9,7 @@
 
 library(shiny)
 library(shinydashboard)
+library(shinybusy)
 library(shinyjs)
 library(shinyBS)
 library(fresh)
@@ -29,6 +30,7 @@ my_theme <- create_theme(
 
 sidebar <- dashboardSidebar(
 	sidebarMenu(
+		id = "tabs", 
 		menuItem("Preprocessing", tabName = "prepocessing", icon = icon("users-gear")),
 		menuItem("MP Exploration", icon = icon("chart-line"), tabName = "mp_exploration"),
 		menuItem("De novo Analysis", icon = icon("magnifying-glass-chart"), tabName = "denovo_analysis")
@@ -47,6 +49,10 @@ body <- dashboardBody(
           });
         }
       ")),
+	# Add a spinner in an application each time the server take more 100 milliseconds to respond.
+	add_busy_spinner(spin = "fading-circle", 
+									 position = "top-right", 
+									 margins = c(10,10)),
 	tabItems(
 		tabItem(tabName = "prepocessing",
 						h3("Preprocessing"),
@@ -58,13 +64,12 @@ body <- dashboardBody(
 						sidebarLayout(
 							sidebarPanel(
 								h4("Input files"),
-								fileInput("cnv_tsv", label = "CNV File (mandatory, BED)",
-													accept = ".tsv"),
+								fileInput("cnv_tsv", label = "CNV File (mandatory, BED)"),
 								verbatimTextOutput("cnv_tsv_status"),
 								fileInput("ped_tsv", label = "Pedigree File (mandatory, tsv)"),
 								verbatimTextOutput("ped_tsv_status"),
-								#fileInput("genes_tsv", label = "Gene Annotation File (optional, tsv)"),
-								#fileInput("prob_tsv", label = "Problematic regions (optional, tsv)", accept = NULL),
+								fileInput("prb_tsv", label = "Problematic regions (optional, BED)"),
+								verbatimTextOutput("prb_tsv_status"),
 								hr(),
 								h4("Parameters"),
 								selectInput("build", label = "Genome build",
@@ -78,29 +83,36 @@ body <- dashboardBody(
 								div(class = "outdir-box", verbatimTextOutput("outdir_display")),
 								actionButton("submit_preprocess", label = "Submit",
 														 icon = icon("gear"), disabled = TRUE)
-
+								
 							),
-
 							mainPanel(
-								bsCollapse(id = "preprocess_panel", open = "Annotation table (Preview)",
-													 bsCollapsePanel("Annotation table (Preview)", 
-													 								DTOutput("preview_preproc_tbl"),
-													 								verbatimTextOutput("annot_tsv_status"),
-													 								hr(),
-													 								actionButton("submit_inheritance", 
-													 														 label = "Proceed to Inheritance calculation",
-													 														 icon = icon("gear"), disabled = FALSE), style = "info"),
-													 bsCollapsePanel("Inheritance table (Preview)", 
-													 								DTOutput("preview_inherit_tbl"),
-													 								hr(),
-													 								actionButton("submit_mpexploration", 
-													 														 label = "Proceed to Mendelian Precision analysis",
-													 														 icon = icon("gear"), disabled = FALSE), style = "success")
-								)               
+								conditionalPanel(condition = "input.submit_preprocess > 0",
+																 bsCollapse(id = "preprocess_panel",
+																 					 open = c("Annotation table (Preview)","Inheritance table (Preview)"),
+																 					 multiple = TRUE,
+																 					 bsCollapsePanel("Annotation table (Preview)", 
+																 					 								DTOutput("preview_preproc_tbl"),
+																 					 								verbatimTextOutput("annot_tsv_status"),
+																 					 								hr(),
+																 					 								actionButton("submit_inheritance", 
+																 					 														 label = "Proceed to Inheritance calculation",
+																 					 														 icon = icon("gear"), 
+																 					 														 disabled = TRUE), 
+																 					 								style = "info"),
+																 					 bsCollapsePanel("Inheritance table (Preview)", 
+																 					 								DTOutput("preview_inherit_tbl"),
+																 					 								verbatimTextOutput("inherit_tsv_status"),
+																 					 								hr(),
+																 					 								actionButton("goto_mpexploration", 
+																 					 														 label = "Go to Mendelian Precision analysis",
+																 					 														 icon = icon("arrow-right"), 
+																 					 														 disabled = TRUE), 
+																 					 								style = "success")
+																 ))               
 							)
 						)
 		),
-
+		
 		tabItem(tabName = "mp_exploration",
 						h3("MP Exploration"),
 						helpText(
@@ -110,16 +122,36 @@ body <- dashboardBody(
 						br(),
 						sidebarLayout(
 							sidebarPanel(
-								fileInput("preprocessed_file", label = "Preprocessed input (mandatory)"),
-								selectInput("select", label = "Genome build",
-														choices = list("hg38" = 38, "hg19" = 19),
-														selected = 38),
+								h4("Input"),
+								uiOutput("conditional_input"),
+								hr(),
+								h4("Parameters"),
+								radioButtons("transmission", label = "Transmission type", 
+														 choices = list("CNV level" = 1, "Gene level" = 2), 
+														 selected = 2, inline = TRUE),
+								checkboxGroupInput("cnv_type", label = "CNV type", 
+														choices = c("DEL", "DUP"), 
+														selected = c("DEL","DUP"), inline = TRUE),
+								selectizeInput("quality_metric", label = "Quality metric",
+															 options = NULL, choices = NULL),
+								hr(),
+								h4("Inclusion criteria"),
+								uiOutput("score_ui"),
+								uiOutput("size_ui"),
+								sliderInput("min_exon_ov", "% Exon overlap minimum",
+														min = 0, max = 100, value = 0, step = 10),
+								shinyWidgets::sliderTextInput(inputId = "cnv_size", 
+																							label = "CNV size range", 
+																							choices = c(1,5,10,15,20,25,30)),
+								hr(),
+								h4("Exlusion criteria"),
+								uiOutput("score_ui"),
 								hr(),
 								actionButton("submit_display", label = "Apply filters",
 														 icon = icon("gear"), disabled = TRUE)
-
+								
 							),
-
+							
 							# Show a plot of the generated distribution
 							mainPanel(
 								tableOutput("summary_table"),
@@ -127,7 +159,7 @@ body <- dashboardBody(
 							)
 						)
 		),
-
+		
 		tabItem(tabName = "denovo_analysis",
 						h3("De Novo Analysis"),
 						helpText("HELP"),

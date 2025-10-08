@@ -105,7 +105,7 @@ function(input, output, session) {
 			annot_output_file(file.path(results_dir, "cnvs_annotated_by_genes.tsv"))
 			
 			incProgress(0.5, detail = "Annotating CNVs...")
-
+			
 			ret <- MCNV2::annotate(cnvs_file = cnvs_file, 
 														 prob_regions_file = prob_regions_file, 
 														 output_file = annot_output_file(), 
@@ -189,7 +189,7 @@ function(input, output, session) {
 	output$conditional_input <- renderUI({
 		if (inherit_check()) {
 			tagList(
-				tags$text(paste("✅ Path to inheritance file:\n",
+				tags$p(paste("✅ Path to inheritance file:\n",
 												inheritance_output_file()))
 			)
 		} else {
@@ -223,15 +223,74 @@ function(input, output, session) {
 	
 	observeEvent(inheritance_output_file(), {
 		if (file.exists(inheritance_output_file())) {
-			dat <- readr::read_tsv(inheritance_output_file(), n_max = 1, 
-														 show_col_types = FALSE)
-			updateSelectizeInput(inputId = "quality_metric", 
-													 choices = colnames(dat))
+			spec <- readr::spec_tsv(inheritance_output_file())
+			
+			num_cols <- names(spec$cols)[
+				vapply(spec$cols, function(x) {
+					inherits(x, "collector_double") || inherits(x, "collector_number")
+				}, logical(1))
+			]
+			
+			updateSelectizeInput(inputId = "quality_metric", choices = num_cols)
 		} else {
 			updateSelectizeInput(inputId = "quality_metric", choices = NULL)
 		}
 	})
 	
+	output$qty_metric_range_ui <- renderUI({
+		req(inheritance_output_file())
+		req(input$quality_metric)
+		
+		# get range without loading the full file
+		dt <- data.table::fread(inheritance_output_file(), select = input$quality_metric, 
+														sep = "\t", showProgress = FALSE)
+		range_values <- range(dt[[input$quality_metric]], na.rm = TRUE)
+		
+		if(is.numeric(range_values)){
+			rng_infos <- create_dynamic_ticks(range_values)
+			
+			sliderTextInput(
+				inputId = "qty_metric_range", 
+				label = paste0(input$quality_metric, " range"),
+				choices = rng_infos$ticks,
+				selected = c(rng_infos$min, rng_infos$max),
+				grid = TRUE
+			)
+		} else {
+			tags$p("❌ The chosen quality metric is not numeric.")
+		}
+		
+	})
 	
+	output$summary <- renderUI({
+		req(inheritance_output_file())
+		req(input$quality_metric)
+		
+		# convert CNV size range
+		min_cnv_size <- parse_cnv_size_value(input$cnv_range[1])
+		max_cnv_size <- parse_cnv_size_value(input$cnv_range[2])
+		
+		# TODO: get exclusion list
+		input$exclusion_genes
+		
+		dataset <- arrow::open_tsv_dataset(inheritance_output_file())
+		filtered_dataset <- dataset %>% dplyr::filter(TYPE_child %in% input$cnv_type,
+																									Gnomad_Max_AF <= input$freq_cutoff,
+																									Exon_Overlap >= input$min_exon_ov/100,
+																									Transcript_BP_Overlap >= input$min_transcript_ov/100,
+																									Size_child >= min_cnv_size,
+																									Size_child <= max_cnv_size,
+																									LOEUF <= input$loeuf_cutoff,
+																									.data[[input$quality_metric]] >= input$qty_metric_range
+																									)
+
+		n_cnvs_all <- dataset %>% summarize( n = n()) %>% pull(n, as_vector = TRUE)
+		n_cnvs_filtered <- filtered_dataset %>% summarize( n = n()) %>% pull(n, as_vector = TRUE)
+		
+		tags$text(n_cnvs_filtered, "/", n_cnvs_all)
+
+		
+		
+	})
 	
 }

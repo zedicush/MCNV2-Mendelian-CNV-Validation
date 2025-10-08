@@ -49,6 +49,16 @@ body <- dashboardBody(
           });
         }
       ")),
+	tags$style(type = "text/css", "
+      .inline label {
+        display: table-cell;
+        text-align: left;
+        vertical-align: middle;
+      }
+      .inline .form-group {
+        display: table-row;
+      }
+    "),
 	# Add a spinner in an application each time the server take more 100 milliseconds to respond.
 	add_busy_spinner(spin = "fading-circle", 
 									 position = "top-right", 
@@ -117,7 +127,8 @@ body <- dashboardBody(
 						h3("MP Exploration"),
 						helpText(
 							"This step requires a preprocessed file created at the ",
-							tags$a("Preprocessing step", onclick = "openTab('prepocessing')", href = "#")
+							tags$a("Preprocessing step", onclick = "openTab('prepocessing')",
+										 href = "#")
 						),
 						br(),
 						sidebarLayout(
@@ -130,32 +141,75 @@ body <- dashboardBody(
 														 choices = list("CNV level" = 1, "Gene level" = 2), 
 														 selected = 2, inline = TRUE),
 								checkboxGroupInput("cnv_type", label = "CNV type", 
-														choices = c("DEL", "DUP"), 
-														selected = c("DEL","DUP"), inline = TRUE),
+																	 choices = c("DEL", "DUP"), 
+																	 selected = c("DEL","DUP"), inline = TRUE),
 								selectizeInput("quality_metric", label = "Quality metric",
 															 options = NULL, choices = NULL),
 								hr(),
-								h4("Inclusion criteria"),
-								uiOutput("score_ui"),
-								uiOutput("size_ui"),
-								sliderInput("min_exon_ov", "% Exon overlap minimum",
+								h4("CNV-level inclusion criteria"),
+								uiOutput("qty_metric_range_ui"),
+								tags$div(
+									class = "inline",
+									style = "width: 100%;",
+									numericInput(
+										inputId = "freq_cutoff",
+										label = "GnomAD Max AF ≤",
+										min = 0, max = 0.05, step = 0.001, value = 0.001
+									)
+								),
+								br(),br(),
+								sliderInput("min_exon_ov", "Min. % of disrupted exons",
 														min = 0, max = 100, value = 0, step = 10),
-								shinyWidgets::sliderTextInput(inputId = "cnv_size", 
-																							label = "CNV size range", 
-																							choices = c(1,5,10,15,20,25,30)),
+								sliderInput("min_transcript_ov", "Min. % bp overlap",
+														min = 0, max = 100, value = 0, step = 10),
+								sliderTextInput(
+									inputId = "cnv_range",
+									label = "CNV size (bp):",
+									choices = c("1","30kb","40kb","50kb","100kb","200kb","500kb","1Mb",">1Mb"),
+									selected = c("1", ">1Mb"),
+									grid = TRUE
+								),
 								hr(),
-								h4("Exlusion criteria"),
-								uiOutput("score_ui"),
+								h4("Gene-level exlusion criteria"),
+								# TODO: gestion du fichier
+								fileInput("exclusion_genes", label = "Exclusion list (Ensembl Gene IDs)"),
+								verbatimTextOutput("exclusion_list_status"),
+								tags$div(class = "inline",
+												 numericInput(inputId = "loeuf_cutoff", 
+												 						 label = "Exclude genes with LOEUF ≤ ", 
+												 						 min = 0, max = 1, step = 0.1, value = 0.6)
+								),
 								hr(),
-								actionButton("submit_display", label = "Apply filters",
-														 icon = icon("gear"), disabled = TRUE)
+								actionButton("submit_mpviz", label = "Apply filters",
+														 icon = icon("gear"), disabled = FALSE)
 								
 							),
-							
-							# Show a plot of the generated distribution
 							mainPanel(
-								tableOutput("summary_table"),
-								tableOutput("header"),
+								conditionalPanel(condition = "input.submit_mpviz > 0",
+																 tabsetPanel(id = "tabs",
+																 						tabPanel("Overview",
+																 										 fluidRow(
+																 										 	column(4, wellPanel(h5("Global MP (DEL)"), textOutput("mp_del"))),
+																 										 	column(4, wellPanel(h5("Global MP (DUP)"), textOutput("mp_dup"))),
+																 										 	column(4, wellPanel(h5("De novo: Observed vs Expected"), textOutput("dnv_obs_exp")))
+																 										 ),
+																 										 htmlOutput("summary")
+																 						),
+																 						tabPanel("Plot DEL", plotOutput("plot_del", height = 600)),
+																 						tabPanel("Plot DUP", plotOutput("plot_dup", height = 600)),
+																 						tabPanel("Filtered table", DTOutput("tbl")),
+																 						tabPanel("De novo & biomaRt",
+																 										 fluidRow(
+																 										 	column(6, DTOutput("dnv_tbl")),
+																 										 	column(6,
+																 										 				 h5("Selection: locus & genes (biomaRt)"),
+																 										 				 verbatimTextOutput("selected_locus"),
+																 										 				 tableOutput("biomart_hits")
+																 										 	)
+																 										 )
+																 						)
+																 )
+								)
 							)
 						)
 		),

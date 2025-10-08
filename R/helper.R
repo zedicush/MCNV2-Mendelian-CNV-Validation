@@ -1,5 +1,7 @@
 #' @export
-check_input_file <- function(filepath, file_type = c("cnv", "ped", "annot","prb", "preproc"), sep = "\t") {
+check_input_file <- function(filepath, 
+														 file_type = c("cnv", "ped", "annot","prb", "preproc"), 
+														 sep = "\t") {
 	file_type <- match.arg(file_type)
 	
 	if (!file.exists(filepath)) {
@@ -120,10 +122,13 @@ annotate <- function(cnvs_file, prob_regions_file, output_file,
 																		"gene_resources.tsv", 
 																		package = "MCNV2")
 	
-	cmd = paste("python3", gene_annotation_script, "--cnv", cnvs_file,
-							"--gene_resource", gene_resource_file, "--prob_regions", prob_regions_file,
+	cmd = paste("python3", gene_annotation_script, 
+							"--cnv", cnvs_file,
+							"--gene_resource", gene_resource_file, 
+							"--prob_regions", prob_regions_file,
 							"--out", output_file, 
-							"--genome_version", genome_version, "--bedtools_path", bedtools_path)
+							"--genome_version", genome_version, 
+							"--bedtools_path", bedtools_path)
 	ret <- system(command = cmd, intern = FALSE)
 	
 	return(ret)
@@ -140,12 +145,44 @@ compute_gene_inheritance <- function(){
 
 #' @export
 compute_inheritance <- function(){
-	print(system.file("python",
-										"gene_annotation.py", 
-										package = "MCNV2"))
+	print(system.file("python", "compute_inheritance.py", package = "MCNV2"))
 	
-	gene_inheritance <- compute_gene_inheritance()
-	cnv_inheritance <- compute_cnv_inheritance()
-
 	return(0)
+}
+
+parse_cnv_size_value <- function(x) {
+	if(grepl(x = x, pattern = ">")){
+		x <- Inf
+	} else {
+		x <- gsub("kb", "000", x)
+		x <- gsub("Mb", "000000", x)
+		x <- as.numeric(x)
+	}
+	
+	return(x)
+}
+
+create_dynamic_slider <- function(range_values){
+	
+	min_val <- range_values[1]
+	max_val <- range_values[2]
+	diff_val <- max_val - min_val
+	
+	if (max_val <= 1) {
+		# Cas 0–1
+		step_val <- 0.1
+		seq_vals <- seq(0, 1, by = step_val)
+	} else {
+		# Cas général : 100 intervalles, arrondis à un chiffre "propre"
+		raw_step <- diff_val / 100
+		magnitude <- 10 ^ floor(log10(raw_step))
+		step_val <- round(raw_step / magnitude) * magnitude
+		seq_vals <- seq(
+			floor(min_val / step_val) * step_val,
+			ceiling(max_val / step_val) * step_val,
+			by = step_val
+		)
+	}
+	
+	return(seq_vals)
 }

@@ -1,3 +1,16 @@
+cnv_size_colors <- c(
+	#"0" = "#888888",         # dark gray
+	"1-30kb" = "#A6CEE3",         # bleu clair
+	"30-40kb" = "#1F78B4",     # bleu foncé
+	"40-50kb" = "#33A02C",    # vert
+	"50-100kb" = "#FB9A99",   # rose clair
+	"100-200kb" = "#6A3D9A",   # violet foncé
+	"200-500kb" = "#CAB2D6",  # violet clair
+	"500-1M" = "#FDBF6F", # orange clair
+	">1M" = "#FF7F00", # orange
+	"All" = "#E31A1C"       # rouge vif
+)
+
 #' @export
 check_input_file <- function(filepath, 
 														 file_type = c("cnv", "ped", "annot","prb", "preproc", "gene"), 
@@ -205,5 +218,108 @@ create_dynamic_ticks <- function(range_values) {
 	return(list(ticks = ticks, step = step, min = min(ticks), max = max(ticks)))
 }
 
+# plot_one_view <- function(df_view, type_label, mode, subtitle_tag) {
+# 	if (!nrow(df_view) || !all(c("type","trans","Size_Range") %in% names(df_view))) {
+# 		return(ggplot() + theme_minimal() + ggtitle(paste(type_label, "—", subtitle_tag, "(no data)")))
+# 	}
+# 	if (identical(mode, "mp_score")) {
+# 		ths <- thresholds_seq()
+# 		ag <- mp_vs_score_by_size(df_view, type_label, ths)
+# 		if (!nrow(ag)) return(ggplot() + theme_minimal() + ggtitle(paste(type_label, "—", subtitle_tag, "(no data)")))
+# 		ag$Size_Range <- factor(ag$Size_Range,
+# 														levels = c("[1kb–10kb[","[10kb–30kb[","[30kb–50kb[","[50kb–100kb[",
+# 																			 "[100kb–200kb[","[200kb–500kb[","[500kb–1000kb[",">=1Mb"))
+# 		ggplot(ag, aes(x = threshold, y = precision, color = Size_Range)) +
+# 			geom_line(linewidth = 0.9) +
+# 			geom_point(size = 1.8) +
+# 			geom_text(aes(label = n), vjust = -0.8, size = 2.6, alpha = 0.8, check_overlap = TRUE) +
+# 			scale_y_continuous(limits = c(0, 1), labels = scales::percent) +
+# 			labs(title = paste("Mendelian Precision —", type_label),
+# 					 subtitle = subtitle_tag,
+# 					 x = "Score threshold (≥)", y = "Mendelian Precision") +
+# 			theme_minimal(base_size = 12) +
+# 			theme(plot.title = element_text(size = 13))
+# 	} else {
+# 		ag <- mp_by_size(df_view, type_label)
+# 		if (!nrow(ag)) return(ggplot() + theme_minimal() + ggtitle(paste(type_label, "—", subtitle_tag, "(no data)")))
+# 		ag$Size_Range <- factor(ag$Size_Range,
+# 														levels = c("[1kb–10kb[","[10kb–30kb[","[30kb–50kb[","[50kb–100kb[",
+# 																			 "[100kb–200kb[","[200kb–500kb[","[500kb–1000kb[",">=1Mb"))
+# 		ggplot(ag, aes(x = Size_Range, y = mendelian_precision)) +
+# 			geom_col() +
+# 			geom_text(aes(label = paste0("n = ", total_CNVs))) +
+# 			scale_y_continuous(limits = c(0, 1), labels = scales::percent) +
+# 			labs(title = paste("Mendelian Precision —", type_label),
+# 					 subtitle = subtitle_tag,
+# 					 x = "Size_Range", y = "Mendelian Precision") +
+# 			theme_minimal(base_size = 8) +
+# 			theme(axis.text.x = element_text(angle = 25, hjust = 1))
+# 	}
+# }
+# 
+
+mp_vs_metric_by_size <- function(ds, quality_metric, transmission_col) {
+	
+	range_values <- range(ds %>% pull(all_of(quality_metric), as_vector = TRUE))
+	rng_infos <- create_dynamic_ticks(range_values)
+	
+	res <- lapply(rng_infos$ticks, function(th) {
+		tmp <- ds %>% dplyr::filter(.data[[quality_metric]] >= th) 
+		n <- tmp %>% summarise(n()) %>% pull()
+		if (n == 0) return(NULL)
+		tmp %>%
+			mutate(trans = !!sym(transmission_col) == "inherited") %>%
+			dplyr::group_by(Size_Range) %>%
+			dplyr::summarise(n = dplyr::n(),
+											 MP = round(mean(trans, na.rm = TRUE), digits = 2),
+											 .groups = "drop") %>%
+			dplyr::mutate(threshold = th) %>% collect()
+	})
+	dplyr::bind_rows(res)
+}
+
+mp_vs_metric <- function(ds, quality_metric, transmission_col) {
+	
+	range_values <- range(ds %>% pull(all_of(quality_metric), as_vector = TRUE))
+	rng_infos <- create_dynamic_ticks(range_values)
+	
+	res <- lapply(rng_infos$ticks, function(th) {
+		tmp <- ds %>% dplyr::filter(.data[[quality_metric]] >= th) 
+		n <- tmp %>% summarise(n()) %>% pull()
+		if (n == 0) return(NULL)
+		tmp %>%
+			mutate(trans = !!sym(transmission_col) == "inherited") %>%
+			dplyr::summarise(n = dplyr::n(),
+											 MP = round(mean(trans, na.rm = TRUE), digits = 2)) %>%
+			dplyr::mutate(Size_Range = "All", threshold = th) %>% collect()
+	})
+	dplyr::bind_rows(res)
+}
+
+plot_mp_vs_metric <- function(dt, title, subtitle, y_lab, x_lab){
+	dt$Size_Range <- factor(dt$Size_Range,
+													levels = c("1-30kb","30-40kb","40-50kb","50-100kb",
+																		 "100-200kb","200-500kb","500-1M",">1M","All"))
+	
+	p <- ggplot(dt, aes(x = threshold, y = MP, color = Size_Range)) +
+		geom_line() +
+		geom_point(aes(size = n)) +
+		scale_y_continuous(limits = c(0, 1), labels = scales::percent) +
+		labs(title = title, subtitle = subtitle, x = x_lab, y = y_lab) +
+		theme_minimal(base_size = 12) +
+		scale_color_manual(values = cnv_size_colors, name = "CNV Length Bin")
+	
+	return(p)
+}
 
 
+mp_by_size <- function(ds, transmission_col) {
+	df %>%
+		dplyr::group_by(Size_Range) %>%
+		mutate(trans = !!sym(transmission_col) == "inherited") %>%
+		dplyr::summarise(
+			n = dplyr::n(),
+			MP = round(mean(trans, na.rm = TRUE), digits = 2),
+			.groups = "drop"
+		) %>% collect
+}

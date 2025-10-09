@@ -8,6 +8,7 @@
 #
 
 library(shiny)
+data("mtcars")
 
 options(shiny.maxRequestSize = Inf)  # No upload size limit
 
@@ -27,7 +28,9 @@ function(input, output, session) {
 	preproc_check <- reactiveVal(FALSE)
 	prob_regions_file <- reactiveVal(NULL)
 	annot_output_file <- reactiveVal(NULL)
-	inheritance_output_file <- reactiveVal(NULL)
+	inherit_output_file <- reactiveVal(NULL)
+	filtered_ds <- reactiveVal(NULL) #arrow dataset to avoid loading file in memory
+	ready_to_plot <- reactiveVal(FALSE)
 	
 	observeEvent(input$cnv_tsv, {
 		req(input$cnv_tsv)  # Attend que le fichier soit chargé
@@ -157,10 +160,10 @@ function(input, output, session) {
 			
 			if(ret == 0){
 				inherit_check(TRUE)
-				inheritance_output_file("~/workspace/projects/Support/BIOINF-219/data/DEL_DUP_inheritance_readyForShiny.tsv")
+				inherit_output_file("~/workspace/projects/Support/BIOINF-219/data/DEL_DUP_inheritance_readyForShiny.tsv")
 				output$inherit_tsv_status <- renderText(paste("✅ Path to inheritance file:\n",
-																											inheritance_output_file()))
-				dat <- readr::read_tsv(inheritance_output_file(), n_max = 50, show_col_types = FALSE)
+																											inherit_output_file()))
+				dat <- readr::read_tsv(inherit_output_file(), n_max = 50, show_col_types = FALSE)
 				output$preview_inherit_tbl <- renderDataTable({
 					datatable(dat, options = list(scrollX = TRUE), rownames = FALSE)
 				})
@@ -190,7 +193,7 @@ function(input, output, session) {
 		if (inherit_check()) {
 			tagList(
 				tags$p(paste("✅ Path to inheritance file:\n",
-												inheritance_output_file()))
+										 inherit_output_file()))
 			)
 		} else {
 			tagList(
@@ -213,7 +216,7 @@ function(input, output, session) {
 		
 		preproc_check(ret$status)
 		if(preproc_check()){
-			inheritance_output_file(filepath)
+			inherit_output_file(filepath)
 			output$preproc_tsv_status <- renderText(ret$msg)
 		} else {
 			output$preproc_tsv_status <- renderText(ret$msg)
@@ -221,28 +224,42 @@ function(input, output, session) {
 		
 	})
 	
-	observeEvent(inheritance_output_file(), {
-		if (file.exists(inheritance_output_file())) {
-			spec <- readr::spec_tsv(inheritance_output_file())
+	observeEvent(inherit_output_file(), {
+		if (file.exists(inherit_output_file())) {
+			
+			internal_columns <- c("START_child","STOP_child", "Exon_Overlap",
+														"Transcript_BP_Overlap","Size_child","LOEUF", 
+														"Gnomad_Max_AF", "segmentaldup_Overlap",
+														"Overlap_CNV_mother","Overlap_CNV_father",
+														"overlapPR", "Size_child")
+			
+			spec <- readr::spec_tsv(inherit_output_file())
 			
 			num_cols <- names(spec$cols)[
 				vapply(spec$cols, function(x) {
 					inherits(x, "collector_double") || inherits(x, "collector_number")
 				}, logical(1))
 			]
-			
-			updateSelectizeInput(inputId = "quality_metric", choices = num_cols)
+			num_cols <- num_cols[!num_cols %in% internal_columns]
+			if(length(num_cols) > 0){
+				updateSelectizeInput(inputId = "quality_metric", 
+														 choices = num_cols)
+			} else {
+				ready_to_plot(FALSE)
+				# TODO: ajouter un message d'alerte!
+				# TODO: desactiver le bouton submit_mpviz
+			}
 		} else {
 			updateSelectizeInput(inputId = "quality_metric", choices = NULL)
 		}
 	})
 	
 	output$qty_metric_range_ui <- renderUI({
-		req(inheritance_output_file())
+		req(inherit_output_file())
 		req(input$quality_metric)
 		
 		# get range without loading the full file
-		dt <- data.table::fread(inheritance_output_file(), select = input$quality_metric, 
+		dt <- data.table::fread(inherit_output_file(), select = input$quality_metric, 
 														sep = "\t", showProgress = FALSE)
 		range_values <- range(dt[[input$quality_metric]], na.rm = TRUE)
 		
@@ -262,35 +279,123 @@ function(input, output, session) {
 		
 	})
 	
-	output$summary <- renderUI({
-		req(inheritance_output_file())
+	observeEvent(input$submit_mpviz, {
+		
+		req(inherit_output_file())
 		req(input$quality_metric)
 		
 		# convert CNV size range
 		min_cnv_size <- parse_cnv_size_value(input$cnv_range[1])
 		max_cnv_size <- parse_cnv_size_value(input$cnv_range[2])
 		
-		# TODO: get exclusion list
-		input$exclusion_genes
+		# get quality metric thresholds
+		min_qty_metric <- as.numeric(input$qty_metric_range[1])
+		max_qty_metric <- as.numeric(input$qty_metric_range[2])
 		
-		dataset <- arrow::open_tsv_dataset(inheritance_output_file())
-		filtered_dataset <- dataset %>% dplyr::filter(TYPE_child %in% input$cnv_type,
-																									Gnomad_Max_AF <= input$freq_cutoff,
-																									Exon_Overlap >= input$min_exon_ov/100,
-																									Transcript_BP_Overlap >= input$min_transcript_ov/100,
-																									Size_child >= min_cnv_size,
-																									Size_child <= max_cnv_size,
-																									LOEUF <= input$loeuf_cutoff,
-																									.data[[input$quality_metric]] >= input$qty_metric_range
-																									)
+		dataset <- arrow::open_tsv_dataset(inherit_output_file())
+		dataset <- dataset %>% dplyr::filter(TYPE_child %in% input$cnv_type)
+		filtered_dataset <- dataset %>% dplyr::filter(#Gnomad_Max_AF <= input$freq_cutoff,
+			Exon_Overlap >= input$min_exon_ov/100,
+			Transcript_BP_Overlap >= input$min_transcript_ov/100
+			#Size_child >= min_cnv_size,
+			#Size_child <= max_cnv_size,
+			#LOEUF <= input$loeuf_cutoff
+			#.data[[input$quality_metric]] >= min_qty_metric,
+			#.data[[input$quality_metric]] <= max_qty_metric
+			
+		)
 
-		n_cnvs_all <- dataset %>% summarize( n = n()) %>% pull(n, as_vector = TRUE)
-		n_cnvs_filtered <- filtered_dataset %>% summarize( n = n()) %>% pull(n, as_vector = TRUE)
+		# apply exclusion list
+		if(!is.null(input$exclus_genes)){
+			lines <- tryCatch(readLines(input$exclus_genes$datapath, warn = FALSE), 
+												error = function(e) character())
+			exclusion_list <- unique(trimws(lines[nzchar(trimws(lines))]))
+			filtered_dataset <- filtered_dataset %>% dplyr::filter(!GeneID %in% exclusion_list)
+		}		
 		
-		tags$text(n_cnvs_filtered, "/", n_cnvs_all)
-
+		# update reactive filtered dataset
+		filtered_ds(filtered_dataset)
 		
+		# calcul de la MP globale
+		transmission_col <- ifelse(test = input$transmission == 1, 
+															 yes = "inheritance_by_cnv", 
+															 no = "inheritance_by_gene")
+		mp <- filtered_ds() %>%
+			dplyr::select(TYPE_child, all_of(transmission_col)) %>%
+			collect() %>%
+			group_by(TYPE_child, !!sym(transmission_col)) %>%
+			summarise(n = n(), .groups = "drop_last") %>%
+			tidyr::complete(!!sym(transmission_col) := c("de novo", "inherited"), 
+											fill = list(n = 0)) %>%
+			summarise(
+				n_de_novo = sum(n[!!sym(transmission_col) == "de novo"]),
+				n_inherited = sum(n[!!sym(transmission_col) == "inherited"]),
+				prop_inherited = ifelse((n_de_novo + n_inherited) > 0, 
+																n_inherited / (n_de_novo + n_inherited), 
+																NA_real_),
+				.groups = "drop"
+			)
 		
+		n_cnvs_all <- dataset %>% summarize(n = n()) %>% collect()
+		n_cnvs_filtered <- filtered_ds() %>% summarize(n = n()) %>% collect()
+		
+		output$n_filtered_cnvs <- renderValueBox({
+			valueBox(
+				paste0(n_cnvs_filtered$n,"/",n_cnvs_all$n), "Filtered CNVs", 
+				icon = icon("filter"), color = "purple"
+			)
+		})
+		
+		output$mp_del <- renderValueBox({
+			valueBox(
+				ifelse(test = !is.null(mp[mp$TYPE_child == "DEL",]$prop_inherited),
+							 yes = pct(round(mp[mp$TYPE_child == "DEL",]$prop_inherited, digits = 3)),
+							 no = "NA"), "Global MP (DEL)", icon = icon("square-minus"), color = "red"
+			)
+		})
+		
+		output$mp_dup <- renderValueBox({
+			valueBox(
+				ifelse(test = !is.null(mp[mp$TYPE_child == "DUP",]$prop_inherited),
+							 yes = pct(round(mp[mp$TYPE_child == "DUP",]$prop_inherited, digits = 3)),
+							 no = "NA"), "Global MP (DUP)", icon = icon("square-plus"), color = "teal"
+			)
+		})
+		
+		#plot_one_view(views$all,   "DEL", input$plot_type, "All CNVs")
+		output$plot_overview_del <- renderPlotly({ 
+			dat <- rbind(mp_vs_metric_by_size(ds =  filtered_ds() %>% dplyr::filter(TYPE_child == "DEL"), 
+																				quality_metric = input$quality_metric, 
+																				transmission_col = transmission_col), 
+								 mp_vs_metric(ds = filtered_ds() %>% dplyr::filter(TYPE_child == "DEL"), 
+								 						 quality_metric = input$quality_metric, 
+								 						 transmission_col = transmission_col))
+			p <- plot_mp_vs_metric(dt = dat, 
+														 title = "Mendelian Precision - DEL", 
+														 subtitle = "All filtered CNVs", 
+														 y_lab = "Medeliaan Precision", 
+														 x_lab = paste0(input$quality_metric, " threshold (≥)"))
+			
+			ggplotly(p) 
+		}) 
+		
+		output$plot_overview_dup <- renderPlotly({ 
+			dat <- rbind(mp_vs_metric_by_size(ds =  filtered_ds() %>% dplyr::filter(TYPE_child == "DUP"), 
+																				quality_metric = input$quality_metric, 
+																				transmission_col = transmission_col), 
+									 mp_vs_metric(ds = filtered_ds() %>% dplyr::filter(TYPE_child == "DUP"), 
+									 						 quality_metric = input$quality_metric, 
+									 						 transmission_col = transmission_col))
+			p <- plot_mp_vs_metric(dt = dat, 
+														 title = "Mendelian Precision - DUP", 
+														 subtitle = "All filtered CNVs", 
+														 y_lab = "Medeliaan Precision", 
+														 x_lab = paste0(input$quality_metric, "threshold (≥)"))
+			
+			ggplotly(p)  
+		}) 
 	})
+	
+
 	
 }

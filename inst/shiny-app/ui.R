@@ -12,10 +12,12 @@ library(shinydashboard)
 library(shinybusy)
 library(shinyjs)
 library(shinyBS)
+library(shinyWidgets)
 library(fresh)
+library(plotly)
 
 my_theme <- create_theme(
-	theme = "default", # Can also use a Bootswatch template like "cerulean"
+	theme = "cosmo", # Can also use a Bootswatch template like "cerulean"
 	bs_vars_button(
 		default_color = "#FFF",
 		default_bg = "#112446",
@@ -27,6 +29,7 @@ my_theme <- create_theme(
 		border = "#112446"
 	)
 )
+
 
 sidebar <- dashboardSidebar(
 	sidebarMenu(
@@ -72,7 +75,7 @@ body <- dashboardBody(
 						),
 						br(),
 						sidebarLayout(
-							sidebarPanel(
+							sidebarPanel( 
 								h4("Input files"),
 								fileInput("cnv_tsv", label = "CNV File (mandatory, BED)"),
 								verbatimTextOutput("cnv_tsv_status"),
@@ -92,8 +95,8 @@ body <- dashboardBody(
 								div(class = "run-status", uiOutput("run_state")),
 								div(class = "outdir-box", verbatimTextOutput("outdir_display")),
 								actionButton("submit_preprocess", label = "Submit",
-														 icon = icon("gear"), disabled = TRUE)
-								
+														 icon = icon("gear"), disabled = TRUE),
+								width = 3
 							),
 							mainPanel(
 								conditionalPanel(condition = "input.submit_preprocess > 0",
@@ -118,7 +121,8 @@ body <- dashboardBody(
 																 					 														 icon = icon("arrow-right"), 
 																 					 														 disabled = TRUE), 
 																 					 								style = "success")
-																 ))               
+																 )),
+								width = 9               
 							)
 						)
 		),
@@ -148,16 +152,16 @@ body <- dashboardBody(
 								hr(),
 								h4("CNV-level inclusion criteria"),
 								uiOutput("qty_metric_range_ui"),
-								tags$div(
-									class = "inline",
-									style = "width: 100%;",
-									numericInput(
-										inputId = "freq_cutoff",
-										label = "GnomAD Max AF ≤",
-										min = 0, max = 0.05, step = 0.001, value = 0.001
-									)
-								),
-								br(),br(),
+								# tags$div(
+								# 	class = "inline",
+								# 	style = "width: 100%;",
+								# 	numericInput(
+								# 		inputId = "freq_cutoff",
+								# 		label = "GnomAD Max AF ≤",
+								# 		min = 0, max = 0.05, step = 0.001, value = 0.001
+								# 	)
+								# ),
+								# br(),br(),
 								sliderInput("min_exon_ov", "Min. % of disrupted exons",
 														min = 0, max = 100, value = 0, step = 10),
 								sliderInput("min_transcript_ov", "Min. % bp overlap",
@@ -171,29 +175,30 @@ body <- dashboardBody(
 								),
 								hr(),
 								h4("Gene-level exlusion criteria"),
-								# TODO: gestion du fichier
-								fileInput("exclusion_genes", label = "Exclusion list (Ensembl Gene IDs)"),
-								verbatimTextOutput("exclusion_list_status"),
+								fileInput("exclus_genes", label = "Exclusion list (Ensembl Gene IDs)"),
 								tags$div(class = "inline",
 												 numericInput(inputId = "loeuf_cutoff", 
 												 						 label = "Exclude genes with LOEUF ≤ ", 
 												 						 min = 0, max = 1, step = 0.1, value = 0.6)
 								),
 								hr(),
+								# TODO: empecher de soumettre s'il n'y a pas au moins un type de CNV selectionné
 								actionButton("submit_mpviz", label = "Apply filters",
-														 icon = icon("gear"), disabled = FALSE)
+														 icon = icon("gear"), disabled = FALSE),
+								width = 3
 								
 							),
 							mainPanel(
 								conditionalPanel(condition = "input.submit_mpviz > 0",
+																 valueBoxOutput("n_filtered_cnvs"),
+																 valueBoxOutput("mp_del"),
+																 valueBoxOutput("mp_dup"),
 																 tabsetPanel(id = "tabs",
 																 						tabPanel("Overview",
-																 										 fluidRow(
-																 										 	column(4, wellPanel(h5("Global MP (DEL)"), textOutput("mp_del"))),
-																 										 	column(4, wellPanel(h5("Global MP (DUP)"), textOutput("mp_dup"))),
-																 										 	column(4, wellPanel(h5("De novo: Observed vs Expected"), textOutput("dnv_obs_exp")))
-																 										 ),
-																 										 htmlOutput("summary")
+																 										 # TODO: replacer par uiOutput pour affichage plus fluide
+																 										 plotlyOutput(outputId = "plot_overview_del"),
+																 										 hr(),
+																 										 plotlyOutput(outputId = "plot_overview_dup") 
 																 						),
 																 						tabPanel("Plot DEL", plotOutput("plot_del", height = 600)),
 																 						tabPanel("Plot DUP", plotOutput("plot_dup", height = 600)),
@@ -209,7 +214,8 @@ body <- dashboardBody(
 																 										 )
 																 						)
 																 )
-								)
+								),
+								width = 9
 							)
 						)
 		),
@@ -223,6 +229,6 @@ body <- dashboardBody(
 )
 
 dashboardPage(skin = "black",
-							dashboardHeader(title = "MCNV2 - Mendelian CNV Validation"),
+							dashboardHeader(title = "MCNV2"),
 							sidebar,
 							body)

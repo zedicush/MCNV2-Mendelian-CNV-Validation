@@ -1,6 +1,6 @@
 #' @export
 check_input_file <- function(filepath, 
-														 file_type = c("cnv", "ped", "annot","prb", "preproc"), 
+														 file_type = c("cnv", "ped", "annot","prb", "preproc", "gene"), 
 														 sep = "\t") {
 	file_type <- match.arg(file_type)
 	
@@ -134,15 +134,6 @@ annotate <- function(cnvs_file, prob_regions_file, output_file,
 	return(ret)
 }
 
-
-compute_cnv_inheritance <- function(){
-	return(NULL)
-}
-
-compute_gene_inheritance <- function(){
-	return(NULL)
-}
-
 #' @export
 compute_inheritance <- function(){
 	print(system.file("python", "compute_inheritance.py", package = "MCNV2"))
@@ -162,27 +153,57 @@ parse_cnv_size_value <- function(x) {
 	return(x)
 }
 
-create_dynamic_slider <- function(range_values){
-	
-	min_val <- range_values[1]
-	max_val <- range_values[2]
-	diff_val <- max_val - min_val
-	
-	if (max_val <= 1) {
-		# Cas 0–1
-		step_val <- 0.1
-		seq_vals <- seq(0, 1, by = step_val)
-	} else {
-		# Cas général : 100 intervalles, arrondis à un chiffre "propre"
-		raw_step <- diff_val / 100
-		magnitude <- 10 ^ floor(log10(raw_step))
-		step_val <- round(raw_step / magnitude) * magnitude
-		seq_vals <- seq(
-			floor(min_val / step_val) * step_val,
-			ceiling(max_val / step_val) * step_val,
-			by = step_val
-		)
+create_dynamic_ticks <- function(range_values) {
+	if (!is.numeric(range_values) || length(range_values) != 2) {
+		stop("range_values must be a numeric vector of length 2 (min, max).")
 	}
 	
-	return(seq_vals)
+	min_val <- min(range_values)
+	max_val <- max(range_values)
+	
+	if (max_val <= 1) {
+		step <- 0.1
+		ticks <- seq(0, 1, by = step)
+		return(list(ticks = ticks, step = step))
+	}
+	
+	diff_val <- max_val - min_val
+	raw_step <- diff_val / 100
+	
+	# base magnitude and candidate "nice" steps (1,2,5,10 * 10^k)
+	magnitude <- 10 ^ floor(log10(raw_step))
+	candidates <- magnitude * c(1, 2, 5, 10)
+	step <- candidates[which(candidates >= raw_step)[1]]
+	if (is.na(step)) step <- tail(candidates, 1)  # fallback
+	
+	# force a sensible minimal step for large ranges to avoid tiny non-round steps:
+	if (diff_val >= 100) {
+		diff_mag <- floor(log10(diff_val))
+		min_step <- 10 ^ max(0, diff_mag - 1)  # e.g. diff 192 -> min_step = 10
+		if (step < min_step) step <- min_step
+	}
+	
+	# round step to integer when >= 1
+	if (step >= 1) step <- round(step)
+	
+	# internal round ticks (multiples of step) inside the interval
+	internal_start <- ceiling(min_val / step) * step
+	internal_end   <- floor(max_val / step) * step
+	
+	if (internal_start <= internal_end) {
+		mid_ticks <- seq(internal_start, internal_end, by = step)
+	} else {
+		mid_ticks <- numeric(0)
+	}
+	
+	ticks <- unique(c(min_val, mid_ticks, max_val))
+	
+	# tidy rounding: if step < 1 keep decimals, else integers
+	digits <- if (step < 1) abs(floor(log10(step))) else 0
+	ticks <- round(ticks, digits = digits)
+	
+	return(list(ticks = ticks, step = step, min = min(ticks), max = max(ticks)))
 }
+
+
+

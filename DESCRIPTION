@@ -27,10 +27,12 @@ Imports:
         data.table,
         DT,
         ggplot2,
+        plotly,
         dplyr,
         tidyr,
         stringr,
         biomaRt,
         patchwork,
-        reticulate
+        reticulate,
+        arrow
 RoxygenNote: 7.3.2

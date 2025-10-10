@@ -1,3 +1,4 @@
+#' @export
 setup_python_env <- function(envname = "r-MCNV2") {
 	library(reticulate)
 	

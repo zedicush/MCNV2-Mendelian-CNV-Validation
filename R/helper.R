@@ -1,14 +1,25 @@
 cnv_size_colors <- c(
-	#"0" = "#888888",         # dark gray
-	"1-30kb" = "#A6CEE3",         # bleu clair
-	"30-40kb" = "#1F78B4",     # bleu foncé
-	"40-50kb" = "#33A02C",    # vert
-	"50-100kb" = "#FB9A99",   # rose clair
-	"100-200kb" = "#6A3D9A",   # violet foncé
-	"200-500kb" = "#CAB2D6",  # violet clair
-	"500-1M" = "#FDBF6F", # orange clair
-	">1M" = "#FF7F00", # orange
-	"All" = "#E31A1C"       # rouge vif
+	"1-30kb" = "#A6CEE3",
+	"30-40kb" = "#1F78B4",
+	"40-50kb" = "#33A02C",
+	"50-100kb" = "#FB9A99",
+	"100-200kb" = "#6A3D9A",
+	"200-500kb" = "#CAB2D6",
+	"500-1M" = "#FDBF6F",
+	">1M" = "#FF7F00",
+	"All" = "#E31A1C"
+)
+
+cnv_size_shapes <- c(
+	"1-30kb" = "0",
+	"30-40kb" = "1",
+	"40-50kb" = "2",
+	"50-100kb" = "3",
+	"100-200kb" = "4",
+	"200-500kb" = "5",
+	"500-1M" = "6",
+	">1M" = "7",
+	"All" = "8"
 )
 
 #' @export
@@ -56,27 +67,23 @@ check_input_file <- function(filepath,
 			unordered = list()
 		),
 		preproc = list(
-			ordered = list(
-				cnvid   = c("cnv_id")
-			),
+			ordered = list(),
 			unordered = list(
+				cnvid   = c("cnv_id"),
 				chr   = c("chr", "chrom", "seqnames","chr_child", "chrom_child", "seqnames_child"),
 				start = c("start", "begin", "pos_start","start_child", "begin_child", "pos_start_child"),
 				end   = c("end", "stop", "pos_end","end_child", "stop_child", "pos_end_child"),
 				sample = c("sampleid", "sample_id", "id_sample","sampleid_child"),
 				type   = c("type", "svtype", "variant_type","type_child"),
 				length = c("size","length","size_child"),
-				length_range = c("size_range","length_range"),
-				exon_overlap = c("exon_overlap"),
-				transcript_overlap = c("transcript_overlap","transcript_bp_overlap"),
-				geneid = c("gene_id"),
-				overlap_pr = c("overlappr"),
-				#biotype = c("biotype"),
-				#cnv_inherit = c("inheritance_by_cnv"),
-				gene_inherit = c("inheritance_by_gene"),
-				loeuf = c("loeuf"),
-				overlap_father = c("overlap_cnv_father"),
-				overlap_mother = c("overlap_cnv_mother")
+				#length_range = c("size_range","length_range"),
+				#exon_overlap = c("exon_overlap"),
+				transcript_overlap = c("transcript_overlap","transcript_bp_overlap","bp_overlap"),
+				#geneid = c("gene_id"),
+				biotype = c("biotype","gene_type"),
+				cnv_inherit = c("inheritance_by_cnv","transmitted_cnv"),
+				gene_inherit = c("inheritance_by_gene","transmitted_gene"),
+				loeuf = c("loeuf")
 			)
 		),
 		other = list(
@@ -148,10 +155,21 @@ annotate <- function(cnvs_file, prob_regions_file, output_file,
 }
 
 #' @export
-compute_inheritance <- function(){
-	print(system.file("python", "compute_inheritance.py", package = "MCNV2"))
+compute_inheritance <- function(cnvs_file, pedigree_file, output_file, 
+																overlap = 0.5){
+
+	compute_inheritance_script <- system.file("python", "compute_inheritance.py", 
+																				package = "MCNV2")
 	
-	return(0)
+	cmd = paste("python3", compute_inheritance_script, 
+							"--cnv_geneAnnot", cnvs_file,
+							"--pedigree", pedigree_file, 
+							"--output", output_file, 
+							"--overlap", overlap)
+	
+	ret <- system(command = cmd, intern = FALSE)
+	
+	return(ret)
 }
 
 parse_cnv_size_value <- function(x) {
@@ -262,10 +280,11 @@ mp_vs_metric_by_size <- function(ds, quality_metric, transmission_col) {
 	
 	range_values <- range(ds %>% pull(all_of(quality_metric), as_vector = TRUE))
 	rng_infos <- create_dynamic_ticks(range_values)
-	
+
 	res <- lapply(rng_infos$ticks, function(th) {
 		tmp <- ds %>% dplyr::filter(.data[[quality_metric]] >= th) 
-		n <- tmp %>% summarise(n()) %>% pull()
+		n <- tmp %>% summarise(n()) %>% pull(as_vector = TRUE)
+		
 		if (n == 0) return(NULL)
 		tmp %>%
 			mutate(trans = !!sym(transmission_col) == "inherited") %>%
@@ -285,7 +304,7 @@ mp_vs_metric <- function(ds, quality_metric, transmission_col) {
 	
 	res <- lapply(rng_infos$ticks, function(th) {
 		tmp <- ds %>% dplyr::filter(.data[[quality_metric]] >= th) 
-		n <- tmp %>% summarise(n()) %>% pull()
+		n <- tmp %>% summarise(n()) %>% pull(as_vector = TRUE)
 		if (n == 0) return(NULL)
 		tmp %>%
 			mutate(trans = !!sym(transmission_col) == "inherited") %>%
@@ -303,11 +322,12 @@ plot_mp_vs_metric <- function(dt, title, subtitle, y_lab, x_lab){
 	
 	p <- ggplot(dt, aes(x = threshold, y = MP, color = Size_Range)) +
 		geom_line() +
-		geom_point(aes(size = n)) +
+		geom_point(aes(size = n, shape = Size_Range)) +
 		scale_y_continuous(limits = c(0, 1), labels = scales::percent) +
 		labs(title = title, subtitle = subtitle, x = x_lab, y = y_lab) +
 		theme_minimal(base_size = 12) +
-		scale_color_manual(values = cnv_size_colors, name = "CNV Length Bin")
+		scale_color_manual(values = cnv_size_colors, name = "CNV Length Bin") +
+		scale_shape_manual(values = cnv_size_shapes, name = "CNV Length Bin")
 	
 	return(p)
 }

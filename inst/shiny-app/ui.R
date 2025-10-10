@@ -15,6 +15,7 @@ library(shinyBS)
 library(shinyWidgets)
 library(fresh)
 library(plotly)
+library(DT)
 
 my_theme <- create_theme(
 	theme = "cosmo", # Can also use a Bootswatch template like "cerulean"
@@ -88,7 +89,6 @@ body <- dashboardBody(
 								selectInput("build", label = "Genome build",
 														choices = list("GRCh38/hg38" = 38, "GRCh37/hg19" = 37),
 														selected = 38),
-								#radioButtons("build", "Genome build", c("38","37"), selected = "38", inline = TRUE),
 								numericInput("th_prob", "Problematic regions threshold (child CNV proportion)", 0.50, min = 0, max = 1, step = 0.05),
 								numericInput("th_cnv", "Inheritance threshold (child CNV proportion)", 0.50, min = 0, max = 1, step = 0.05),
 								hr(),
@@ -96,7 +96,7 @@ body <- dashboardBody(
 								div(class = "outdir-box", verbatimTextOutput("outdir_display")),
 								actionButton("submit_preprocess", label = "Submit",
 														 icon = icon("gear"), disabled = TRUE),
-								width = 3
+								width = 4
 							),
 							mainPanel(
 								conditionalPanel(condition = "input.submit_preprocess > 0",
@@ -122,7 +122,7 @@ body <- dashboardBody(
 																 					 														 disabled = TRUE), 
 																 					 								style = "success")
 																 )),
-								width = 9               
+								width = 8              
 							)
 						)
 		),
@@ -140,31 +140,14 @@ body <- dashboardBody(
 								h4("Input"),
 								uiOutput("conditional_input"),
 								hr(),
-								h4("Parameters"),
-								radioButtons("transmission", label = "Transmission type", 
+								radioButtons("transmission", label = tags$h4("Transmission type"), 
 														 choices = list("CNV level" = 1, "Gene level" = 2), 
-														 selected = 2, inline = TRUE),
-								checkboxGroupInput("cnv_type", label = "CNV type", 
-																	 choices = c("DEL", "DUP"), 
-																	 selected = c("DEL","DUP"), inline = TRUE),
-								selectizeInput("quality_metric", label = "Quality metric",
-															 options = NULL, choices = NULL),
+														 selected = 1, inline = TRUE),
 								hr(),
 								h4("CNV-level inclusion criteria"),
-								uiOutput("qty_metric_range_ui"),
-								# tags$div(
-								# 	class = "inline",
-								# 	style = "width: 100%;",
-								# 	numericInput(
-								# 		inputId = "freq_cutoff",
-								# 		label = "GnomAD Max AF ≤",
-								# 		min = 0, max = 0.05, step = 0.001, value = 0.001
-								# 	)
-								# ),
-								# br(),br(),
 								sliderInput("min_exon_ov", "Min. % of disrupted exons",
 														min = 0, max = 100, value = 0, step = 10),
-								sliderInput("min_transcript_ov", "Min. % bp overlap",
+								sliderInput("min_transcript_ov", "Min. % transcript overlap",
 														min = 0, max = 100, value = 0, step = 10),
 								sliderTextInput(
 									inputId = "cnv_range",
@@ -176,16 +159,20 @@ body <- dashboardBody(
 								hr(),
 								h4("Gene-level exlusion criteria"),
 								fileInput("exclus_genes", label = "Exclusion list (Ensembl Gene IDs)"),
-								tags$div(class = "inline",
-												 numericInput(inputId = "loeuf_cutoff", 
-												 						 label = "Exclude genes with LOEUF ≤ ", 
-												 						 min = 0, max = 1, step = 0.1, value = 0.6)
-								),
+								# tags$div(class = "inline",
+								# 				 numericInput(inputId = "loeuf_cutoff", 
+								# 				 						 label = "Exclude genes with LOEUF ≤ ", 
+								# 				 						 min = 0, max = 1, step = 0.1, value = 0.6)
+								# ),
 								hr(),
-								# TODO: empecher de soumettre s'il n'y a pas au moins un type de CNV selectionné
+								h4("MP representation"),
+								helpText("Choose a quantitative variable to use as a variable threshold"),
+								selectizeInput("quality_metric", label = "Quality metric",
+															 options = NULL, choices = NULL),
+								uiOutput("qty_metric_range_ui"),
 								actionButton("submit_mpviz", label = "Apply filters",
 														 icon = icon("gear"), disabled = FALSE),
-								width = 3
+								width = 4
 								
 							),
 							mainPanel(
@@ -195,12 +182,11 @@ body <- dashboardBody(
 																 valueBoxOutput("mp_dup"),
 																 tabsetPanel(id = "tabs",
 																 						tabPanel("Overview",
-																 										 # TODO: replacer par uiOutput pour affichage plus fluide
-																 										 plotlyOutput(outputId = "plot_overview_del"),
-																 										 hr(),
-																 										 plotlyOutput(outputId = "plot_overview_dup") 
+																 										 uiOutput("plots_overview")
 																 						),
-																 						tabPanel("Plot DEL", plotOutput("plot_del", height = 600)),
+																 						tabPanel("Investigate DELetions", 
+																 										 uiOutput("investigate_del")
+																 										 ),
 																 						tabPanel("Plot DUP", plotOutput("plot_dup", height = 600)),
 																 						tabPanel("Filtered table", DTOutput("tbl")),
 																 						tabPanel("De novo & biomaRt",
@@ -215,7 +201,7 @@ body <- dashboardBody(
 																 						)
 																 )
 								),
-								width = 9
+								width = 8
 							)
 						)
 		),

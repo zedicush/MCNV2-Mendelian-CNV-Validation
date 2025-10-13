@@ -35,5 +35,6 @@ Imports:
         patchwork,
         reticulate,
         arrow,
-        DT
+        DT,
+        parallel
 RoxygenNote: 7.3.2

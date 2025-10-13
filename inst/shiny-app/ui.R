@@ -184,7 +184,7 @@ body <- dashboardBody(
 																 						tabPanel("Overview",
 																 										 uiOutput("plots_overview")
 																 						),
-																 						tabPanel("Investigate DELetions", 
+																 						tabPanel("Fine-tune deletions", 
 																 										 uiOutput("investigate_del")
 																 										 ),
 																 						tabPanel("Plot DUP", plotOutput("plot_dup", height = 600)),

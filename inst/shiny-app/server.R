@@ -200,10 +200,7 @@ function(input, output, session) {
 		} else {
 			tagList(
 				fileInput("preproc_file", label = "Preprocessed input (mandatory)"),
-				verbatimTextOutput("preproc_tsv_status"),
-				selectInput("build_mp", label = "Genome build",
-										choices = list("GRCh38/hg38" = 38, "GRCh37/hg19" = 37),
-										selected = 38)
+				verbatimTextOutput("preproc_tsv_status")
 			)
 		}
 	})
@@ -315,143 +312,160 @@ function(input, output, session) {
 	})
 	
 	observeEvent(input$submit_mpviz, {
-		
-		req(inherit_output_file())
-		req(input$quality_metric)
-		
-		cnv_range <- isolate(input$cnv_range)
-		# convert CNV size range
-		min_cnv_size <- parse_cnv_size_value(cnv_range[1])
-		max_cnv_size <- parse_cnv_size_value(cnv_range[2])
-		min_exon_ov <- isolate(input$min_exon_ov)
-		min_transcript_ov <- isolate(input$min_transcript_ov)
-		exclus_genes <- isolate(input$exclus_genes)
-		quality_metric <- isolate(input$quality_metric)
-		# get quality metric thresholds
-		min_qty_metric <- isolate(input$quality_metric_min)
-		max_qty_metric <- isolate(input$quality_metric_max)
-		
-		dataset <- arrow::open_tsv_dataset(inherit_output_file())
-		
-		dataset <- dataset %>% mutate(Size_Range = case_when(
-			Size < 30000 ~ "1-30kb",
-			Size < 40000 ~ "30-40kb",
-			Size < 50000 ~ "40-50kb",
-			Size < 100000 ~ "50-100kb",
-			Size < 200000 ~ "100-200kb",
-			Size < 500000 ~ "200-500kb",
-			Size < 1000000 ~ "500-1M",
-			Size >= 1000000 ~ ">1M",
-			TRUE ~ NA_character_
-		))
-		
-		filtered_dataset <- dataset %>% 
-			dplyr::filter(
-				#Exon_Overlap >= min_exon_ov/100,
-				bp_overlap >= min_transcript_ov/100,
-				Size >= min_cnv_size,
-				Size <= max_cnv_size,
-				.data[[input$quality_metric]] >= min_qty_metric,
-				.data[[input$quality_metric]] <= max_qty_metric
-			)
-		
-		# apply exclusion list
-		# TODO: est-ce qu'on retire un CNV dès qu'il impact un "green" genes?
-		if(!is.null(exclus_genes)){
-			lines <- tryCatch(readLines(exclus_genes$datapath, warn = FALSE), 
-												error = function(e) character())
-			exclusion_list <- unique(trimws(lines[nzchar(trimws(lines))]))
-			filtered_dataset <- filtered_dataset %>% dplyr::filter(!GeneID %in% exclusion_list)
-		}		
-		
-		# update reactive filtered dataset
-		filtered_ds(filtered_dataset)
-		
-		# calcul de la MP globale
-		transmission_col <- ifelse(test = input$transmission == 1, 
-															 yes = "transmitted_cnv", 
-															 no = "transmitted_gene")
-		
-		mp <- filtered_ds() %>% 
-			dplyr::select(cnv_id, Type, all_of(transmission_col)) %>%
-			mutate(transmission = as.logical(.data[[transmission_col]])) %>%
-			distinct() %>%
-			group_by(Type, transmission) %>% 
-			summarise(n = n(), .groups = "drop") %>%
-			collect() %>% 
-			tidyr::complete(Type, transmission = c(FALSE, TRUE), fill = list(n = 0)) %>%
-			group_by(Type) %>% 
-			summarise(n_de_novo = sum(n[!transmission]), 
-								n_inherited = sum(n[transmission]),
-								prop_inherited = n_inherited / (n_de_novo + n_inherited))
-		
-		n_cnvs_all <- dataset %>% dplyr::select(cnv_id) %>% distinct() %>% summarize(n = n()) %>% collect()
-		n_cnvs_filtered <- filtered_ds() %>% dplyr::select(cnv_id) %>% distinct() %>% summarize(n = n()) %>% collect()
-		
-		output$n_filtered_cnvs <- renderValueBox({
-			valueBox(
-				n_cnvs_filtered$n, paste0("Filtered CNVs over ",n_cnvs_all$n), 
-				icon = icon("filter"), color = "purple"
-			)
-		})
-		
-		output$mp_del <- renderValueBox({
-			valueBox(
-				ifelse(test = !is.null(mp[mp$Type == "DEL",]$prop_inherited),
-							 yes = pct(round(mp[mp$Type == "DEL",]$prop_inherited, digits = 3)),
-							 no = "NA"), "Global MP (DEL)", icon = icon("square-minus"), color = "red"
-			)
-		})
-		
-		output$mp_dup <- renderValueBox({
-			valueBox(
-				ifelse(test = !is.null(mp[mp$Type == "DUP",]$prop_inherited),
-							 yes = pct(round(mp[mp$Type == "DUP",]$prop_inherited, digits = 3)),
-							 no = "NA"), "Global MP (DUP)", icon = icon("square-plus"), color = "teal"
-			)
-		})
-		
-		output$plot_overview_del <- renderPlotly({ 
-			dat <- rbind(mp_vs_metric_by_size(ds =  filtered_ds() %>% dplyr::filter(Type == "DEL"), 
-																				quality_metric = quality_metric, 
-																				transmission_col = transmission_col), 
-									 mp_vs_metric(ds = filtered_ds() %>% dplyr::filter(Type == "DEL"), 
-									 						 quality_metric = quality_metric, 
-									 						 transmission_col = transmission_col))
-			if(nrow(dat) > 0){
-				p <- plot_mp_vs_metric(dt = dat, 
-															 title = "Mendelian Precision - DEL", 
-															 subtitle = "All filtered CNVs", 
-															 y_lab = "Mendelian Precision", 
-															 x_lab = paste0(quality_metric, " threshold (≥)"))
-				
-				ggplotly(p) 
-			} else {
-				NULL
+		withProgress(message = "Running analysis...", value = 0, {
+			req(inherit_output_file())
+			req(input$quality_metric)
+			
+			cnv_range <- isolate(input$cnv_range)
+			# convert CNV size range
+			min_cnv_size <- parse_cnv_size_value(cnv_range[1])
+			max_cnv_size <- parse_cnv_size_value(cnv_range[2])
+			min_exon_ov <- isolate(input$min_exon_ov)
+			min_transcript_ov <- isolate(input$min_transcript_ov)
+			exclus_genes <- isolate(input$exclus_genes)
+			quality_metric <- isolate(input$quality_metric)
+			# get quality metric thresholds
+			min_qty_metric <- isolate(input$quality_metric_min)
+			max_qty_metric <- isolate(input$quality_metric_max)
+			
+			dataset <- arrow::open_tsv_dataset(inherit_output_file())
+			
+			dataset <- dataset %>% mutate(Size_Range = case_when(
+				Size < 30000 ~ "1-30kb",
+				Size < 40000 ~ "30-40kb",
+				Size < 50000 ~ "40-50kb",
+				Size < 100000 ~ "50-100kb",
+				Size < 200000 ~ "100-200kb",
+				Size < 500000 ~ "200-500kb",
+				Size < 1000000 ~ "500-1M",
+				Size >= 1000000 ~ ">1M",
+				TRUE ~ NA_character_
+			))
+			
+			# calcul de la MP globale
+			transmission_col <- ifelse(test = input$transmission == 1, 
+																 yes = "transmitted_cnv", 
+																 no = "transmitted_gene")
+			
+			if(transmission_col == "transmitted_gene"){
+				# suppress intergenic CNV
+				dataset <- dataset %>% 
+					dplyr::filter(transmitted_gene != "intergenic")
 			}
 			
-		}) 
-		
-		output$plot_overview_dup <- renderPlotly({ 
-			dat <- rbind(mp_vs_metric_by_size(ds =  filtered_ds() %>% dplyr::filter(Type == "DUP"), 
-																				quality_metric = quality_metric, 
-																				transmission_col = transmission_col), 
-									 mp_vs_metric(ds = filtered_ds() %>% dplyr::filter(Type == "DUP"), 
-									 						 quality_metric = quality_metric, 
-									 						 transmission_col = transmission_col))
+			incProgress(0.5, detail = "Create subset...")
 			
-			if(nrow(dat) > 0){
-				p <- plot_mp_vs_metric(dt = dat, 
-															 title = "Mendelian Precision - DUP", 
-															 subtitle = "All filtered CNVs", 
-															 y_lab = "Mendelian Precision", 
-															 x_lab = paste0(quality_metric, " threshold (≥)"))
+			filtered_dataset <- dataset %>% 
+				dplyr::filter(
+					#Exon_Overlap >= min_exon_ov/100,
+					bp_overlap >= min_transcript_ov/100,
+					Size >= min_cnv_size,
+					Size <= max_cnv_size,
+					.data[[input$quality_metric]] >= min_qty_metric,
+					.data[[input$quality_metric]] <= max_qty_metric
+				)
+			
+			# apply exclusion list
+			# TODO: est-ce qu'on retire un CNV dès qu'il impact un "green" genes?
+			if(!is.null(exclus_genes)){
+				lines <- tryCatch(readLines(exclus_genes$datapath, warn = FALSE), 
+													error = function(e) character())
+				exclusion_list <- unique(trimws(lines[nzchar(trimws(lines))]))
+				filtered_dataset <- filtered_dataset %>% dplyr::filter(!GeneID %in% exclusion_list)
+			}		
+			
+			# update reactive filtered dataset
+			filtered_ds(filtered_dataset)
+
+			
+			mp <- filtered_ds() %>% 
+				dplyr::select(cnv_id, Type, all_of(transmission_col)) %>%
+				mutate(transmission = as.logical(.data[[transmission_col]])) %>%
+				distinct() %>%
+				group_by(Type, transmission) %>% 
+				summarise(n = n(), .groups = "drop") %>%
+				collect() %>% 
+				tidyr::complete(Type, transmission = c(FALSE, TRUE), fill = list(n = 0)) %>%
+				group_by(Type) %>% 
+				summarise(n_de_novo = sum(n[!transmission]), 
+									n_inherited = sum(n[transmission]),
+									prop_inherited = n_inherited / (n_de_novo + n_inherited))
+			
+			n_cnvs_all <- dataset %>% dplyr::select(cnv_id) %>% distinct() %>% summarize(n = n()) %>% collect()
+			n_cnvs_filtered <- filtered_ds() %>% dplyr::select(cnv_id) %>% distinct() %>% summarize(n = n()) %>% collect()
+			
+			output$n_filtered_cnvs <- renderValueBox({
+				valueBox(
+					format(n_cnvs_filtered$n, big.mark = ","), 
+					paste0("Filtered CNVs over ", format(n_cnvs_all$n, big.mark = ",")), 
+					icon = icon("filter"), color = "purple"
+				)
+			})
+			
+			output$mp_del <- renderValueBox({
+				valueBox(
+					ifelse(test = !is.null(mp[mp$Type == "DEL",]$prop_inherited),
+								 yes = pct(round(mp[mp$Type == "DEL",]$prop_inherited, digits = 3)),
+								 no = "NA"), "Global MP (DEL)", icon = icon("square-minus"), 
+					color = "red"
+				)
+			})
+			
+			output$mp_dup <- renderValueBox({
+				valueBox(
+					ifelse(test = !is.null(mp[mp$Type == "DUP",]$prop_inherited),
+								 yes = pct(round(mp[mp$Type == "DUP",]$prop_inherited, digits = 3)),
+								 no = "NA"), "Global MP (DUP)", icon = icon("square-plus"), 
+					color = "teal"
+				)
+			})
+			
+			incProgress(0.7, detail = "Plotting deletions in progress...")
+			output$plot_overview_del <- renderPlotly({ 
+				dat <- rbind(mp_vs_metric_by_size(ds =  filtered_ds() %>% dplyr::filter(Type == "DEL"), 
+																					quality_metric = quality_metric, 
+																					transmission_col = transmission_col), 
+										 mp_vs_metric(ds = filtered_ds() %>% dplyr::filter(Type == "DEL"), 
+										 						 quality_metric = quality_metric, 
+										 						 transmission_col = transmission_col))
+				if(nrow(dat) > 0){
+					p <- plot_mp_vs_metric(dt = dat, 
+																 title = "Mendelian Precision - DEL", 
+																 subtitle = "All filtered CNVs", 
+																 y_lab = "Mendelian Precision", 
+																 x_lab = paste0(quality_metric, " threshold (≥)"))
+					
+					ggplotly(p) 
+				} else {
+					NULL
+				}
 				
-				ggplotly(p) 
-			} else {
-				NULL
-			}
-		}) 
+			}) 
+			
+			incProgress(0.9, detail = "Plotting duplications in progress...")
+			output$plot_overview_dup <- renderPlotly({ 
+				dat <- rbind(mp_vs_metric_by_size(ds =  filtered_ds() %>% dplyr::filter(Type == "DUP"), 
+																					quality_metric = quality_metric, 
+																					transmission_col = transmission_col), 
+										 mp_vs_metric(ds = filtered_ds() %>% dplyr::filter(Type == "DUP"), 
+										 						 quality_metric = quality_metric, 
+										 						 transmission_col = transmission_col))
+				
+				if(nrow(dat) > 0){
+					p <- plot_mp_vs_metric(dt = dat, 
+																 title = "Mendelian Precision - DUP", 
+																 subtitle = "All filtered CNVs", 
+																 y_lab = "Mendelian Precision", 
+																 x_lab = paste0(quality_metric, " threshold (≥)"))
+					
+					ggplotly(p) 
+				} else {
+					NULL
+				}
+			}) 
+			showNotification("Plotting complete!", type = "message")
+			
+		})
 	})
 	
 	output$investigate_del <- renderUI({

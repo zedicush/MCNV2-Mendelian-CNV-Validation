@@ -244,9 +244,10 @@ function(input, output, session) {
 		if (file.exists(inherit_output_file())) {
 			
 			internal_columns <- c("Chr","Start","End", "Exon_Overlap",
-														"t_Start","t_End","STOP", 
-														"cnv_problematic_region_ov",
-														"LOEUF", "segmentaldup_Overlap")
+														"t_Start","t_End","STOP", "LOEUF",
+														"segmentaldup_Overlap", "Size",
+														"cnv_problematic_region_overlap", 
+														"transcript_length")
 			
 			spec <- readr::spec_tsv(inherit_output_file())
 			
@@ -573,114 +574,87 @@ function(input, output, session) {
 		}
 	)
 	
-	output$test <- renderUI({
-		req(inherit_output_file())
-		req(quality_metrics())
-		outputs <- list()
-		
-		outputs[[length(outputs) + 1]] <- h4("Filters")
-		
-		outputs[[length(outputs) + 1]] <- updateSelectizeInput(inputId = "ftdel_quality_metric", 
-																													 choices = quality_metrics())
-		
-		# get range without loading the full file
-		dt <- data.table::fread(inherit_output_file(), 
-														select = input$ftdel_quality_metric, 
-														sep = "\t", showProgress = FALSE)
-		range_values <- range(dt[[input$quality_metric]], na.rm = TRUE)
-		
-		if(is.numeric(range_values)){
-			rng_infos <- create_dynamic_ticks(range_values)
-			outputs[[length(outputs) + 1]] <- tagList(fluidRow(
-				column(4,
-							 numericInput("ftdel_quality_metric_min", "Min:", value = rng_infos$min, 
-							 						 min = rng_infos$min, max = rng_infos$max, 
-							 						 width = "100%")
-				),
-				column(4,
-							 numericInput("ftdel_quality_metric_max", "Max:", value = rng_infos$max, 
-							 						 min = rng_infos$min, max = rng_infos$max, 
-							 						 width = "100%")
-				),
-				column(4,
-							 actionButton(inputId = "add_filter_ftdel", 
-							 						 label = "Apply filters", 
-							 						 icon = icon("square-plus"))
-				)
-			))
-		}
-		
-		outputs[[length(outputs) + 1]] <- verbatimTextOutput(outputId = "display_filter_ftdel")
-		
-		outputs[[length(outputs) + 1]] <- actionButton(inputId = "apply_ftdel", 
-																									 label = "Apply filters", 
-																									 icon = icon("filter"))
-		outputs[[length(outputs) + 1]] <- fluidRow(
-			column(6, plotlyOutput(outputId = "plot_ftdel_baseline_del",  
-														 height = "500px")),
-			column(6, plotlyOutput(outputId = "plot_ftdel_filtered_del", 
-														 height = "500px"))
-		)
-		
-		return(outputs)
+	observeEvent(input$submit_ft_mpviz, {
+		withProgress(message = "Running analysis...", value = 0, {
+			req(inherit_output_file())
+			req(input$quality_metric)
+			
+			output$p1 <- output$p2 <- output$p3 <- output$p4 <- renderPlotly({
+				if(input$cnv_type == "DEL"){
+					p <- baseline_DEL_plot()
+				} else {
+					p <- baseline_DUP_plot()
+				}
+				
+				ggplotly(p)
+			})
+			
+		})
 	})
+
+																					 
 	
-	observeEvent(input$add_filter_ftdel, {
-		
-		output$preproc_tsv_status <- renderText(paste0(input$ftdel_quality_metric,"_",
-																									 input$ftdel_quality_metric_min,"_",
-																									 input$ftdel_quality_metric_max))
-		
-	})
 	
-	output$finetune_del <- renderUI({
+	output$finetune_ui <- renderUI({
 		req(filtered_ds())
 		
-		tagList(
-			h4("Filter data with select group module"),
-			shinyWidgets::panel(
-				select_group_ui(
-					id = "ftdel_filters",
-					params = lapply(X = quality_metrics(), 
-													FUN = function(n) { list(inputId = n, label = paste0(n,":")) }), 
-					inline = FALSE,
-					btn_reset_label = "Reset filters",
-					vs_args = list(disableSelectAll = FALSE)
-				),
-				status = "primary"
-			), actionButton("lol", "lol")
-		)
-		
-	})
-	
-	output$finetune_dup <- renderUI({
-		req(filtered_ds())
-		
-		lapply(quality_metrics(), function(col) {
-			col_vals <- filtered_ds()[[col]]
+		outputs <- lapply(quality_metrics(), function(metric) {
+			
+			col_vals <- filtered_ds() %>% pull(all_of(metric))
 			rng <- range(col_vals, na.rm = TRUE)
 			
+			ns_metric <- paste0("filter_", metric)
+			
 			fluidRow(
-				column(6, numericInput(paste0("min_", col), paste("Min", col), value = rng[1])),
-				column(6, numericInput(paste0("max_", col), paste("Max", col), value = rng[2]))
+				class = "align-items-end",
+				column(4,
+							 pickerInput(
+							 	inputId = paste0(ns_metric, "_op"),
+							 	label = metric,
+							 	choices = c("-" = "NA", "≥" = ">=", "≤" = "<="),
+							 	selected = "NA",
+							 	options = list(
+							 		style = "btn-light",   # Bootstrap color theme (btn-default, btn-light, btn-info, etc.)
+							 		size = "sm",             # sm, lg
+							 		`dropup-auto` = FALSE    # optional: keep dropdown direction stable
+							 	)
+							 )
+				),
+				column(8,
+							 numericInput(
+							 	inputId = paste0(ns_metric, "_val"),
+							 	label = "value",
+							 	value = rng[1],
+							 	min = rng[1],
+							 	max = rng[2]
+							 )
+				)
 			)
 		})
 		
+		tagList(
+			h4("Filters"),
+			radioButtons("cnv_type", "CNV type", 
+									 choices = c("DEL","DUP"), selected = "DEL"),
+			outputs,
+			hr(),
+			# h4("MP representation"),
+			# radioButtons("ft_plot_type", "Plot type",
+			# 						 choices = c("MP x Quality metric" = "mp_quality",
+			# 						 						"MP x CNV size" = "mp_size"),
+			# 						 selected = "mp_quality"
+			# ),
+			# conditionalPanel(condition = "input.ft_plot_type == 'mp_quality'",
+			# 								 helpText("Choose a quantitative variable to use as a variable threshold."),
+			# 								 helpText("The MP will be calculated for CNV with a quality >= to the threshold"),
+			# 								 selectizeInput("ft_quality_metric", label = "Quality metric",
+			# 								 							 options = NULL, choices = NULL),
+			# 								 uiOutput("ft_qty_metric_range_ui")
+			# ),
+			actionButton("submit_ft_mpviz", label = "Apply filters",
+									 icon = icon("gear"), disabled = FALSE)
+		)
+		
 	})
-	
-	
-	# res_mod <- select_group_server(
-	# 	id = "my-filters",
-	# 	data = filtered_ds(),
-	# 	vars = quality_metrics()
-	# )
-	# 
-	# output$table <- reactable::renderReactable({
-	# 	reactable::reactable(res_mod())
-	# })
-	# 
-	# output$inputs <- renderPrint({
-	# 	attr(res_mod(), "inputs")
-	# })
-	# 	
+
 }

@@ -37,15 +37,7 @@ sidebar <- dashboardSidebar(
 		id = "tabs", 
 		menuItem("Preprocessing", tabName = "prepocessing", icon = icon("users-gear")),
 		menuItem("MP Exploration", tabName = "mp_exploration", icon = icon("chart-line")),
-		menuItem("Fine-tuning", tabName = "fine_tuning", icon = icon("filter"), 
-						 menuSubItem("Deletions", tabName = "finemap_del",
-						 						icon = shiny::icon("square-minus")
-						 ),
-						 menuSubItem(
-						 	"Duplications", tabName = "finemap_dup",
-						 	icon = shiny::icon("square-plus")
-						 )
-		)	 
+		menuItem("Fine-tuning", tabName = "fine_tuning", icon = icon("filter"))	 
 	)
 )
 
@@ -181,7 +173,7 @@ body <- dashboardBody(
 																 selectizeInput("quality_metric", label = "Quality metric",
 																 							 options = NULL, choices = NULL),
 																 uiOutput("qty_metric_range_ui")
-																 ),
+								),
 								actionButton("submit_mpviz", label = "Apply filters",
 														 icon = icon("gear"), disabled = TRUE),
 								width = 3
@@ -208,37 +200,45 @@ body <- dashboardBody(
 							)
 						)
 		),
-		tabItem(tabName = "finemap_del",
-						h3("Fine tuning for DEL"),
-						helpText("Fine-tune your filters to maximize the MP curve for deletions."),
+		tabItem(tabName = "fine_tuning",
+						h3("Type-specific fine tuning"),
+						helpText("Fine-tune your filters to maximize the MP curve"),
 						br(),
 						sidebarLayout(
 							sidebarPanel( 
-								uiOutput("finetune_del"),
+								uiOutput("finetune_ui"),
 								width = 3
 							),
 							mainPanel(
-								conditionalPanel(condition = "input.lol > 0",
-																 h3("LOL")
+								conditionalPanel(condition = "input.submit_ft_mpviz > 0",
+																 fluidRow(
+																 	column(6,
+																 				 plotlyOutput("p1")
+																 	),
+																 	column(6,
+																 				 plotlyOutput("p2")
+																 	)
+																 ),
+																 hr(),
+																 fluidRow(
+																 	column(6,
+																 				 selectizeInput("p3_type", 
+																 				 							 label = "Plot 3",
+																 				 							 choices = c("type1","type2","type3","type4"),
+																 				 							 selected = "type1"),
+																 				 plotlyOutput("p3")
+																 	),
+																 	column(6,
+																 				 selectizeInput("p4_type", 
+																 				 							 label = "Plot ",
+																 				 							 choices = c("type1","type2","type3","type4"),
+																 				 							 selected = "type2"),
+																 				 plotlyOutput("p4")
+																 	)
+																 )
+																 
 								),
 								width = 9              
-							)
-						)
-		),
-		tabItem(tabName = "finemap_dup",
-						h3("Fine tuning for DUP"),
-						helpText("Fine-tune your filters to maximize the MP curve for duplications."),
-						br(),
-						sidebarLayout(
-							sidebarPanel( 
-								uiOutput("finetune_dup"),
-								width = 4
-							),
-							mainPanel(
-								conditionalPanel(condition = "input.lol2 > 0",
-																 h3("LOL")
-								),
-								width = 8              
 							)
 						)
 		)

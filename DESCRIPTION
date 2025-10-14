@@ -39,4 +39,4 @@ Imports:
         parallel,
         datamods,
         reticulate
-RoxygenNote: 7.3.3
+RoxygenNote: 7.3.2

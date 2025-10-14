@@ -1,8 +1,7 @@
 cnv_size_colors <- c(
 	"1-30kb" = "#A6CEE3",
-	"30-40kb" = "#1F78B4",
-	"40-50kb" = "#33A02C",
-	"50-100kb" = "#FB9A99",
+	"30-50kb" = "#1F78B4",
+	"50-100kb" = "#33A02C",
 	"100-200kb" = "#6A3D9A",
 	"200-500kb" = "#CAB2D6",
 	"500-1M" = "#FDBF6F",
@@ -11,9 +10,8 @@ cnv_size_colors <- c(
 )
 
 cnv_size_shapes <- c(
-	"1-30kb" = "0",
-	"30-40kb" = "1",
-	"40-50kb" = "2",
+	"1-30kb" = "1",
+	"30-50kb" = "2",
 	"50-100kb" = "3",
 	"100-200kb" = "4",
 	"200-500kb" = "5",
@@ -76,14 +74,13 @@ check_input_file <- function(filepath,
 				sample = c("sampleid", "sample_id", "id_sample","sampleid_child"),
 				type   = c("type", "svtype", "variant_type","type_child"),
 				length = c("size","length","size_child"),
-				#length_range = c("size_range","length_range"),
 				#exon_overlap = c("exon_overlap"),
 				transcript_overlap = c("transcript_overlap","transcript_bp_overlap","bp_overlap"),
-				#geneid = c("gene_id"),
+				geneid = c("gene_id"),
 				biotype = c("biotype","gene_type"),
 				cnv_inherit = c("inheritance_by_cnv","transmitted_cnv"),
-				gene_inherit = c("inheritance_by_gene","transmitted_gene"),
-				loeuf = c("loeuf")
+				gene_inherit = c("inheritance_by_gene","transmitted_gene")
+				#loeuf = c("loeuf")
 			)
 		),
 		other = list(
@@ -299,11 +296,10 @@ create_dynamic_ticks <- function(range_values, n_steps = 100) {
 # }
 # 
 
-mp_vs_metric_by_size <- function(ds, quality_metric, transmission_col, 
-																 inheritance_flag = "True") {
-	
-	range_values <- range(ds %>% pull(all_of(quality_metric)))
-	rng_infos <- create_dynamic_ticks(range_values, n_steps = 20)
+mp_vs_metric_by_size <- function(ds, quality_metric, thresholds, 
+																 transmission_col, inheritance_flag = "True") {
+	ds <- isolate(ds) 
+	rng_infos <- create_dynamic_ticks(thresholds, n_steps = 20)
 
 	res <- parallel::mclapply(X = rng_infos$ticks, FUN = function(th) {
 		tmp <- ds %>% dplyr::filter(.data[[quality_metric]] >= th) 
@@ -318,14 +314,15 @@ mp_vs_metric_by_size <- function(ds, quality_metric, transmission_col,
 											 .groups = "drop") %>%
 			dplyr::mutate(threshold = th) %>% collect()
 	}, mc.cores = parallel::detectCores() - 1)
+	
 	dplyr::bind_rows(res)
 }
 
-mp_vs_metric <- function(ds, quality_metric, transmission_col, 
+mp_vs_metric <- function(ds, quality_metric, thresholds, transmission_col, 
 												 inheritance_flag = "True") {
 	
-	range_values <- range(ds %>% pull(all_of(quality_metric)))
-	rng_infos <- create_dynamic_ticks(range_values, n_steps = 20)
+	ds <- isolate(ds)
+	rng_infos <- create_dynamic_ticks(thresholds, n_steps = 20)
 	
 	res <- parallel::mclapply(X = rng_infos$ticks, FUN = function(th) {
 		tmp <- ds %>% dplyr::filter(.data[[quality_metric]] >= th) 
@@ -337,12 +334,26 @@ mp_vs_metric <- function(ds, quality_metric, transmission_col,
 											 MP = round(mean(trans, na.rm = TRUE), digits = 2)) %>%
 			dplyr::mutate(Size_Range = "All", threshold = th) %>% collect()
 	}, mc.cores = parallel::detectCores() - 1)
+	
 	dplyr::bind_rows(res)
+}
+
+mp_by_size <- function(ds, transmission_col, inheritance_flag = "True") {
+	ds <- isolate(ds)
+	
+	ds %>%
+		dplyr::group_by(Size_Range) %>%
+		mutate(trans = !!sym(transmission_col) == inheritance_flag) %>%
+		dplyr::summarise(
+			n = dplyr::n(),
+			MP = round(mean(trans, na.rm = TRUE), digits = 2),
+			.groups = "drop"
+		) %>% collect
 }
 
 plot_mp_vs_metric <- function(dt, title, subtitle, y_lab, x_lab){
 	dt$Size_Range <- factor(dt$Size_Range,
-													levels = c("1-30kb","30-40kb","40-50kb","50-100kb",
+													levels = c("1-30kb","30-50kb","50-100kb",
 																		 "100-200kb","200-500kb","500-1M",">1M","All"))
 	
 	p <- ggplot(dt, aes(x = threshold, y = MP, color = Size_Range)) +
@@ -357,15 +368,18 @@ plot_mp_vs_metric <- function(dt, title, subtitle, y_lab, x_lab){
 	return(p)
 }
 
+plot_mp_vs_size <- function(dt, title, subtitle, y_lab, x_lab){
+	dt$Size_Range <- factor(dt$Size_Range,
+													levels = c("1-30kb","30-50kb","50-100kb",
+																		 "100-200kb","200-500kb","500-1M",">1M","All"))
+	
+	p <- ggplot(dt, aes(x = Size_Range, y = MP, fill = Size_Range)) +
+		geom_col() +
+		labs(title = title, subtitle = subtitle, x = x_lab, y = y_lab) +
+		geom_text(aes(label = n)) +
+		theme_minimal(base_size = 12) +
+		scale_y_continuous(limits = c(0, 1), labels = scales::percent) +
+		scale_fill_manual(values = cnv_size_colors, name = "CNV Length Bin")
 
-mp_by_size <- function(ds, transmission_col, 
-											 inheritance_flag = "True") {
-	df %>%
-		dplyr::group_by(Size_Range) %>%
-		mutate(trans = !!sym(transmission_col) == inheritance_flag) %>%
-		dplyr::summarise(
-			n = dplyr::n(),
-			MP = round(mean(trans, na.rm = TRUE), digits = 2),
-			.groups = "drop"
-		) %>% collect
+	return(p)
 }

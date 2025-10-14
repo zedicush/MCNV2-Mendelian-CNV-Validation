@@ -97,7 +97,6 @@ body <- dashboardBody(
 								selectInput("build", label = "Genome build",
 														choices = list("GRCh38/hg38" = 38, "GRCh37/hg19" = 37),
 														selected = 38),
-								numericInput("th_prob", "Problematic regions threshold (child CNV proportion)", 0.50, min = 0, max = 1, step = 0.05),
 								numericInput("th_cnv", "Inheritance threshold (child CNV proportion)", 0.50, min = 0, max = 1, step = 0.05),
 								hr(),
 								div(class = "run-status", uiOutput("run_state")),
@@ -161,22 +160,30 @@ body <- dashboardBody(
 									grid = TRUE
 								),
 								sliderInput("min_exon_ov", "Min. % of disrupted exons",
-														min = 0, max = 100, value = 90, step = 5),
+														min = 0, max = 100, value = 0, step = 5),
 								sliderInput("min_transcript_ov", "Min. % transcript overlap",
-														min = 0, max = 100, value = 90, step = 5),
+														min = 0, max = 100, value = 0, step = 5),
 								sliderInput("max_prb_region_ov", "Max. % problematic regions overlap",
-														min = 0, max = 100, value = 30, step = 5),
+														min = 0, max = 100, value = 100, step = 5),
 								hr(),
 								h4("Gene-level exlusion criteria"),
 								fileInput("exclus_genes", label = "Exclusion list (Ensembl Gene IDs)"),
 								hr(),
 								h4("MP representation"),
-								helpText("Choose a quantitative variable to use as a variable threshold"),
-								selectizeInput("quality_metric", label = "Quality metric",
-															 options = NULL, choices = NULL),
-								uiOutput("qty_metric_range_ui"),
+								radioButtons("plot_type", "Plot type",
+														 choices = c("MP x Quality metric" = "mp_quality",
+														 						"MP x CNV size" = "mp_size"),
+														 selected = "mp_quality"
+								),
+								conditionalPanel(condition = "input.plot_type == 'mp_quality'",
+																 helpText("Choose a quantitative variable to use as a variable threshold."),
+																 helpText("The MP will be calculated for CNV with a quality >= to the threshold"),
+																 selectizeInput("quality_metric", label = "Quality metric",
+																 							 options = NULL, choices = NULL),
+																 uiOutput("qty_metric_range_ui")
+																 ),
 								actionButton("submit_mpviz", label = "Apply filters",
-														 icon = icon("gear"), disabled = FALSE),
+														 icon = icon("gear"), disabled = TRUE),
 								width = 3
 								
 							),
@@ -213,7 +220,7 @@ body <- dashboardBody(
 							mainPanel(
 								conditionalPanel(condition = "input.lol > 0",
 																 h3("LOL")
-																 ),
+								),
 								width = 9              
 							)
 						)

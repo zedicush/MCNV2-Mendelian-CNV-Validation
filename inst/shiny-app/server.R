@@ -107,11 +107,14 @@ function(input, output, session) {
 				prob_regions_file <- input$prb_tsv$datapath
 			} else {
 				prob_regions_file <- system.file("resources",
-																				 paste0("problematic_regions_GRCh",input$build,".bed"), 
+																				 paste0("problematic_regions_GRCh",
+																				 			 input$build,".bed"), 
 																				 package = "MCNV2")
 			}
 			
-			annot_output_file(file.path(results_dir, "cnvs_annotated_by_genes.tsv"))
+			annot_output_file(file.path(results_dir, paste0("cnvs_annotated_by_genes_",
+																											format(Sys.time(), "%y%m%d%H%M"),
+																											".tsv")))
 			
 			incProgress(0.5, detail = "Annotating CNVs...")
 			
@@ -151,12 +154,14 @@ function(input, output, session) {
 			updateCollapse(session, id = "preprocess_panel", 
 										 close = "Annotation table (Preview)")
 			
-			req(annot_output_file())  # Verifie que le fichier est valide
+			req(annot_output_file()) 
 			req(input$ped_tsv)
 			
 			pedigree_file <- isolate(input$ped_tsv$datapath)
 			required_overlap <- isolate(input$th_cnv)
-			inherit_output_file(file.path(results_dir, "cnvs_inheritance.tsv"))
+			inherit_output_file(file.path(results_dir, paste0("cnvs_inheritance_",
+																												format(Sys.time(), "%y%m%d%H%M"),
+																												".tsv")))
 			
 			ret <- MCNV2::compute_inheritance(cnvs_file = annot_output_file(), 
 																				pedigree_file = pedigree_file, 
@@ -167,7 +172,6 @@ function(input, output, session) {
 			
 			if(ret == 0){
 				inherit_check(TRUE)
-				#inherit_output_file("~/workspace/projects/Support/BIOINF-219/data/DEL_DUP_inheritance_readyForShiny_annot.tsv")
 				output$inherit_tsv_status <- renderText(paste("✅ Path to inheritance file:\n",
 																											inherit_output_file()))
 				dat <- readr::read_tsv(inherit_output_file(), n_max = 50, show_col_types = FALSE)
@@ -194,6 +198,14 @@ function(input, output, session) {
 	
 	observeEvent(input$goto_mpexploration, {
 		updateTabItems(session, "tabs", "mp_exploration")  # move to the "mp_exploration" tab
+	})
+	
+	observeEvent(inherit_output_file(), {
+		if (file.exists(inherit_output_file())) {
+			updateActionButton(session, "submit_mpviz", disabled = FALSE)
+		} else {
+			updateActionButton(session, "submit_mpviz", disabled = TRUE)
+		}
 	})
 	
 	output$conditional_input <- renderUI({
@@ -233,6 +245,7 @@ function(input, output, session) {
 			
 			internal_columns <- c("Chr","Start","End", "Exon_Overlap",
 														"t_Start","t_End","STOP", 
+														"cnv_problematic_region_ov",
 														"LOEUF", "segmentaldup_Overlap")
 			
 			spec <- readr::spec_tsv(inherit_output_file())
@@ -330,6 +343,7 @@ function(input, output, session) {
 			min_transcript_ov <- isolate(input$min_transcript_ov)
 			exclus_genes <- isolate(input$exclus_genes)
 			quality_metric <- isolate(input$quality_metric)
+			max_prb_region_ov <- isolate(input$max_prb_region_ov)
 			# get quality metric thresholds
 			min_qty_metric <- isolate(input$quality_metric_min)
 			max_qty_metric <- isolate(input$quality_metric_max)
@@ -338,8 +352,7 @@ function(input, output, session) {
 			
 			dataset <- dataset %>% mutate(Size_Range = case_when(
 				Size < 30000 ~ "1-30kb",
-				Size < 40000 ~ "30-40kb",
-				Size < 50000 ~ "40-50kb",
+				Size < 50000 ~ "30-50kb",
 				Size < 100000 ~ "50-100kb",
 				Size < 200000 ~ "100-200kb",
 				Size < 500000 ~ "200-500kb",
@@ -363,13 +376,30 @@ function(input, output, session) {
 			
 			filtered_dataset <- dataset %>% 
 				dplyr::filter(
-					#Exon_Overlap >= min_exon_ov/100,
-					bp_overlap >= min_transcript_ov/100,
 					Size >= min_cnv_size,
-					Size <= max_cnv_size,
-					.data[[input$quality_metric]] >= min_qty_metric,
-					.data[[input$quality_metric]] <= max_qty_metric
+					Size <= max_cnv_size
 				)
+			
+			if(min_exon_ov > 0){
+				filtered_dataset <- filtered_dataset %>% 
+					dplyr::filter(
+						Exon_Overlap >= min_exon_ov/100
+					)
+			}
+			
+			if(min_transcript_ov > 0){
+				filtered_dataset <- filtered_dataset %>% 
+					dplyr::filter(
+						bp_overlap >= min_transcript_ov/100
+					)
+			}
+			
+			if(max_prb_region_ov < 100){
+				filtered_dataset <- filtered_dataset %>% 
+					dplyr::filter(
+						cnv_problematic_region_overlap <= max_prb_region_ov/100
+					)
+			}
 			
 			# apply exclusion list
 			# TODO: est-ce qu'on retire un CNV dès qu'il impact un "green" genes?
@@ -382,7 +412,6 @@ function(input, output, session) {
 			
 			# update reactive filtered dataset
 			filtered_ds(filtered_dataset)
-			
 			
 			mp <- filtered_ds() %>% 
 				dplyr::select(cnv_id, Type, all_of(transmission_col)) %>%
@@ -427,48 +456,89 @@ function(input, output, session) {
 			})
 			
 			incProgress(0.7, detail = "Plotting deletions in progress...")
-			output$plot_overview_del <- renderPlotly({ 
-				dat <- rbind(mp_vs_metric_by_size(ds =  filtered_ds() %>% dplyr::filter(Type == "DEL"), 
-																					quality_metric = quality_metric, 
-																					transmission_col = transmission_col), 
-										 mp_vs_metric(ds = filtered_ds() %>% dplyr::filter(Type == "DEL"), 
-										 						 quality_metric = quality_metric, 
-										 						 transmission_col = transmission_col))
+			output$plot_overview_del <- renderPlotly({
+				
+				if(input$plot_type == "mp_quality"){
+					dat <- rbind(mp_vs_metric_by_size(ds =  filtered_ds() %>% dplyr::filter(Type == "DEL"),
+																						quality_metric = quality_metric,
+																						thresholds = c(min_qty_metric, max_qty_metric),
+																						transmission_col = transmission_col),
+											 mp_vs_metric(ds = filtered_ds() %>% dplyr::filter(Type == "DEL"),
+											 						 quality_metric = quality_metric,
+											 						 thresholds = c(min_qty_metric, max_qty_metric),
+											 						 transmission_col = transmission_col))
+				} else {
+					dat <- mp_by_size(ds = filtered_ds() %>% dplyr::filter(Type == "DEL"),
+														transmission_col = transmission_col)
+				}
+				
+				
 				if(nrow(dat) > 0){
-					p <- plot_mp_vs_metric(dt = dat, 
-																 title = "Mendelian Precision - DEL", 
-																 subtitle = "All filtered CNVs", 
-																 y_lab = "Mendelian Precision", 
-																 x_lab = paste0(quality_metric, " threshold (≥)"))
+					
+					if(input$plot_type == "mp_quality"){
+						p <- plot_mp_vs_metric(dt = dat,
+																	 title = "Mendelian Precision - DEL",
+																	 subtitle = "All filtered CNVs",
+																	 y_lab = "Mendelian Precision",
+																	 x_lab = paste0(quality_metric, " threshold (≥)"))
+					} else {
+						p <- plot_mp_vs_size(dt = dat,
+																 title = "Mendelian Precision - DEL",
+																 subtitle = "All filtered CNVs",
+																 y_lab = "Mendelian Precision",
+																 x_lab = "CNV Size (binned)")
+					}
+					
 					baseline_DEL_plot(p)
-					ggplotly(p) 
+					ggplotly(p)
 				} else {
 					NULL
 				}
 				
-			}) 
+			})
 			
 			incProgress(0.9, detail = "Plotting duplications in progress...")
-			output$plot_overview_dup <- renderPlotly({ 
-				dat <- rbind(mp_vs_metric_by_size(ds =  filtered_ds() %>% dplyr::filter(Type == "DUP"), 
-																					quality_metric = quality_metric, 
-																					transmission_col = transmission_col), 
-										 mp_vs_metric(ds = filtered_ds() %>% dplyr::filter(Type == "DUP"), 
-										 						 quality_metric = quality_metric, 
-										 						 transmission_col = transmission_col))
+			output$plot_overview_dup <- renderPlotly({
+				
+				if(input$plot_type == "mp_quality"){
+					dat <- rbind(mp_vs_metric_by_size(ds =  filtered_ds() %>% dplyr::filter(Type == "DUP"),
+																						quality_metric = quality_metric,
+																						thresholds = c(min_qty_metric, max_qty_metric),
+																						transmission_col = transmission_col),
+											 mp_vs_metric(ds = filtered_ds() %>% dplyr::filter(Type == "DUP"),
+											 						 quality_metric = quality_metric,
+											 						 thresholds = c(min_qty_metric, max_qty_metric),
+											 						 transmission_col = transmission_col))
+				} else {
+					dat <- mp_by_size(ds = filtered_ds() %>% dplyr::filter(Type == "DUP"),
+														transmission_col = transmission_col)
+				}
+				
 				
 				if(nrow(dat) > 0){
-					p <- plot_mp_vs_metric(dt = dat, 
-																 title = "Mendelian Precision - DUP", 
-																 subtitle = "All filtered CNVs", 
-																 y_lab = "Mendelian Precision", 
-																 x_lab = paste0(quality_metric, " threshold (≥)"))
+					
+					if(input$plot_type == "mp_quality"){
+						p <- plot_mp_vs_metric(dt = dat,
+																	 title = "Mendelian Precision - DUP",
+																	 subtitle = "All filtered CNVs",
+																	 y_lab = "Mendelian Precision",
+																	 x_lab = paste0(quality_metric, " threshold (≥)"))
+					} else {
+						p <- plot_mp_vs_size(dt = dat,
+																 title = "Mendelian Precision - DUP",
+																 subtitle = "All filtered CNVs",
+																 y_lab = "Mendelian Precision",
+																 x_lab = "CNV Size (binned)")
+					}
+					
 					baseline_DUP_plot(p)
-					ggplotly(p) 
+					ggplotly(p)
 				} else {
 					NULL
 				}
-			}) 
+				
+			})
+			
 			#TODO: modify so the completion natification appears AFTER plots
 			showNotification("Plotting complete!", type = "message")
 			
@@ -480,7 +550,7 @@ function(input, output, session) {
 		dat <- filtered_ds() %>% head(1000) %>% collect()
 		datatable(dat, options = list(scrollX = TRUE), rownames = FALSE)
 	})
-
+	
 	output$ddl_filtered_tbl <- downloadHandler(
 		filename = function() {
 			paste0("MCNV2_filtered_data_", Sys.Date(), ".csv")
@@ -502,7 +572,7 @@ function(input, output, session) {
 			)
 		}
 	)
-
+	
 	output$test <- renderUI({
 		req(inherit_output_file())
 		req(quality_metrics())
@@ -556,7 +626,7 @@ function(input, output, session) {
 	})
 	
 	observeEvent(input$add_filter_ftdel, {
-
+		
 		output$preproc_tsv_status <- renderText(paste0(input$ftdel_quality_metric,"_",
 																									 input$ftdel_quality_metric_min,"_",
 																									 input$ftdel_quality_metric_max))
@@ -582,7 +652,7 @@ function(input, output, session) {
 		)
 		
 	})
-
+	
 	output$finetune_dup <- renderUI({
 		req(filtered_ds())
 		

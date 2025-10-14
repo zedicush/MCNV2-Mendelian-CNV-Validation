@@ -215,7 +215,7 @@ create_dynamic_ticks <- function(range_values, n_steps = 100) {
 	if (max_val <= 1) {
 		step <- 0.1
 		ticks <- seq(0, 1, by = step)
-		return(list(ticks = ticks, step = step))
+		return(list(ticks = ticks, step = step, min = min(ticks), max = max(ticks)))
 	}
 	
 	diff_val <- max_val - min_val
@@ -362,8 +362,8 @@ plot_mp_vs_metric <- function(dt, title, subtitle, y_lab, x_lab){
 		scale_y_continuous(limits = c(0, 1), labels = scales::percent) +
 		labs(title = title, subtitle = subtitle, x = x_lab, y = y_lab) +
 		theme_minimal(base_size = 12) +
-		scale_color_manual(values = cnv_size_colors, name = "CNV Length Bin") +
-		scale_shape_manual(values = cnv_size_shapes, name = "CNV Length Bin")
+		scale_color_manual(values = cnv_size_colors, name = "CNV Length") +
+		scale_shape_manual(values = cnv_size_shapes, name = "CNV Length")
 	
 	return(p)
 }
@@ -379,7 +379,7 @@ plot_mp_vs_size <- function(dt, title, subtitle, y_lab, x_lab){
 		geom_text(aes(label = n)) +
 		theme_minimal(base_size = 12) +
 		scale_y_continuous(limits = c(0, 1), labels = scales::percent) +
-		scale_fill_manual(values = cnv_size_colors, name = "CNV Length Bin")
+		scale_fill_manual(values = cnv_size_colors, name = "CNV Length")
 
 	return(p)
 }

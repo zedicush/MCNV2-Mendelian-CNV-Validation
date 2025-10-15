@@ -701,7 +701,7 @@ function(input, output, session) {
 				} else {
 					p <- baseline_DUP_plot()
 				}
-				ggplotly(p)
+				clean_plot_for_plotly(p)
 			})
 			
 			### P2 - 4: after_add_filters ###
@@ -734,7 +734,7 @@ function(input, output, session) {
 					} else {
 						p <- baseline_DUP_plot()
 					}
-					return(ggplotly(p))
+					return(clean_plot_for_plotly(p))
 				}
 				
 				# if any changes
@@ -770,7 +770,7 @@ function(input, output, session) {
 					
 				}
 				
-				ggplotly(p)
+				clean_plot_for_plotly(p)
 			})
 			
 		})

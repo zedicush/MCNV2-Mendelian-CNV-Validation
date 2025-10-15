@@ -439,3 +439,39 @@ plot_mp_vs_size <- function(dt, title, subtitle, y_lab, x_lab){
 
 	return(p)
 }
+
+clean_plot_for_plotly <- function(p, 
+																	x_angle = 45,      # angle pour l'axe x
+																	text_size = 9,     # taille du texte des axes et geom_text
+																	title_size = 13,   # taille du titre
+																	legend_text_size = 9,
+																	legend_title_size = 10,
+																	geom_text_size = 3,
+																	margin_bottom = 100) {
+	
+	# Redéfinit la taille par défaut des geom_text
+	update_geom_defaults("text", list(size = geom_text_size))
+	
+	# Modifie le thème du ggplot
+	p_clean <- p +
+		theme_minimal(base_size = text_size) +
+		theme(
+			axis.text.x = element_text(
+				angle = x_angle,
+				hjust = ifelse(x_angle == 0, 0.5, 1),
+				size = text_size
+			),
+			axis.text.y = element_text(size = text_size),
+			plot.title = element_text(size = title_size, face = "bold"),
+			legend.text = element_text(size = legend_text_size),
+			legend.title = element_text(size = legend_title_size)
+		)
+	
+	# Convertit en plotly avec marge ajustée
+	ggplotly(p_clean) %>%
+		layout(
+			margin = list(b = margin_bottom)
+		)
+}
+
+

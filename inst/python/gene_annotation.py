@@ -240,7 +240,7 @@ def main():
                         pl.col("attrs")
                           .str.replace_all('""', '"')
                           .str.strip_chars('"')
-                          .str.extract(r'gene_id\s+"([^"]+)"')
+                          .str.extract(r'gene_id\s+"([^"]+)\.\d+"')
                     )
                     .otherwise(None)
                     .alias("GeneID")

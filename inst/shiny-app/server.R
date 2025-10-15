@@ -365,7 +365,7 @@ function(input, output, session) {
 			))
 			
 			# calcul de la MP globale
-			transmission_col <- ifelse(test = input$transmission == 1, 
+			transmission_col <- ifelse(test = isolate(input$transmission) == 1, 
 																 yes = "transmitted_cnv", 
 																 no = "transmitted_gene")
 			
@@ -510,7 +510,7 @@ function(input, output, session) {
 			incProgress(0.9, detail = "Plotting duplications in progress...")
 			output$plot_overview_dup <- renderPlotly({
 				
-				if(input$plot_type == "mp_quality"){
+				if(plot_type == "mp_quality"){
 					dat <- rbind(mp_vs_metric_by_size(ds =  filtered_ds() %>% dplyr::filter(Type == "DUP"),
 																						quality_metric = quality_metric,
 																						thresholds = c(min_qty_metric, max_qty_metric),
@@ -527,7 +527,7 @@ function(input, output, session) {
 				
 				if(nrow(dat) > 0){
 					
-					if(input$plot_type == "mp_quality"){
+					if(plot_type == "mp_quality"){
 						p <- plot_mp_vs_metric(dt = dat,
 																	 title = "Mendelian Precision - DUP",
 																	 subtitle = "All filtered CNVs",
@@ -583,26 +583,17 @@ function(input, output, session) {
 		}
 	)
 	
-	observeEvent(input$submit_ft_mpviz, {
-		withProgress(message = "Running analysis...", value = 0, {
-			req(inherit_output_file())
-			req(input$quality_metric)
-			
-			output$p1 <- output$p2 <- output$p3 <- output$p4 <- renderPlotly({
-				if(input$cnv_type == "DEL"){
-					p <- baseline_DEL_plot()
-				} else {
-					p <- baseline_DUP_plot()
-				}
-				
-				ggplotly(p)
-			})
-			
-		})
+	observeEvent(filtered_ds(), {
+		if (!is.null(filtered_ds())) {
+			updateActionButton(session, "goto_finetuning", disabled = FALSE)
+		} else {
+			updateActionButton(session, "goto_finetuning", disabled = TRUE)
+		}
 	})
 	
-	
-	
+	observeEvent(input$goto_finetuning, {
+		updateTabItems(session, "tabs", "fine_tuning")  # move to the "mp_exploration" tab
+	})
 	
 	output$finetune_ui <- renderUI({
 		req(filtered_ds())
@@ -647,23 +638,143 @@ function(input, output, session) {
 									 choices = c("DEL","DUP"), selected = "DEL"),
 			outputs,
 			hr(),
-			# h4("MP representation"),
-			# radioButtons("ft_plot_type", "Plot type",
-			# 						 choices = c("MP x Quality metric" = "mp_quality",
-			# 						 						"MP x CNV size" = "mp_size"),
-			# 						 selected = "mp_quality"
-			# ),
-			# conditionalPanel(condition = "input.ft_plot_type == 'mp_quality'",
-			# 								 helpText("Choose a quantitative variable to use as a variable threshold."),
-			# 								 helpText("The MP will be calculated for CNV with a quality >= to the threshold"),
-			# 								 selectizeInput("ft_quality_metric", label = "Quality metric",
-			# 								 							 options = NULL, choices = NULL),
-			# 								 uiOutput("ft_qty_metric_range_ui")
-			# ),
 			actionButton("submit_ft_mpviz", label = "Apply filters",
 									 icon = icon("gear"), disabled = FALSE)
 		)
-		
 	})
+	
+	observe({
+		lapply(quality_metrics(), function(metric) {
+			ns_metric <- paste0("filter_", metric)
+			op_id <- paste0(ns_metric, "_op")
+			val_id <- paste0(ns_metric, "_val")
+			
+			observeEvent(input[[op_id]], {
+				if (is.null(input[[op_id]])) return(NULL)
+				if (input[[op_id]] == "NA") {
+					shinyjs::disable(val_id)
+				} else {
+					shinyjs::enable(val_id)
+				}
+			}, ignoreInit = TRUE)
+		})
+	})
+	
+	# --- activer bouton seulement si au moins un filtre est actif
+	observe({
+		# On construit un vecteur des statuts de tous les filtres
+		filter_states <- sapply(quality_metrics(), function(metric) {
+			op <- input[[paste0("filter_", metric, "_op")]]
+			val <- input[[paste0("filter_", metric, "_val")]]
+			if (is.null(op) || op == "NA") return(FALSE)
+			TRUE
+		})
+		
+		# Si au moins un TRUE → activer le bouton
+		if (any(filter_states)) {
+			shinyjs::enable("submit_ft_mpviz")
+		} else {
+			shinyjs::disable("submit_ft_mpviz")
+		}
+	})
+
+	
+	observeEvent(input$submit_ft_mpviz, {
+		withProgress(message = "Running analysis...", value = 0, {
+			req(inherit_output_file())
+			req(filtered_ds())
+			cnv_type <- isolate(input$cnv_type)
+			plot_type <- isolate(input$plot_type)
+			quality_metric <- isolate(input$quality_metric)
+			# get quality metric thresholds
+			min_qty_metric <- isolate(input$quality_metric_min)
+			max_qty_metric <- isolate(input$quality_metric_max)
+			# transmission type
+			transmission_col <- ifelse(test = isolate(input$transmission) == 1, 
+																 yes = "transmitted_cnv", 
+																 no = "transmitted_gene")
+			
+			### P1: before_add_filters ###
+			output$before_add_filters <- renderPlotly({
+				if(cnv_type == "DEL"){
+					p <- baseline_DEL_plot()
+				} else {
+					p <- baseline_DUP_plot()
+				}
+				ggplotly(p)
+			})
+			
+			### P2 - 4: after_add_filters ###
+			# get filters
+			df <- filtered_ds()
+			
+			for (m in quality_metrics()) {
+				op <- isolate(input[[paste0("filter_", m, "_op")]])
+				val <- isolate(input[[paste0("filter_", m, "_val")]])
+				
+				if (!is.null(op) && op != "NA" && !is.na(val)) {
+					
+					if (op == ">=") {
+						df <- df %>% filter(.data[[m]] >= val)
+					} else if (op == "<=") {
+						df <- df %>% filter(.data[[m]] <= val)
+					}
+				}
+			}
+			
+			
+			output$after_add_filters <- renderPlotly({
+				p <- NULL
+				
+				# Aucun chamgement
+				if((filtered_ds() %>% count %>% collect) == (df %>% count %>% collect)){
+					print("aucun changement")
+					if(cnv_type == "DEL"){
+						p <- baseline_DEL_plot()
+					} else {
+						p <- baseline_DUP_plot()
+					}
+					return(ggplotly(p))
+				}
+				
+				# if any changes
+				if(plot_type == "mp_quality"){
+					dat <- rbind(mp_vs_metric_by_size(ds =  df %>% dplyr::filter(Type == cnv_type),
+																						quality_metric = quality_metric,
+																						thresholds = c(min_qty_metric, max_qty_metric),
+																						transmission_col = transmission_col),
+											 mp_vs_metric(ds = df %>% dplyr::filter(Type == cnv_type),
+											 						 quality_metric = quality_metric,
+											 						 thresholds = c(min_qty_metric, max_qty_metric),
+											 						 transmission_col = transmission_col))
+				} else {
+					dat <- mp_by_size(ds = df %>% dplyr::filter(Type == cnv_type),
+														transmission_col = transmission_col)
+				}
+				
+				if(nrow(dat) > 0){
+					
+					if(plot_type == "mp_quality"){
+						p <- plot_mp_vs_metric(dt = dat,
+																	 title = paste0("Mendelian Precision - ", cnv_type),
+																	 subtitle = "All filtered CNVs",
+																	 y_lab = "Mendelian Precision",
+																	 x_lab = paste0(quality_metric, " threshold (≥)"))
+					} else {
+						p <- plot_mp_vs_size(dt = dat,
+																 title = paste0("Mendelian Precision - ", cnv_type),
+																 subtitle = "All filtered CNVs",
+																 y_lab = "Mendelian Precision",
+																 x_lab = "CNV Size (binned)")
+					}
+					
+				}
+				
+				ggplotly(p)
+			})
+			
+		})
+	})
+	
 	
 }

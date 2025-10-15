@@ -197,7 +197,11 @@ body <- dashboardBody(
 																 										 downloadButton("ddl_filtered_tbl", 
 																 										 							 "Download CSV")
 																 						)
-																 )
+																 ),
+																 actionButton("goto_finetuning", 
+																 						 label = "Go to Fine-tuning analysis",
+																 						 icon = icon("arrow-right"), 
+																 						 disabled = TRUE)
 								),
 								width = 9
 							)
@@ -216,26 +220,26 @@ body <- dashboardBody(
 								conditionalPanel(condition = "input.submit_ft_mpviz > 0",
 																 fluidRow(
 																 	column(6,
-																 				 h5(tags$b("Before filters")),
-																 				 plotlyOutput("p1")
+																 				 h5(tags$b("Before additional filters")),
+																 				 plotlyOutput("before_add_filters")
 																 	),
 																 	column(6,
-																 				 h5(tags$b("After filters")),
-																 				 plotlyOutput("p2")
+																 				 h5(tags$b("After additional filters")),
+																 				 plotlyOutput("after_add_filters")
 																 	)
 																 ),
 																 hr(),
 																 fluidRow(
 																 	column(6,
 																 				 selectizeInput("p3_type", 
-																 				 							 label = "Plot 3",
+																 				 							 label = "Comparison 1",
 																 				 							 choices = c("type1","type2","type3","type4"),
 																 				 							 selected = "type1"),
 																 				 plotlyOutput("p3")
 																 	),
 																 	column(6,
 																 				 selectizeInput("p4_type", 
-																 				 							 label = "Plot ",
+																 				 							 label = "Comparison 2",
 																 				 							 choices = c("type1","type2","type3","type4"),
 																 				 							 selected = "type2"),
 																 				 plotlyOutput("p4")

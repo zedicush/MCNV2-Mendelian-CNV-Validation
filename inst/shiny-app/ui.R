@@ -63,6 +63,26 @@ body <- dashboardBody(
         display: table-row;
       }
     "),
+	tags$style(HTML("
+      .modal-dialog {
+        max-width: 1600px;
+        width: 95vw;
+        margin: 30px auto;
+      }
+      .modal-content {
+        height: 85vh;
+      }
+      .modal-body {
+        padding: 15px;
+        height: calc(85vh - 130px);
+      }
+      .modal-header {
+        padding: 10px 15px;
+      }
+      .modal-footer {
+        padding: 10px 15px;
+      }
+    ")),
 	# Add a spinner in an application each time the server take more 100 milliseconds to respond.
 	add_busy_spinner(spin = "fading-circle", 
 									 position = "top-right", 
@@ -221,7 +241,9 @@ body <- dashboardBody(
 																 fluidRow(
 																 	column(6,
 																 				 h5(tags$b("Before additional filters")),
-																 				 plotlyOutput("before_add_filters")
+																 				 plotlyOutput("before_add_filters"),
+																 				 br(),
+																 				 actionButton("zoom_before_add_filters", "", icon = icon("search-plus"))
 																 	),
 																 	column(6,
 																 				 h5(tags$b("After additional filters")),
@@ -250,7 +272,12 @@ body <- dashboardBody(
 																 				 							 selected = "intergenic_only"),
 																 				 plotlyOutput("comp_plot2")
 																 	)
-																 )
+																 ),
+																 hr(),
+																 actionButton("goback_mpexploration", 
+																 						 label = "Go back to Mendelian Precision analysis",
+																 						 icon = icon("arrow-left"), 
+																 						 disabled = FALSE)
 																 
 								),
 								width = 9              

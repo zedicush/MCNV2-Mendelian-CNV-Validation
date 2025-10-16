@@ -16,7 +16,8 @@ options(arrow.pull_as_vector = TRUE)
 params <- getOption("MCNV2.params", default = list())
 
 bedtools_path <- params$bedtools_path %||% "bedtools" 
-results_dir   <- params$results_dir   %||% system.file("results", package = "MCNV2")
+results_dir   <- params$results_dir   %||% system.file("results",
+																											 package = "MCNV2")
 
 # Define server logic required to draw a histogram
 function(input, output, session) {
@@ -42,8 +43,15 @@ function(input, output, session) {
 	ft_complete_ds <- reactiveVal(NULL) # [Fine-tuning ALL CNVS after secondary filters]
 	ft_filtered_ds <- reactiveVal(NULL) # [Fine-tuning CNVs after primary AND secondary filters]
 	
+	# reactive plots
 	baseline_DEL_plot <-  reactiveVal(NULL)
 	baseline_DUP_plot <-  reactiveVal(NULL)
+	panel_plot1 <-  reactiveVal(NULL)
+	panel_plot2 <-  reactiveVal(NULL)
+	panel_plot3 <-  reactiveVal(NULL)
+	panel_plot4 <-  reactiveVal(NULL)
+	
+	submit_ft_mpviz_button_state <- reactiveVal(0)
 	
 	observeEvent(input$cnv_tsv, {
 		req(input$cnv_tsv)  # Attend que le fichier soit chargé
@@ -250,7 +258,7 @@ function(input, output, session) {
 		if (file.exists(inherit_output_file())) {
 			
 			internal_columns <- c("Chr","Start","End", "Exon_Overlap",
-														"t_Start","t_End","STOP", "LOEUF",
+														"t_Start","t_End","STOP",
 														"segmentaldup_Overlap", "Size",
 														"cnv_problematic_region_overlap", 
 														"transcript_length")
@@ -342,6 +350,19 @@ function(input, output, session) {
 			req(inherit_output_file())
 			req(input$quality_metric)
 			
+			# reset fine-tuning plots and button to NULL
+			output$before_add_filters <- renderPlotly({NULL})
+			output$after_add_filters <- renderPlotly({NULL})
+			output$comp_plot1 <- renderPlotly({NULL})
+			output$comp_plot2 <- renderPlotly({NULL})
+			panel_plot1(NULL)
+			panel_plot2(NULL)
+			panel_plot3(NULL)
+			panel_plot4(NULL)
+			submit_ft_mpviz_button_state(0)
+			updateSelectizeInput(session, "comp_plot1_type", selected = "genic_only")
+			updateSelectizeInput(session, "comp_plot2_type", selected = "intergenic_only")
+			
 			cnv_range <- isolate(input$cnv_range)
 			# convert CNV size range
 			min_cnv_size <- parse_cnv_size_value(cnv_range[1])
@@ -427,13 +448,14 @@ function(input, output, session) {
 				}
 			}
 			
+			filtered_dataset <- filtered_dataset %>% mutate(transmission = as.logical(.data[[transmission_col]]))
+			
 			# update reactive filtered dataset
 			filtered_ds(filtered_dataset)
 			
 			# TODO: control this calculation
 			mp <- filtered_ds() %>% 
-				dplyr::select(cnv_id, Type, all_of(transmission_col)) %>%
-				mutate(transmission = as.logical(.data[[transmission_col]])) %>%
+				dplyr::select(cnv_id, Type, transmission) %>%
 				distinct() %>%
 				group_by(Type, transmission) %>% 
 				summarise(n = n(), .groups = "drop") %>%
@@ -622,9 +644,9 @@ function(input, output, session) {
 							 	choices = c("-" = "NA", "≥" = ">=", "≤" = "<="),
 							 	selected = "NA",
 							 	options = list(
-							 		style = "btn-light",   # Bootstrap color theme (btn-default, btn-light, btn-info, etc.)
+							 		style = "btn-light",
 							 		size = "sm",             # sm, lg
-							 		`dropup-auto` = FALSE    # optional: keep dropdown direction stable
+							 		`dropup-auto` = FALSE
 							 	)
 							 )
 				),
@@ -686,11 +708,13 @@ function(input, output, session) {
 		}
 	})
 	
-	
 	observeEvent(input$submit_ft_mpviz, {
 		withProgress(message = "Running analysis...", value = 0, {
 			req(inherit_output_file())
 			req(filtered_ds())
+			
+			submit_ft_mpviz_button_state(submit_ft_mpviz_button_state() + 1)
+			
 			cnv_type <- isolate(input$cnv_type)
 			plot_type <- isolate(input$plot_type)
 			quality_metric <- isolate(input$quality_metric)
@@ -698,10 +722,10 @@ function(input, output, session) {
 			min_qty_metric <- isolate(input$quality_metric_min)
 			max_qty_metric <- isolate(input$quality_metric_max)
 			# transmission type
-			transmission_col <- ifelse(test = isolate(input$transmission) == 1, 
-																 yes = "transmitted_cnv", 
+			transmission_col <- ifelse(test = isolate(input$transmission) == 1,
+																 yes = "transmitted_cnv",
 																 no = "transmitted_gene")
-			
+
 			### P1: before_add_filters ###
 			output$before_add_filters <- renderPlotly({
 				if(cnv_type == "DEL"){
@@ -709,20 +733,23 @@ function(input, output, session) {
 				} else {
 					p <- baseline_DUP_plot()
 				}
-				clean_plot_for_plotly(p)
+				
+				p <- clean_plot_for_plotly(p)
+				panel_plot1(p)
+				return(p)
 			})
-			
+
 			### P2: after_add_filters ###
 			# get filters
 			filtered_df <- filtered_ds()
 			complete_df <- complete_ds()
-			
+
 			for (m in quality_metrics()) {
 				op <- isolate(input[[paste0("filter_", m, "_op")]])
 				val <- isolate(input[[paste0("filter_", m, "_val")]])
-				
+
 				if (!is.null(op) && op != "NA" && !is.na(val)) {
-					
+
 					if (op == ">=") {
 						filtered_df <- filtered_df %>% filter(.data[[m]] >= val)
 						complete_df <- complete_df %>% filter(.data[[m]] >= val)
@@ -732,14 +759,14 @@ function(input, output, session) {
 					}
 				}
 			}
-			
+
 			# save ds after secondary filters
 			ft_filtered_ds(filtered_df)
 			ft_complete_ds(complete_df)
-			
+
 			output$after_add_filters <- renderPlotly({
 				p <- NULL
-				
+
 				# Aucun chamgement
 				if((filtered_ds() %>% count %>% collect) == (ft_filtered_ds() %>% count %>% collect)){
 					print("aucun changement")
@@ -748,9 +775,12 @@ function(input, output, session) {
 					} else {
 						p <- baseline_DUP_plot()
 					}
-					return(clean_plot_for_plotly(p))
+
+					p <- clean_plot_for_plotly(p)
+					panel_plot2(p)
+					return(p)
 				}
-				
+
 				# if any changes
 				if(plot_type == "mp_quality"){
 					dat <- rbind(mp_vs_metric_by_size(ds =  ft_filtered_ds() %>% dplyr::filter(Type == cnv_type),
@@ -765,9 +795,9 @@ function(input, output, session) {
 					dat <- mp_by_size(ds = ft_filtered_ds() %>% dplyr::filter(Type == cnv_type),
 														transmission_col = transmission_col)
 				}
-				
+
 				if(nrow(dat) > 0){
-					
+
 					if(plot_type == "mp_quality"){
 						p <- plot_mp_vs_metric(dt = dat,
 																	 title = paste0("Mendelian Precision - ", cnv_type),
@@ -781,10 +811,12 @@ function(input, output, session) {
 																 y_lab = "Mendelian Precision",
 																 x_lab = "CNV Size (binned)")
 					}
-					
+
 				}
 				
-				clean_plot_for_plotly(p)
+				p <- clean_plot_for_plotly(p)
+				panel_plot2(p)
+				return(p)
 			})
 		})
 	})
@@ -804,7 +836,7 @@ function(input, output, session) {
 															 no = "transmitted_gene")
 		
 		### P3: after_add_filters ###
-
+		
 		df1 <- switch(input$comp_plot1_type,
 									
 									# Filtrer les CNVs associés à un gène
@@ -888,7 +920,9 @@ function(input, output, session) {
 				
 			}
 			
-			clean_plot_for_plotly(p)
+			p <- clean_plot_for_plotly(p)
+			panel_plot3(p)
+			return(p)
 		})
 	})
 	
@@ -902,61 +936,61 @@ function(input, output, session) {
 		min_qty_metric <- isolate(input$quality_metric_min)
 		max_qty_metric <- isolate(input$quality_metric_max)
 		# transmission type
-		transmission_col <- ifelse(test = isolate(input$transmission) == 1, 
-															 yes = "transmitted_cnv", 
+		transmission_col <- ifelse(test = isolate(input$transmission) == 1,
+															 yes = "transmitted_cnv",
 															 no = "transmitted_gene")
-		
+
 		### P4: after_add_filters ###
-		
+
 		df1 <- switch(input$comp_plot2_type,
-									
+
 									# Filtrer les CNVs associés à un gène
 									genic_only = {
 										ft_filtered_ds() %>% dplyr::filter(!is.na(GeneID))
 									},
-									
+
 									# Filtrer les CNVs intergéniques
 									intergenic_only = {
 										ft_filtered_ds() %>% dplyr::filter(is.na(GeneID))
 									},
-									
+
 									# Pas de filtre sur les gènes exclus
 									no_excluded_genes = {
 										# TODO: ajouter les filtres primaires
 										ft_complete_ds()
 									},
-									
+
 									# Retirer les CNVs sur gènes contraints (LOEUF < 1)
 									no_constrained_genes = {
-										
+
 										# TODO: ajouter les filtres primaires
 										cnv_ids_to_remove <- ft_complete_ds() %>%
 											dplyr::filter(!is.na(LOEUF) & LOEUF < 1) %>%
 											dplyr::pull(cnv_id) %>% unique()
-										
+
 										if(length(cnv_ids_to_remove) > 0){
 											ft_complete_ds() %>% dplyr::filter(!cnv_id %in% cnv_ids_to_remove)
 										} else {
 											ft_complete_ds()
 										}
 									},
-									
+
 									# Fallback si aucune option ne matche
 									{
 										NULL
 									}
 		)
-		
+
 
 		output$comp_plot2 <- renderPlotly({
 			p <- NULL
-			
+
 			# Aucun chamgement
 			if( is.null(df1) || (df1 %>% count %>% collect) == 0){
 				print("Problem in p4 - no data")
 				return(NULL)
 			}
-			
+
 			# if any changes
 			if(plot_type == "mp_quality"){
 				dat <- rbind(mp_vs_metric_by_size(ds =  df1 %>% dplyr::filter(Type == cnv_type),
@@ -971,28 +1005,58 @@ function(input, output, session) {
 				dat <- mp_by_size(ds = df1 %>% dplyr::filter(Type == cnv_type),
 													transmission_col = transmission_col)
 			}
-			
+
 			if(nrow(dat) > 0){
-				
+
 				if(plot_type == "mp_quality"){
 					p <- plot_mp_vs_metric(dt = dat,
-																 title = paste0("MP - ", 
+																 title = paste0("MP - ",
 																 							 cnv_type, " - ",input$comp_plot2_type),
 																 subtitle = "",
 																 y_lab = "Mendelian Precision",
 																 x_lab = paste0(quality_metric, " threshold (≥)"))
 				} else {
 					p <- plot_mp_vs_size(dt = dat,
-															 title = paste0("MP - ", 
+															 title = paste0("MP - ",
 															 							 cnv_type, " - ",input$comp_plot2_type),
 															 subtitle = "",
 															 y_lab = "Mendelian Precision",
 															 x_lab = "CNV Size (binned)")
 				}
-				
+
 			}
 			
-			clean_plot_for_plotly(p)
+			p <- clean_plot_for_plotly(p)
+			panel_plot4(p)
+			return(p)
+		
 		})
 	})
+	
+	# Bouton zoom - ouvrir le modal
+	observeEvent(input$zoom_before_add_filters, {
+		showModal(modalDialog(
+			title = "MP - before additional filters",
+			size = "xl",
+			plotlyOutput("before_add_filters_zoomed", height = "100%"),
+			footer = tagList(
+				downloadButton("download_before_add_filters_tab",
+											 "Download table", 
+											 class = "btn-success"),
+				modalButton("Close")
+			),
+			easyClose = TRUE
+		))
+	})
+	
+	# Plot zoomé dans le modal
+	output$before_add_filters_zoomed <- renderPlotly({
+		req(panel_plot1())
+		panel_plot1() %>% layout()
+	})
+	
+	observeEvent(input$goback_mpexploration, {
+		updateTabItems(session, "tabs", "mp_exploration")  # move to the "mp_exploration" tab
+	})
+	
 }

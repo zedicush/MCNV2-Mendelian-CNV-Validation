@@ -14,12 +14,17 @@ MCNV2 is an R package for the validation and annotation of Mendelian CNVs. It pr
 
 MCNV2 can be installed directly from GitHub:
 
-```
+```r
+# Install devtools if not already installed
 install.packages("devtools")
 
+# Create a GitHub personal access token (opens browser)
 usethis::create_github_token()
+
+# Set the token for git credential management
 gitcreds::gitcreds_set()
 
+# Install the MCNV2 package from the GitHub repo and a specific branch
 devtools::install_github(
   "git@github.com:JacquemontLab/MCNV2-Mendelian-CNV-Validation.git",
   ref = "package-integration"
@@ -28,7 +33,7 @@ devtools::install_github(
 
 Or if you have a local source tarball:
 
-```
+```r
 install.packages("/path/to/MCNV2_0.1.0.tar.gz", repos = NULL, type = "source")
 ```
 

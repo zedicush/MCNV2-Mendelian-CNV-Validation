@@ -248,6 +248,7 @@ compute_inheritance <- function(cnvs_file, pedigree_file, output_file,
 	}
 }
 
+#' @export
 parse_cnv_size_value <- function(x) {
 	if(grepl(x = x, pattern = ">")){
 		x <- 1000000000
@@ -260,6 +261,7 @@ parse_cnv_size_value <- function(x) {
 	return(x)
 }
 
+#' @export
 create_dynamic_ticks <- function(range_values, n_steps = 100) {
 	if (!is.numeric(range_values) || length(range_values) != 2) {
 		stop("range_values must be a numeric vector of length 2 (min, max).")
@@ -352,6 +354,7 @@ create_dynamic_ticks <- function(range_values, n_steps = 100) {
 # }
 # 
 
+#' @export
 mp_vs_metric_by_size <- function(ds, quality_metric, thresholds, 
 																 transmission_col, inheritance_flag = "True") {
 	ds <- isolate(ds) 
@@ -374,6 +377,7 @@ mp_vs_metric_by_size <- function(ds, quality_metric, thresholds,
 	dplyr::bind_rows(res)
 }
 
+#' @export
 mp_vs_metric <- function(ds, quality_metric, thresholds, transmission_col, 
 												 inheritance_flag = "True") {
 	
@@ -394,6 +398,7 @@ mp_vs_metric <- function(ds, quality_metric, thresholds, transmission_col,
 	dplyr::bind_rows(res)
 }
 
+#' @export
 mp_by_size <- function(ds, transmission_col, inheritance_flag = "True") {
 	ds <- isolate(ds)
 	
@@ -440,6 +445,7 @@ plot_mp_vs_size <- function(dt, title, subtitle, y_lab, x_lab){
 	return(p)
 }
 
+#' @export
 clean_plot_for_plotly <- function(p, 
 																	x_angle = 45,      # angle pour l'axe x
 																	text_size = 9,     # taille du texte des axes et geom_text

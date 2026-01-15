@@ -16,8 +16,11 @@ options(arrow.pull_as_vector = TRUE)
 params <- getOption("MCNV2.params", default = list())
 
 bedtools_path <- params$bedtools_path %||% "bedtools" 
-results_dir   <- params$results_dir   %||% system.file("results",
-																											 package = "MCNV2")
+results_dir <- params$results_dir %||% file.path("~", "mcnv2_results")
+results_dir <- path.expand(results_dir)
+dir.create(results_dir, recursive = TRUE, showWarnings = FALSE)
+if (!dir.exists(results_dir)) stop("Cannot create results_dir: ", results_dir)
+
 
 # Define server logic required to draw a histogram
 function(input, output, session) {
@@ -126,9 +129,13 @@ function(input, output, session) {
 																				 package = "MCNV2")
 			}
 			
-			annot_output_file(file.path(results_dir, paste0("cnvs_annotated_by_genes_",
-																											format(Sys.time(), "%y%m%d%H%M"),
-																											".tsv")))
+			out_path <- file.path(
+			  results_dir,
+			  paste0("cnvs_annotated_by_genes_", format(Sys.time(), "%y%m%d%H%M"), ".tsv")
+			)
+			out_path <- normalizePath(out_path, winslash = "/", mustWork = FALSE)
+			annot_output_file(out_path)
+			
 			
 			incProgress(0.5, detail = "Annotating CNVs...")
 			
@@ -173,9 +180,13 @@ function(input, output, session) {
 			
 			pedigree_file <- isolate(input$ped_tsv$datapath)
 			required_overlap <- isolate(input$th_cnv)
-			inherit_output_file(file.path(results_dir, paste0("cnvs_inheritance_",
-																												format(Sys.time(), "%y%m%d%H%M"),
-																												".tsv")))
+			inherit_path <- file.path(
+			  results_dir,
+			  paste0("cnvs_inheritance_", format(Sys.time(), "%y%m%d%H%M"), ".tsv")
+			)
+			inherit_path <- normalizePath(inherit_path, winslash = "/", mustWork = FALSE)
+			inherit_output_file(inherit_path)
+			
 			
 			ret <- MCNV2::compute_inheritance(cnvs_file = annot_output_file(), 
 																				pedigree_file = pedigree_file, 

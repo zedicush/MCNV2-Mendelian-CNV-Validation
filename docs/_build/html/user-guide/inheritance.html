@@ -1,0 +1,368 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="../">
+<head>
+  <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Inheritance status &mdash; MCNV2 Toolbox 1.0 documentation</title>
+      <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=b86133f3" />
+      <link rel="stylesheet" type="text/css" href="../_static/css/theme.css?v=9edc463e" />
+      <link rel="stylesheet" type="text/css" href="../_static/sphinx-design.min.css?v=95c83b7e" />
+      <link rel="stylesheet" type="text/css" href="../_static/custom.css?v=9ad6ce3d" />
+
+  
+    <link rel="shortcut icon" href="../_static/mcnv2_icon.svg"/>
+      <script src="../_static/jquery.js?v=5d32c60e"></script>
+      <script src="../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="../_static/documentation_options.js?v=f2a433a1"></script>
+      <script src="../_static/doctools.js?v=9a2dae69"></script>
+      <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
+      <script src="../_static/design-tabs.js?v=f930bc37"></script>
+      <script async="async" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+    <script src="../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="Mendelian Precision" href="mendelian_precision.html" />
+    <link rel="prev" title="Preprocessing" href="preprocessing.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../index.html" class="icon icon-home">
+            MCNV2 Toolbox
+              <img src="../_static/mcnv2_logo.png" class="logo" alt="Logo"/>
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Getting Started</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../getting-started/index.html">Getting Started</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">User Guide</span></p>
+<ul class="current">
+<li class="toctree-l1 current"><a class="reference internal" href="index.html">User Guide</a><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="input_formats.html">Input formats</a></li>
+<li class="toctree-l2"><a class="reference internal" href="preprocessing.html">Preprocessing</a></li>
+<li class="toctree-l2 current"><a class="current reference internal" href="#">Inheritance status</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#overview">Overview</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#cnv-level-matching-transmitted-cnv">CNV-level matching (Transmitted_CNV)</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#gene-level-matching-transmitted-gene">Gene-level matching (Transmitted_gene)</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#comparison-of-the-two-approaches">Comparison of the two approaches</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#example-use-cases">Example use cases</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#see-also">See also</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="mendelian_precision.html">Mendelian Precision</a></li>
+<li class="toctree-l2"><a class="reference internal" href="filtering.html">Filtering strategies</a></li>
+<li class="toctree-l2"><a class="reference internal" href="outputs.html">Outputs</a></li>
+</ul>
+</li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Tutorials</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../tutorials/index.html">Tutorials</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Reference</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../reference/index.html">Reference</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">About</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../about/index.html">About</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../index.html">MCNV2 Toolbox</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="index.html">User Guide</a></li>
+      <li class="breadcrumb-item active">Inheritance status</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="../_sources/user-guide/inheritance.rst.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="inheritance-status">
+<h1>Inheritance status<a class="headerlink" href="#inheritance-status" title="Link to this heading"></a></h1>
+<p>MCNV2 classifies each offspring CNV as <strong>inherited (True)</strong> or <strong>non-inherited (False)</strong> based on parental CNV data.</p>
+<p>This page provides a comprehensive explanation of the two inheritance modes available in MCNV2.</p>
+<section id="overview">
+<h2>Overview<a class="headerlink" href="#overview" title="Link to this heading"></a></h2>
+<p>Inheritance status is calculated using two approaches:</p>
+<ol class="arabic simple">
+<li><p><strong>CNV-level matching</strong> (coordinate-based) → Column: <strong>Transmitted_CNV</strong></p></li>
+<li><p><strong>Gene-level matching</strong> (gene-based) → Column: <strong>Transmitted_gene</strong></p></li>
+</ol>
+<p>Both approaches are computed during the Preprocessing step and stored in the inheritance status table.</p>
+</section>
+<section id="cnv-level-matching-transmitted-cnv">
+<h2>CNV-level matching (Transmitted_CNV)<a class="headerlink" href="#cnv-level-matching-transmitted-cnv" title="Link to this heading"></a></h2>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p><strong>Definition:</strong></p>
+<p>A child CNV is considered <strong>inherited (True)</strong> if it has reciprocal overlap ≥ threshold with at least one parental CNV of the <strong>same type (DEL or DUP)</strong> on the same chromosome.</p>
+</div>
+<p><strong>Algorithm:</strong></p>
+<p>For each child CNV:</p>
+<ol class="arabic">
+<li><p>Find all parental CNVs (father and mother) on the same chromosome with the <strong>same type (DEL or DUP)</strong></p></li>
+<li><p>Calculate reciprocal overlap with each parental CNV:</p>
+<div class="math notranslate nohighlight">
+\[\text{Reciprocal overlap} = \frac{\text{Overlap length}}{\min(\text{Child CNV length}, \text{Parent CNV length})}\]</div>
+</li>
+<li><p>If reciprocal overlap ≥ threshold (e.g., 50%) with at least one parent → <strong>True</strong> (inherited)</p></li>
+<li><p>Otherwise → <strong>False</strong> (non-inherited, candidate <em>de novo</em>)</p></li>
+</ol>
+<p><strong>Example:</strong></p>
+<div class="highlight-text notranslate"><div class="highlight"><pre><span></span>Child CNV:   chr1:1,000,000-1,100,000 (100 kb deletion)
+Father CNV:  chr1:1,020,000-1,120,000 (100 kb deletion)
+Mother:      No overlapping CNV
+
+Overlap length: 80 kb (1,020,000 to 1,100,000)
+Min length: 100 kb
+Reciprocal overlap: 80 / 100 = 0.80 (80%)
+
+Threshold: 0.5 (50%)
+Result: 80% ≥ 50% → Transmitted_CNV = True (inherited from father)
+</pre></div>
+</div>
+<p><strong>Advantages:</strong></p>
+<ul class="simple">
+<li><p>Simple and intuitive</p></li>
+<li><p>Works for all CNVs (genic and intergenic)</p></li>
+<li><p>Standard approach in CNV literature</p></li>
+</ul>
+<p><strong>Limitations:</strong></p>
+<ul class="simple">
+<li><p>Requires defining an overlap threshold (no consensus on optimal value)</p></li>
+<li><p>Sensitive to breakpoint differences — may miss true inheritances when child and parent CNVs have slightly different boundaries</p></li>
+<li><p>Sensitive to CNV fragmentation — a CNV detected as multiple fragments may not be recognized as inherited even if it represents the same parental CNV (e.g., child fragments: 150kb + 200kb + 50kb vs parent: single 400kb call)</p></li>
+</ul>
+</section>
+<section id="gene-level-matching-transmitted-gene">
+<h2>Gene-level matching (Transmitted_gene)<a class="headerlink" href="#gene-level-matching-transmitted-gene" title="Link to this heading"></a></h2>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p><strong>Definition:</strong></p>
+<p>A child CNV is considered <strong>inherited (True)</strong> if at least one affected gene is also affected by the <strong>same CNV type (DEL or DUP)</strong> in at least one parent.</p>
+</div>
+<p><strong>Algorithm:</strong></p>
+<p>For each child CNV-gene pair:</p>
+<ol class="arabic simple">
+<li><p>Identify all genes overlapping the child CNV</p></li>
+<li><p>For each gene, check if it is also affected by the <strong>same CNV type</strong> in the father or mother</p></li>
+<li><p>If yes → <strong>True</strong> (inherited)</p></li>
+<li><p>If no → <strong>False</strong> (non-inherited)</p></li>
+<li><p>If CNV is intergenic (no gene overlap) → <strong>“intergenic”</strong></p></li>
+</ol>
+<p><strong>Example 1: Same type (inherited):</strong></p>
+<div class="highlight-text notranslate"><div class="highlight"><pre><span></span>Child CNV:   chr1:1,000,000-1,100,000 (DEL, overlaps genes A, B, C)
+Father CNV:  chr1:1,050,000-1,150,000 (DEL, overlaps genes B, C, D)
+Mother:      No CNVs affecting genes A, B, C
+
+Gene A: Not in father (DEL) → Transmitted_gene = False
+Gene B: In father (DEL) → Transmitted_gene = True
+Gene C: In father (DEL) → Transmitted_gene = True
+</pre></div>
+</div>
+<p><strong>Example 2: Different type (not inherited):</strong></p>
+<div class="highlight-text notranslate"><div class="highlight"><pre><span></span>Child CNV:   chr1:1,000,000-1,100,000 (DEL, overlaps gene BRCA1)
+Father CNV:  chr1:1,020,000-1,150,000 (DUP, overlaps gene BRCA1)
+Mother:      No CNVs
+
+Gene BRCA1 is deleted in child but duplicated in father
+→ Different CNV types
+→ Transmitted_gene = False
+</pre></div>
+</div>
+<p><strong>Advantages:</strong></p>
+<ul class="simple">
+<li><p>Robust to breakpoint variability and CNV fragmentation</p></li>
+<li><p>Focuses on functional impact (affected genes)</p></li>
+<li><p>Useful for evaluating gene-based filters</p></li>
+<li><p>No threshold parameter required</p></li>
+</ul>
+<p><strong>Limitations:</strong></p>
+<ul class="simple">
+<li><p>Only applicable to genic CNVs</p></li>
+<li><p>Intergenic CNVs are flagged as “intergenic” (not True/False)</p></li>
+</ul>
+</section>
+<section id="comparison-of-the-two-approaches">
+<h2>Comparison of the two approaches<a class="headerlink" href="#comparison-of-the-two-approaches" title="Link to this heading"></a></h2>
+<table class="docutils align-default">
+<thead>
+<tr class="row-odd"><th class="head"><p>Aspect</p></th>
+<th class="head"><p>Transmitted_CNV</p></th>
+<th class="head"><p>Transmitted_gene</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p><strong>Method</strong></p></td>
+<td><p>Coordinate overlap</p></td>
+<td><p>Shared genes</p></td>
+</tr>
+<tr class="row-odd"><td><p><strong>Threshold</strong></p></td>
+<td><p>User-defined (e.g., 50%)</p></td>
+<td><p>Not required</p></td>
+</tr>
+<tr class="row-even"><td><p><strong>Applicable to</strong></p></td>
+<td><p>All CNVs</p></td>
+<td><p>Genic CNVs only</p></td>
+</tr>
+<tr class="row-odd"><td><p><strong>Robustness to</strong>
+<strong>breakpoint shifts</strong></p></td>
+<td><p>Low (sensitive to
+boundaries)</p></td>
+<td><p>High (ignores
+boundaries)</p></td>
+</tr>
+<tr class="row-even"><td><p><strong>Robustness to</strong>
+<strong>CNV fragmentation</strong></p></td>
+<td><p>Low (fragments may
+fail threshold)</p></td>
+<td><p>High (focuses on
+shared genes)</p></td>
+</tr>
+</tbody>
+</table>
+<div class="admonition tip">
+<p class="admonition-title">Tip</p>
+<p><strong>Recommendation:</strong></p>
+<p>Use both approaches to get a comprehensive view of CNV quality. The difference between CNV-level and gene-level MP highlights the impact of breakpoint variability and CNV fragmentation in your dataset.</p>
+</div>
+</section>
+<section id="example-use-cases">
+<h2>Example use cases<a class="headerlink" href="#example-use-cases" title="Link to this heading"></a></h2>
+<p><strong>Case 1: Inherited by both methods</strong></p>
+<div class="highlight-text notranslate"><div class="highlight"><pre><span></span>Child:  chr1:1,000,000-1,100,000 (DEL, overlaps gene X)
+Father: chr1:1,000,000-1,100,000 (DEL, overlaps gene X)
+
+Transmitted_CNV: True (100% overlap)
+Transmitted_gene: True (gene X deleted in father)
+</pre></div>
+</div>
+<p><strong>Interpretation:</strong> High-confidence inherited CNV.</p>
+<p><strong>Case 2: Inherited by gene, not by CNV (breakpoint shift)</strong></p>
+<div class="highlight-text notranslate"><div class="highlight"><pre><span></span>Child:  chr1:1,000,000-1,100,000 (DEL, overlaps gene X)
+Father: chr1:1,200,000-1,300,000 (DEL, overlaps gene X)
+
+Transmitted_CNV: False (no coordinate overlap)
+Transmitted_gene: True (gene X deleted in father)
+</pre></div>
+</div>
+<p><strong>Interpretation:</strong> Different breakpoints, but same gene affected. Likely inherited despite coordinate mismatch.</p>
+<p><strong>Case 3: Inherited by gene, not by CNV (fragmentation)</strong></p>
+<div class="highlight-text notranslate"><div class="highlight"><pre><span></span>Child:  chr1:1,000,000-1,150,000 (DEL, 150kb, overlaps gene X)
+        chr1:1,150,000-1,350,000 (DEL, 200kb, overlaps gene X)
+        chr1:1,350,000-1,400,000 (DEL, 50kb, no gene)
+
+Father: chr1:1,000,000-1,300,000 (DEL, 300kb, overlaps gene X)
+
+Transmitted_CNV: Fragment 1 (100% overlap) → True
+                 Fragment 2 (75% overlap) → True if threshold ≤75%, False if &gt;75%
+                 Fragment 3 (0% overlap) → False
+
+Transmitted_gene: All fragments overlapping gene X → True
+</pre></div>
+</div>
+<p><strong>Interpretation:</strong> CNV fragmentation causes some fragments to fail coordinate matching, but gene-level matching correctly identifies inheritance.</p>
+<p><strong>Case 4: Non-inherited (candidate *de novo*)</strong></p>
+<div class="highlight-text notranslate"><div class="highlight"><pre><span></span>Child:  chr1:1,000,000-1,100,000 (DEL, overlaps gene X)
+Father: No CNV affecting gene X
+Mother: No CNV affecting gene X
+
+Transmitted_CNV: False
+Transmitted_gene: False
+</pre></div>
+</div>
+<p><strong>Interpretation:</strong> Candidate <em>de novo</em> CNV or technical artefact.</p>
+<p><strong>Case 5: Intergenic CNV</strong></p>
+<div class="highlight-text notranslate"><div class="highlight"><pre><span></span>Child:  chr1:10,000,000-10,050,000 (DEL, intergenic)
+Father: chr1:10,000,000-10,050,000 (DEL, intergenic)
+
+Transmitted_CNV: True (100% overlap)
+Transmitted_gene: &quot;intergenic&quot;
+</pre></div>
+</div>
+<p><strong>Interpretation:</strong> Inherited based on coordinates. Gene-based method not applicable.</p>
+<p><strong>Case 6: Different CNV type</strong></p>
+<div class="highlight-text notranslate"><div class="highlight"><pre><span></span>Child:  chr1:1,000,000-1,100,000 (DEL, overlaps gene X)
+Father: chr1:1,000,000-1,100,000 (DUP, overlaps gene X)
+
+Transmitted_CNV: False (different types)
+Transmitted_gene: False (different types)
+</pre></div>
+</div>
+<p><strong>Interpretation:</strong> Same coordinates but opposite CNV types. Not inherited.</p>
+</section>
+<section id="see-also">
+<h2>See also<a class="headerlink" href="#see-also" title="Link to this heading"></a></h2>
+<ul class="simple">
+<li><p><a class="reference internal" href="preprocessing.html"><span class="doc">Preprocessing</span></a> — How inheritance status is calculated during preprocessing</p></li>
+<li><p><a class="reference internal" href="mendelian_precision.html"><span class="doc">Mendelian Precision</span></a> — How inheritance status is used to compute MP</p></li>
+<li><p><a class="reference internal" href="filtering.html"><span class="doc">Filtering strategies</span></a> — How to filter CNVs based on inheritance status</p></li>
+</ul>
+</section>
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="preprocessing.html" class="btn btn-neutral float-left" title="Preprocessing" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="mendelian_precision.html" class="btn btn-neutral float-right" title="Mendelian Precision" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2026, Mame Seynabou Diop.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

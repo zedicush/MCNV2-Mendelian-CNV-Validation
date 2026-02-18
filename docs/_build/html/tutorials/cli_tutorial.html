@@ -1,0 +1,712 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="../">
+<head>
+  <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>CLI tutorial &mdash; MCNV2 Toolbox 1.0 documentation</title>
+      <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=b86133f3" />
+      <link rel="stylesheet" type="text/css" href="../_static/css/theme.css?v=9edc463e" />
+      <link rel="stylesheet" type="text/css" href="../_static/sphinx-design.min.css?v=95c83b7e" />
+      <link rel="stylesheet" type="text/css" href="../_static/custom.css?v=9ad6ce3d" />
+
+  
+    <link rel="shortcut icon" href="../_static/mcnv2_icon.svg"/>
+      <script src="../_static/jquery.js?v=5d32c60e"></script>
+      <script src="../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="../_static/documentation_options.js?v=f2a433a1"></script>
+      <script src="../_static/doctools.js?v=9a2dae69"></script>
+      <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
+      <script src="../_static/design-tabs.js?v=f930bc37"></script>
+    <script src="../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="Shiny tutorial" href="shiny_tutorial.html" />
+    <link rel="prev" title="Tutorials" href="index.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../index.html" class="icon icon-home">
+            MCNV2 Toolbox
+              <img src="../_static/mcnv2_logo.png" class="logo" alt="Logo"/>
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Getting Started</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../getting-started/index.html">Getting Started</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">User Guide</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../user-guide/index.html">User Guide</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Tutorials</span></p>
+<ul class="current">
+<li class="toctree-l1 current"><a class="reference internal" href="index.html">Tutorials</a><ul class="current">
+<li class="toctree-l2 current"><a class="current reference internal" href="#">CLI tutorial</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#overview">Overview</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#typical-workflow">Typical workflow</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#function-reference">Function reference</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#annotate">annotate()</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#compute-inheritance">compute_inheritance()</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#compute-mp">compute_mp()</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="#batch-processing-example">Batch processing example</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#pipeline-integration">Pipeline integration</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#nextflow-workflow">Nextflow workflow</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="#error-handling">Error handling</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#performance-considerations">Performance considerations</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#see-also">See also</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="shiny_tutorial.html">Shiny tutorial</a></li>
+</ul>
+</li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Reference</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../reference/index.html">Reference</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">About</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../about/index.html">About</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../index.html">MCNV2 Toolbox</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="index.html">Tutorials</a></li>
+      <li class="breadcrumb-item active">CLI tutorial</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="../_sources/tutorials/cli_tutorial.rst.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="cli-tutorial">
+<h1>CLI tutorial<a class="headerlink" href="#cli-tutorial" title="Link to this heading"></a></h1>
+<p>MCNV2 provides R functions for <strong>reproducible batch processing</strong> and integration into automated pipelines.</p>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>These functions are R wrappers that call Python scripts internally. You must have
+the MCNV2 R package installed and Python environment configured
+(see <a class="reference internal" href="../getting-started/installation.html"><span class="doc">Installation</span></a>).</p>
+</div>
+<section id="overview">
+<h2>Overview<a class="headerlink" href="#overview" title="Link to this heading"></a></h2>
+<p>MCNV2 provides three main functions for command-line workflows:</p>
+<ol class="arabic simple">
+<li><p><strong>annotate()</strong> — Annotate CNVs with genes, LOEUF scores, and problematic regions</p></li>
+<li><p><strong>compute_inheritance()</strong> — Calculate inheritance status (Transmitted_CNV and Transmitted_gene)</p></li>
+<li><p><strong>compute_mp()</strong> — Calculate Mendelian Precision with filtering options</p></li>
+</ol>
+</section>
+<section id="typical-workflow">
+<h2>Typical workflow<a class="headerlink" href="#typical-workflow" title="Link to this heading"></a></h2>
+<div class="highlight-R notranslate"><div class="highlight"><pre><span></span><span class="nf">library</span><span class="p">(</span><span class="n">MCNV2</span><span class="p">)</span>
+
+<span class="c1"># 1. Annotate CNVs</span>
+<span class="nf">annotate</span><span class="p">(</span>
+<span class="w">  </span><span class="n">cnvs_file</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s">&quot;data/cnvs.tsv&quot;</span><span class="p">,</span>
+<span class="w">  </span><span class="n">prob_regions_file</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s">&quot;data/problematic_regions.bed&quot;</span><span class="p">,</span>
+<span class="w">  </span><span class="n">output_file</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s">&quot;results/cnvs_annotated.tsv&quot;</span><span class="p">,</span>
+<span class="w">  </span><span class="n">genome_version</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="m">38</span><span class="p">,</span>
+<span class="w">  </span><span class="n">bedtools_path</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s">&quot;/usr/local/bin/bedtools&quot;</span>
+<span class="p">)</span>
+
+<span class="c1"># 2. Compute inheritance status</span>
+<span class="nf">compute_inheritance</span><span class="p">(</span>
+<span class="w">  </span><span class="n">cnvs_file</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s">&quot;results/cnvs_annotated.tsv&quot;</span><span class="p">,</span>
+<span class="w">  </span><span class="n">pedigree_file</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s">&quot;data/pedigree.tsv&quot;</span><span class="p">,</span>
+<span class="w">  </span><span class="n">output_file</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s">&quot;results/cnvs_inheritance.tsv&quot;</span><span class="p">,</span>
+<span class="w">  </span><span class="n">overlap</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="m">0.5</span>
+<span class="p">)</span>
+
+<span class="c1"># 3. Compute Mendelian Precision</span>
+<span class="c1"># Note: MP is stratified by CNV type (DEL vs DUP) by default</span>
+<span class="nf">compute_mp</span><span class="p">(</span>
+<span class="w">  </span><span class="n">inheritance_file</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s">&quot;results/cnvs_inheritance.tsv&quot;</span><span class="p">,</span>
+<span class="w">  </span><span class="n">output_file</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s">&quot;results/mp_summary.tsv&quot;</span><span class="p">,</span>
+<span class="w">  </span><span class="n">transmission_type</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s">&quot;cnv&quot;</span><span class="p">,</span>
+<span class="w">  </span><span class="n">min_size</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="m">30000</span><span class="p">,</span>
+<span class="w">  </span><span class="n">max_prob_regions</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="m">0.5</span>
+<span class="p">)</span>
+</pre></div>
+</div>
+</section>
+<section id="function-reference">
+<h2>Function reference<a class="headerlink" href="#function-reference" title="Link to this heading"></a></h2>
+<section id="annotate">
+<h3>annotate()<a class="headerlink" href="#annotate" title="Link to this heading"></a></h3>
+<p>Annotate CNVs with gene information, LOEUF scores, and problematic region overlap.</p>
+<p><strong>Usage:</strong></p>
+<div class="highlight-R notranslate"><div class="highlight"><pre><span></span><span class="nf">annotate</span><span class="p">(</span>
+<span class="w">  </span><span class="n">cnvs_file</span><span class="p">,</span>
+<span class="w">  </span><span class="n">prob_regions_file</span><span class="p">,</span>
+<span class="w">  </span><span class="n">output_file</span><span class="p">,</span>
+<span class="w">  </span><span class="n">genome_version</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="m">38</span><span class="p">,</span>
+<span class="w">  </span><span class="n">bedtools_path</span>
+<span class="p">)</span>
+</pre></div>
+</div>
+<p><strong>Parameters:</strong></p>
+<ul>
+<li><p><strong>cnvs_file</strong> (character) — Path to CNV file (tab-delimited)</p>
+<p>Required columns: CHR, START, STOP, TYPE, SAMPLE_ID</p>
+</li>
+<li><p><strong>prob_regions_file</strong> (character) — Path to problematic regions BED file</p>
+<p>Default file provided in package if not specified</p>
+</li>
+<li><p><strong>output_file</strong> (character) — Path for output annotated file</p></li>
+<li><p><strong>genome_version</strong> (numeric) — Genome build: 38 (GRCh38/hg38) or 37 (GRCh37/hg19)</p>
+<p>Default: 38</p>
+</li>
+<li><p><strong>bedtools_path</strong> (character) — Path to bedtools executable</p>
+<p>Example: “/usr/local/bin/bedtools”</p>
+</li>
+</ul>
+<p><strong>Returns:</strong></p>
+<ul class="simple">
+<li><p>0 if successful</p></li>
+<li><p>1 if output file was not created (error)</p></li>
+</ul>
+<p><strong>Output columns:</strong></p>
+<p>All input columns plus:</p>
+<ul class="simple">
+<li><p>GeneName — HGNC gene symbol</p></li>
+<li><p>GeneID — Ensembl gene ID</p></li>
+<li><p>Transcript — Ensembl transcript ID</p></li>
+<li><p>LOEUF — Loss-of-function constraint score (gnomAD v4)</p></li>
+<li><p>problematic_region_overlap — Percentage overlap with problematic regions</p></li>
+</ul>
+<p><strong>Example:</strong></p>
+<div class="highlight-R notranslate"><div class="highlight"><pre><span></span><span class="nf">library</span><span class="p">(</span><span class="n">MCNV2</span><span class="p">)</span>
+
+<span class="c1"># Annotate CNVs</span>
+<span class="n">status</span><span class="w"> </span><span class="o">&lt;-</span><span class="w"> </span><span class="nf">annotate</span><span class="p">(</span>
+<span class="w">  </span><span class="n">cnvs_file</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s">&quot;data/cnvs.tsv&quot;</span><span class="p">,</span>
+<span class="w">  </span><span class="n">prob_regions_file</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nf">system.file</span><span class="p">(</span><span class="s">&quot;resources&quot;</span><span class="p">,</span><span class="w"> </span><span class="s">&quot;problematic_regions.bed&quot;</span><span class="p">,</span>
+<span class="w">                                  </span><span class="n">package</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s">&quot;MCNV2&quot;</span><span class="p">),</span>
+<span class="w">  </span><span class="n">output_file</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s">&quot;results/cnvs_annotated.tsv&quot;</span><span class="p">,</span>
+<span class="w">  </span><span class="n">genome_version</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="m">38</span><span class="p">,</span>
+<span class="w">  </span><span class="n">bedtools_path</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s">&quot;/usr/local/bin/bedtools&quot;</span>
+<span class="p">)</span>
+
+<span class="kr">if</span><span class="w"> </span><span class="p">(</span><span class="n">status</span><span class="w"> </span><span class="o">==</span><span class="w"> </span><span class="m">0</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">  </span><span class="nf">message</span><span class="p">(</span><span class="s">&quot;Annotation completed successfully&quot;</span><span class="p">)</span>
+<span class="p">}</span><span class="w"> </span><span class="kr">else</span><span class="w"> </span><span class="p">{</span>
+<span class="w">  </span><span class="nf">stop</span><span class="p">(</span><span class="s">&quot;Annotation failed&quot;</span><span class="p">)</span>
+<span class="p">}</span>
+</pre></div>
+</div>
+</section>
+<section id="compute-inheritance">
+<h3>compute_inheritance()<a class="headerlink" href="#compute-inheritance" title="Link to this heading"></a></h3>
+<p>Calculate inheritance status for each CNV based on parental data.</p>
+<p><strong>Usage:</strong></p>
+<div class="highlight-R notranslate"><div class="highlight"><pre><span></span><span class="nf">compute_inheritance</span><span class="p">(</span>
+<span class="w">  </span><span class="n">cnvs_file</span><span class="p">,</span>
+<span class="w">  </span><span class="n">pedigree_file</span><span class="p">,</span>
+<span class="w">  </span><span class="n">output_file</span><span class="p">,</span>
+<span class="w">  </span><span class="n">overlap</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="m">0.5</span>
+<span class="p">)</span>
+</pre></div>
+</div>
+<p><strong>Parameters:</strong></p>
+<ul>
+<li><p><strong>cnvs_file</strong> (character) — Path to annotated CNV file (output from annotate())</p></li>
+<li><p><strong>pedigree_file</strong> (character) — Path to pedigree file</p>
+<p>Three columns: SAMPLE_ID, FATHER_ID, MOTHER_ID (tab-delimited, no header)</p>
+</li>
+<li><p><strong>output_file</strong> (character) — Path for output file with inheritance status</p></li>
+<li><p><strong>overlap</strong> (numeric) — Minimum overlap for a CNV to be considered as inherited</p>
+<p>Range: 0.01 to 1.0</p>
+<p>Default: 0.5 (50%)</p>
+</li>
+</ul>
+<p><strong>Returns:</strong></p>
+<ul class="simple">
+<li><p>0 if successful</p></li>
+<li><p>1 if output file was not created (error)</p></li>
+</ul>
+<p><strong>Output columns:</strong></p>
+<p>All input columns plus:</p>
+<ul class="simple">
+<li><p><strong>Transmitted_CNV</strong> — True/False (coordinate-based inheritance)</p></li>
+<li><p><strong>Transmitted_gene</strong> — True/False/intergenic (gene-based inheritance)</p></li>
+</ul>
+<p><strong>Example:</strong></p>
+<div class="highlight-R notranslate"><div class="highlight"><pre><span></span><span class="nf">library</span><span class="p">(</span><span class="n">MCNV2</span><span class="p">)</span>
+
+<span class="c1"># Compute inheritance with 50% overlap threshold</span>
+<span class="n">status</span><span class="w"> </span><span class="o">&lt;-</span><span class="w"> </span><span class="nf">compute_inheritance</span><span class="p">(</span>
+<span class="w">  </span><span class="n">cnvs_file</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s">&quot;results/cnvs_annotated.tsv&quot;</span><span class="p">,</span>
+<span class="w">  </span><span class="n">pedigree_file</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s">&quot;data/pedigree.tsv&quot;</span><span class="p">,</span>
+<span class="w">  </span><span class="n">output_file</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s">&quot;results/cnvs_inheritance.tsv&quot;</span><span class="p">,</span>
+<span class="w">  </span><span class="n">overlap</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="m">0.5</span>
+<span class="p">)</span>
+
+<span class="kr">if</span><span class="w"> </span><span class="p">(</span><span class="n">status</span><span class="w"> </span><span class="o">==</span><span class="w"> </span><span class="m">0</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">  </span><span class="nf">message</span><span class="p">(</span><span class="s">&quot;Inheritance calculation completed&quot;</span><span class="p">)</span>
+
+<span class="w">  </span><span class="c1"># Read results</span>
+<span class="w">  </span><span class="n">cnvs</span><span class="w"> </span><span class="o">&lt;-</span><span class="w"> </span><span class="nf">read.table</span><span class="p">(</span><span class="s">&quot;results/cnvs_inheritance.tsv&quot;</span><span class="p">,</span>
+<span class="w">                     </span><span class="n">header</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="kc">TRUE</span><span class="p">,</span><span class="w"> </span><span class="n">sep</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s">&quot;\t&quot;</span><span class="p">,</span><span class="w"> </span><span class="n">quote</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s">&quot;&quot;</span><span class="p">)</span>
+
+<span class="w">  </span><span class="c1"># Count inherited vs non-inherited</span>
+<span class="w">  </span><span class="nf">table</span><span class="p">(</span><span class="n">cnvs</span><span class="o">$</span><span class="n">Transmitted_CNV</span><span class="p">)</span>
+<span class="p">}</span>
+</pre></div>
+</div>
+</section>
+<section id="compute-mp">
+<h3>compute_mp()<a class="headerlink" href="#compute-mp" title="Link to this heading"></a></h3>
+<p>Calculate Mendelian Precision with optional filtering.</p>
+<div class="admonition important">
+<p class="admonition-title">Important</p>
+<p><strong>MP is always stratified by CNV type (DEL vs DUP) by default.</strong></p>
+<p>This is the recommended approach as deletions and duplications have different
+quality profiles. Set <code class="docutils literal notranslate"><span class="pre">stratify_by_type</span> <span class="pre">=</span> <span class="pre">FALSE</span></code> only if you specifically need
+a single global MP value (not recommended).</p>
+</div>
+<div class="admonition important">
+<p class="admonition-title">Important</p>
+<p>This function requires the output file from <code class="docutils literal notranslate"><span class="pre">compute_inheritance()</span></code> as input.</p>
+</div>
+<p><strong>Usage:</strong></p>
+<div class="highlight-R notranslate"><div class="highlight"><pre><span></span><span class="nf">compute_mp</span><span class="p">(</span>
+<span class="w">  </span><span class="n">inheritance_file</span><span class="p">,</span>
+<span class="w">  </span><span class="n">output_file</span><span class="p">,</span>
+<span class="w">  </span><span class="n">transmission_type</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s">&quot;cnv&quot;</span><span class="p">,</span>
+<span class="w">  </span><span class="n">min_size</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="kc">NULL</span><span class="p">,</span>
+<span class="w">  </span><span class="n">max_size</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="kc">NULL</span><span class="p">,</span>
+<span class="w">  </span><span class="n">min_score</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="kc">NULL</span><span class="p">,</span>
+<span class="w">  </span><span class="n">max_prob_regions</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="kc">NULL</span><span class="p">,</span>
+<span class="w">  </span><span class="n">min_loeuf</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="kc">NULL</span><span class="p">,</span>
+<span class="w">  </span><span class="n">stratify_by_size</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="kc">FALSE</span><span class="p">,</span>
+<span class="w">  </span><span class="n">stratify_by_type</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="kc">TRUE</span>
+<span class="p">)</span>
+</pre></div>
+</div>
+<p><strong>Parameters:</strong></p>
+<ul>
+<li><p><strong>inheritance_file</strong> (character) — Path to inheritance file</p>
+<p><strong>Must be the output from compute_inheritance()</strong></p>
+<p>Required columns: Transmitted_CNV, Transmitted_gene</p>
+</li>
+<li><p><strong>output_file</strong> (character) — Path for MP summary output</p></li>
+<li><p><strong>transmission_type</strong> (character) — Transmission matching type</p>
+<ul class="simple">
+<li><p>“cnv” — Use Transmitted_CNV (coordinate-based)</p></li>
+<li><p>“gene” — Use Transmitted_gene (gene-based)</p></li>
+</ul>
+<p>Default: “cnv”</p>
+</li>
+<li><p><strong>min_size</strong> (numeric) — Minimum CNV size in bp (optional)</p>
+<p>Example: 30000 (30 kb)</p>
+</li>
+<li><p><strong>max_size</strong> (numeric) — Maximum CNV size in bp (optional)</p></li>
+<li><p><strong>min_score</strong> (numeric) — Minimum quality score (optional)</p></li>
+<li><p><strong>max_prob_regions</strong> (numeric) — Maximum problematic regions overlap (0-1, optional)</p>
+<p>Example: 0.5 (exclude CNVs with &gt;50% overlap)</p>
+</li>
+<li><p><strong>min_loeuf</strong> (numeric) — Minimum LOEUF threshold (optional)</p>
+<p>Example: 0.6 (exclude constrained genes)</p>
+</li>
+<li><p><strong>stratify_by_size</strong> (logical) — Stratify MP by size ranges</p>
+<p>Default: FALSE</p>
+</li>
+<li><p><strong>stratify_by_type</strong> (logical) — Stratify MP by CNV type (DEL/DUP)</p>
+<p>Default: TRUE (recommended)</p>
+<p><strong>Keep TRUE</strong> unless you specifically need a single global MP value.
+Deletions and duplications have different quality profiles and should be
+evaluated separately.</p>
+</li>
+</ul>
+<p><strong>Returns:</strong></p>
+<ul class="simple">
+<li><p>0 if successful</p></li>
+<li><p>1 if output file was not created (error)</p></li>
+</ul>
+<p><strong>Output:</strong></p>
+<p>Tab-delimited file with MP statistics:</p>
+<ul class="simple">
+<li><p>CNV_type (DEL/DUP, or All if stratify_by_type=FALSE)</p></li>
+<li><p>Size_range (All, or specific ranges if stratify_by_size=TRUE)</p></li>
+<li><p>Total_CNVs</p></li>
+<li><p>Inherited_CNVs</p></li>
+<li><p>Non_inherited_CNVs</p></li>
+<li><p>MP (Mendelian Precision %)</p></li>
+</ul>
+<p><strong>Example output (default: stratified by type):</strong></p>
+<div class="highlight-text notranslate"><div class="highlight"><pre><span></span>CNV_type  Size_range  Total_CNVs  Inherited_CNVs  Non_inherited_CNVs   MP
+DEL       All         5000        4250            750                  85.0
+DUP       All         3000        2400            600                  80.0
+</pre></div>
+</div>
+<p><strong>Example output (stratified by type AND size):</strong></p>
+<div class="highlight-text notranslate"><div class="highlight"><pre><span></span>CNV_type  Size_range   Total_CNVs  Inherited_CNVs  Non_inherited_CNVs   MP
+DEL       1-30kb       800         600             200                  75.0
+DEL       30-50kb      600         540             60                   90.0
+DEL       50-100kb     900         855             45                   95.0
+DUP       1-30kb       600         420             180                  70.0
+DUP       30-50kb      500         425             75                   85.0
+DUP       50-100kb     700         665             35                   95.0
+</pre></div>
+</div>
+<p><strong>Example 1: Basic MP calculation (stratified by type)</strong></p>
+<div class="highlight-R notranslate"><div class="highlight"><pre><span></span><span class="nf">library</span><span class="p">(</span><span class="n">MCNV2</span><span class="p">)</span>
+
+<span class="c1"># Calculate MP (CNV-level, stratified by DEL/DUP, no filters)</span>
+<span class="nf">compute_mp</span><span class="p">(</span>
+<span class="w">  </span><span class="n">inheritance_file</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s">&quot;results/cnvs_inheritance.tsv&quot;</span><span class="p">,</span>
+<span class="w">  </span><span class="n">output_file</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s">&quot;results/mp_summary.tsv&quot;</span><span class="p">,</span>
+<span class="w">  </span><span class="n">transmission_type</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s">&quot;cnv&quot;</span>
+<span class="p">)</span>
+
+<span class="c1"># Read MP results</span>
+<span class="n">mp</span><span class="w"> </span><span class="o">&lt;-</span><span class="w"> </span><span class="nf">read.table</span><span class="p">(</span><span class="s">&quot;results/mp_summary.tsv&quot;</span><span class="p">,</span><span class="w"> </span><span class="n">header</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="kc">TRUE</span><span class="p">,</span><span class="w"> </span><span class="n">sep</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s">&quot;\t&quot;</span><span class="p">)</span>
+<span class="nf">print</span><span class="p">(</span><span class="n">mp</span><span class="p">)</span>
+<span class="c1">#   CNV_type  Size_range  Total_CNVs  Inherited_CNVs  Non_inherited_CNVs   MP</span>
+<span class="c1">#   DEL       All         5000        4250            750                  85.0</span>
+<span class="c1">#   DUP       All         3000        2400            600                  80.0</span>
+</pre></div>
+</div>
+<p><strong>Example 2: MP with filtering</strong></p>
+<div class="highlight-R notranslate"><div class="highlight"><pre><span></span><span class="c1"># Calculate MP with size and quality filters</span>
+<span class="c1"># Still stratified by DEL/DUP (default)</span>
+<span class="nf">compute_mp</span><span class="p">(</span>
+<span class="w">  </span><span class="n">inheritance_file</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s">&quot;results/cnvs_inheritance.tsv&quot;</span><span class="p">,</span>
+<span class="w">  </span><span class="n">output_file</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s">&quot;results/mp_filtered.tsv&quot;</span><span class="p">,</span>
+<span class="w">  </span><span class="n">transmission_type</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s">&quot;cnv&quot;</span><span class="p">,</span>
+<span class="w">  </span><span class="n">min_size</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="m">30000</span><span class="p">,</span><span class="w">           </span><span class="c1"># ≥30 kb</span>
+<span class="w">  </span><span class="n">max_prob_regions</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="m">0.5</span><span class="p">,</span><span class="w">     </span><span class="c1"># ≤50% prob regions overlap</span>
+<span class="w">  </span><span class="n">min_score</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="m">100</span><span class="w">             </span><span class="c1"># Score ≥100</span>
+<span class="p">)</span>
+
+<span class="c1"># Output shows DEL and DUP separately after filtering</span>
+<span class="c1">#   CNV_type  Size_range  Total_CNVs  Inherited_CNVs  Non_inherited_CNVs   MP</span>
+<span class="c1">#   DEL       All         3000        2775            225                  92.5</span>
+<span class="c1">#   DUP       All         1800        1620            180                  90.0</span>
+</pre></div>
+</div>
+<p><strong>Example 3: Technical MP (excluding constrained genes)</strong></p>
+<div class="highlight-R notranslate"><div class="highlight"><pre><span></span><span class="c1"># Calculate technical MP (excluding LOEUF &lt; 0.6)</span>
+<span class="nf">compute_mp</span><span class="p">(</span>
+<span class="w">  </span><span class="n">inheritance_file</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s">&quot;results/cnvs_inheritance.tsv&quot;</span><span class="p">,</span>
+<span class="w">  </span><span class="n">output_file</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s">&quot;results/mp_technical.tsv&quot;</span><span class="p">,</span>
+<span class="w">  </span><span class="n">transmission_type</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s">&quot;gene&quot;</span><span class="p">,</span>
+<span class="w">  </span><span class="n">min_loeuf</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="m">0.6</span>
+<span class="p">)</span>
+
+<span class="c1"># Output:</span>
+<span class="c1">#   CNV_type  Size_range  Total_CNVs  Inherited_CNVs  Non_inherited_CNVs   MP</span>
+<span class="c1">#   DEL       All         4500        4185            315                  93.0</span>
+<span class="c1">#   DUP       All         2700        2511            189                  93.0</span>
+</pre></div>
+</div>
+<p><strong>Example 4: MP stratified by size</strong></p>
+<div class="highlight-R notranslate"><div class="highlight"><pre><span></span><span class="c1"># Calculate MP for each size range</span>
+<span class="nf">compute_mp</span><span class="p">(</span>
+<span class="w">  </span><span class="n">inheritance_file</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s">&quot;results/cnvs_inheritance.tsv&quot;</span><span class="p">,</span>
+<span class="w">  </span><span class="n">output_file</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s">&quot;results/mp_by_size.tsv&quot;</span><span class="p">,</span>
+<span class="w">  </span><span class="n">transmission_type</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s">&quot;cnv&quot;</span><span class="p">,</span>
+<span class="w">  </span><span class="n">stratify_by_size</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="kc">TRUE</span><span class="p">,</span>
+<span class="w">  </span><span class="n">stratify_by_type</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="kc">TRUE</span>
+<span class="p">)</span>
+
+<span class="c1"># Output shows DEL and DUP for each size range</span>
+<span class="c1">#   CNV_type  Size_range   Total_CNVs  Inherited_CNVs  Non_inherited_CNVs   MP</span>
+<span class="c1">#   DEL       1-30kb       800         600             200                  75.0</span>
+<span class="c1">#   DEL       30-50kb      600         540             60                   90.0</span>
+<span class="c1">#   DEL       50-100kb     900         855             45                   95.0</span>
+<span class="c1">#   DEL       100-200kb    700         686             14                   98.0</span>
+<span class="c1">#   DUP       1-30kb       600         420             180                  70.0</span>
+<span class="c1">#   DUP       30-50kb      500         425             75                   85.0</span>
+<span class="c1">#   DUP       50-100kb     700         665             35                   95.0</span>
+<span class="c1">#   DUP       100-200kb    500         490             10                   98.0</span>
+</pre></div>
+</div>
+<p><strong>Example 5: Global MP (not recommended)</strong></p>
+<div class="highlight-R notranslate"><div class="highlight"><pre><span></span><span class="c1"># Calculate single global MP value (not stratified by type)</span>
+<span class="c1"># NOT RECOMMENDED: loses information about DEL vs DUP differences</span>
+<span class="nf">compute_mp</span><span class="p">(</span>
+<span class="w">  </span><span class="n">inheritance_file</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s">&quot;results/cnvs_inheritance.tsv&quot;</span><span class="p">,</span>
+<span class="w">  </span><span class="n">output_file</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s">&quot;results/mp_global.tsv&quot;</span><span class="p">,</span>
+<span class="w">  </span><span class="n">transmission_type</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s">&quot;cnv&quot;</span><span class="p">,</span>
+<span class="w">  </span><span class="n">stratify_by_type</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="kc">FALSE</span>
+<span class="p">)</span>
+
+<span class="c1"># Output (single row):</span>
+<span class="c1">#   CNV_type  Size_range  Total_CNVs  Inherited_CNVs  Non_inherited_CNVs   MP</span>
+<span class="c1">#   All       All         8000        6650            1350                 83.1</span>
+</pre></div>
+</div>
+</section>
+</section>
+<section id="batch-processing-example">
+<h2>Batch processing example<a class="headerlink" href="#batch-processing-example" title="Link to this heading"></a></h2>
+<p>Process multiple datasets:</p>
+<div class="highlight-R notranslate"><div class="highlight"><pre><span></span><span class="nf">library</span><span class="p">(</span><span class="n">MCNV2</span><span class="p">)</span>
+
+<span class="c1"># List of datasets</span>
+<span class="n">datasets</span><span class="w"> </span><span class="o">&lt;-</span><span class="w"> </span><span class="nf">c</span><span class="p">(</span><span class="s">&quot;cohort1&quot;</span><span class="p">,</span><span class="w"> </span><span class="s">&quot;cohort2&quot;</span><span class="p">,</span><span class="w"> </span><span class="s">&quot;cohort3&quot;</span><span class="p">)</span>
+
+<span class="kr">for</span><span class="w"> </span><span class="p">(</span><span class="n">dataset</span><span class="w"> </span><span class="kr">in</span><span class="w"> </span><span class="n">datasets</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">  </span><span class="nf">message</span><span class="p">(</span><span class="nf">paste</span><span class="p">(</span><span class="s">&quot;Processing&quot;</span><span class="p">,</span><span class="w"> </span><span class="n">dataset</span><span class="p">))</span>
+
+<span class="w">  </span><span class="c1"># 1. Annotate</span>
+<span class="w">  </span><span class="nf">annotate</span><span class="p">(</span>
+<span class="w">    </span><span class="n">cnvs_file</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nf">paste0</span><span class="p">(</span><span class="s">&quot;data/&quot;</span><span class="p">,</span><span class="w"> </span><span class="n">dataset</span><span class="p">,</span><span class="w"> </span><span class="s">&quot;_cnvs.tsv&quot;</span><span class="p">),</span>
+<span class="w">    </span><span class="n">prob_regions_file</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nf">system.file</span><span class="p">(</span><span class="s">&quot;resources&quot;</span><span class="p">,</span><span class="w"> </span><span class="s">&quot;problematic_regions.bed&quot;</span><span class="p">,</span>
+<span class="w">                                    </span><span class="n">package</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s">&quot;MCNV2&quot;</span><span class="p">),</span>
+<span class="w">    </span><span class="n">output_file</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nf">paste0</span><span class="p">(</span><span class="s">&quot;results/&quot;</span><span class="p">,</span><span class="w"> </span><span class="n">dataset</span><span class="p">,</span><span class="w"> </span><span class="s">&quot;_annotated.tsv&quot;</span><span class="p">),</span>
+<span class="w">    </span><span class="n">genome_version</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="m">38</span><span class="p">,</span>
+<span class="w">    </span><span class="n">bedtools_path</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s">&quot;/usr/local/bin/bedtools&quot;</span>
+<span class="w">  </span><span class="p">)</span>
+
+<span class="w">  </span><span class="c1"># 2. Inheritance</span>
+<span class="w">  </span><span class="nf">compute_inheritance</span><span class="p">(</span>
+<span class="w">    </span><span class="n">cnvs_file</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nf">paste0</span><span class="p">(</span><span class="s">&quot;results/&quot;</span><span class="p">,</span><span class="w"> </span><span class="n">dataset</span><span class="p">,</span><span class="w"> </span><span class="s">&quot;_annotated.tsv&quot;</span><span class="p">),</span>
+<span class="w">    </span><span class="n">pedigree_file</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nf">paste0</span><span class="p">(</span><span class="s">&quot;data/&quot;</span><span class="p">,</span><span class="w"> </span><span class="n">dataset</span><span class="p">,</span><span class="w"> </span><span class="s">&quot;_pedigree.tsv&quot;</span><span class="p">),</span>
+<span class="w">    </span><span class="n">output_file</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nf">paste0</span><span class="p">(</span><span class="s">&quot;results/&quot;</span><span class="p">,</span><span class="w"> </span><span class="n">dataset</span><span class="p">,</span><span class="w"> </span><span class="s">&quot;_inheritance.tsv&quot;</span><span class="p">),</span>
+<span class="w">    </span><span class="n">overlap</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="m">0.5</span>
+<span class="w">  </span><span class="p">)</span>
+
+<span class="w">  </span><span class="c1"># 3. MP (multiple strategies)</span>
+<span class="w">  </span><span class="c1"># All MP calculations are stratified by type (DEL/DUP) by default</span>
+
+<span class="w">  </span><span class="c1"># 3a. Overall MP</span>
+<span class="w">  </span><span class="nf">compute_mp</span><span class="p">(</span>
+<span class="w">    </span><span class="n">inheritance_file</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nf">paste0</span><span class="p">(</span><span class="s">&quot;results/&quot;</span><span class="p">,</span><span class="w"> </span><span class="n">dataset</span><span class="p">,</span><span class="w"> </span><span class="s">&quot;_inheritance.tsv&quot;</span><span class="p">),</span>
+<span class="w">    </span><span class="n">output_file</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nf">paste0</span><span class="p">(</span><span class="s">&quot;results/&quot;</span><span class="p">,</span><span class="w"> </span><span class="n">dataset</span><span class="p">,</span><span class="w"> </span><span class="s">&quot;_mp_all.tsv&quot;</span><span class="p">),</span>
+<span class="w">    </span><span class="n">transmission_type</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s">&quot;cnv&quot;</span>
+<span class="w">  </span><span class="p">)</span>
+
+<span class="w">  </span><span class="c1"># 3b. Filtered MP</span>
+<span class="w">  </span><span class="nf">compute_mp</span><span class="p">(</span>
+<span class="w">    </span><span class="n">inheritance_file</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nf">paste0</span><span class="p">(</span><span class="s">&quot;results/&quot;</span><span class="p">,</span><span class="w"> </span><span class="n">dataset</span><span class="p">,</span><span class="w"> </span><span class="s">&quot;_inheritance.tsv&quot;</span><span class="p">),</span>
+<span class="w">    </span><span class="n">output_file</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nf">paste0</span><span class="p">(</span><span class="s">&quot;results/&quot;</span><span class="p">,</span><span class="w"> </span><span class="n">dataset</span><span class="p">,</span><span class="w"> </span><span class="s">&quot;_mp_filtered.tsv&quot;</span><span class="p">),</span>
+<span class="w">    </span><span class="n">transmission_type</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s">&quot;cnv&quot;</span><span class="p">,</span>
+<span class="w">    </span><span class="n">min_size</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="m">30000</span><span class="p">,</span>
+<span class="w">    </span><span class="n">max_prob_regions</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="m">0.5</span>
+<span class="w">  </span><span class="p">)</span>
+
+<span class="w">  </span><span class="c1"># 3c. Technical MP</span>
+<span class="w">  </span><span class="nf">compute_mp</span><span class="p">(</span>
+<span class="w">    </span><span class="n">inheritance_file</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nf">paste0</span><span class="p">(</span><span class="s">&quot;results/&quot;</span><span class="p">,</span><span class="w"> </span><span class="n">dataset</span><span class="p">,</span><span class="w"> </span><span class="s">&quot;_inheritance.tsv&quot;</span><span class="p">),</span>
+<span class="w">    </span><span class="n">output_file</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nf">paste0</span><span class="p">(</span><span class="s">&quot;results/&quot;</span><span class="p">,</span><span class="w"> </span><span class="n">dataset</span><span class="p">,</span><span class="w"> </span><span class="s">&quot;_mp_technical.tsv&quot;</span><span class="p">),</span>
+<span class="w">    </span><span class="n">transmission_type</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s">&quot;gene&quot;</span><span class="p">,</span>
+<span class="w">    </span><span class="n">min_loeuf</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="m">0.6</span>
+<span class="w">  </span><span class="p">)</span>
+<span class="p">}</span>
+
+<span class="c1"># Combine results (each file has DEL and DUP rows)</span>
+<span class="n">all_mp</span><span class="w"> </span><span class="o">&lt;-</span><span class="w"> </span><span class="nf">do.call</span><span class="p">(</span><span class="n">rbind</span><span class="p">,</span><span class="w"> </span><span class="nf">lapply</span><span class="p">(</span><span class="n">datasets</span><span class="p">,</span><span class="w"> </span><span class="kr">function</span><span class="p">(</span><span class="n">d</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">  </span><span class="n">mp</span><span class="w"> </span><span class="o">&lt;-</span><span class="w"> </span><span class="nf">read.table</span><span class="p">(</span><span class="nf">paste0</span><span class="p">(</span><span class="s">&quot;results/&quot;</span><span class="p">,</span><span class="w"> </span><span class="n">d</span><span class="p">,</span><span class="w"> </span><span class="s">&quot;_mp_all.tsv&quot;</span><span class="p">),</span>
+<span class="w">                   </span><span class="n">header</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="kc">TRUE</span><span class="p">,</span><span class="w"> </span><span class="n">sep</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s">&quot;\t&quot;</span><span class="p">)</span>
+<span class="w">  </span><span class="n">mp</span><span class="o">$</span><span class="n">Dataset</span><span class="w"> </span><span class="o">&lt;-</span><span class="w"> </span><span class="n">d</span>
+<span class="w">  </span><span class="kr">return</span><span class="p">(</span><span class="n">mp</span><span class="p">)</span>
+<span class="p">}))</span>
+
+<span class="c1"># Result has DEL and DUP rows for each dataset</span>
+<span class="nf">write.table</span><span class="p">(</span><span class="n">all_mp</span><span class="p">,</span><span class="w"> </span><span class="s">&quot;results/combined_mp.tsv&quot;</span><span class="p">,</span>
+<span class="w">            </span><span class="n">sep</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s">&quot;\t&quot;</span><span class="p">,</span><span class="w"> </span><span class="n">row.names</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="kc">FALSE</span><span class="p">,</span><span class="w"> </span><span class="n">quote</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="kc">FALSE</span><span class="p">)</span>
+</pre></div>
+</div>
+</section>
+<section id="pipeline-integration">
+<h2>Pipeline integration<a class="headerlink" href="#pipeline-integration" title="Link to this heading"></a></h2>
+<section id="nextflow-workflow">
+<h3>Nextflow workflow<a class="headerlink" href="#nextflow-workflow" title="Link to this heading"></a></h3>
+<div class="highlight-groovy notranslate"><div class="highlight"><pre><span></span><span class="c1">// main.nf</span>
+<span class="n">process</span><span class="w"> </span><span class="n">annotate</span><span class="w"> </span><span class="o">{</span>
+<span class="w">    </span><span class="nl">input:</span>
+<span class="w">    </span><span class="n">path</span><span class="w"> </span><span class="n">cnv</span>
+<span class="w">    </span><span class="n">path</span><span class="w"> </span><span class="n">prob_regions</span>
+
+<span class="w">    </span><span class="nl">output:</span>
+<span class="w">    </span><span class="n">path</span><span class="w"> </span><span class="s2">&quot;${cnv.baseName}_annotated.tsv&quot;</span>
+
+<span class="w">    </span><span class="nl">script:</span>
+<span class="w">    </span><span class="s2">&quot;&quot;&quot;</span>
+<span class="s2">    Rscript -e &#39;</span>
+<span class="s2">    MCNV2::annotate(</span>
+<span class="s2">        cnvs_file = &quot;${cnv}&quot;,</span>
+<span class="s2">        prob_regions_file = &quot;${prob_regions}&quot;,</span>
+<span class="s2">        output_file = &quot;${cnv.baseName}_annotated.tsv&quot;,</span>
+<span class="s2">        genome_version = 38,</span>
+<span class="s2">        bedtools_path = &quot;/usr/local/bin/bedtools&quot;</span>
+<span class="s2">    )&#39;</span>
+<span class="s2">    &quot;&quot;&quot;</span>
+<span class="o">}</span>
+
+<span class="n">process</span><span class="w"> </span><span class="n">inheritance</span><span class="w"> </span><span class="o">{</span>
+<span class="w">    </span><span class="nl">input:</span>
+<span class="w">    </span><span class="n">path</span><span class="w"> </span><span class="n">annotated</span>
+<span class="w">    </span><span class="n">path</span><span class="w"> </span><span class="n">pedigree</span>
+
+<span class="w">    </span><span class="nl">output:</span>
+<span class="w">    </span><span class="n">path</span><span class="w"> </span><span class="s2">&quot;${annotated.baseName}_inheritance.tsv&quot;</span>
+
+<span class="w">    </span><span class="nl">script:</span>
+<span class="w">    </span><span class="s2">&quot;&quot;&quot;</span>
+<span class="s2">    Rscript -e &#39;</span>
+<span class="s2">    MCNV2::compute_inheritance(</span>
+<span class="s2">        cnvs_file = &quot;${annotated}&quot;,</span>
+<span class="s2">        pedigree_file = &quot;${pedigree}&quot;,</span>
+<span class="s2">        output_file = &quot;${annotated.baseName}_inheritance.tsv&quot;,</span>
+<span class="s2">        overlap = 0.5</span>
+<span class="s2">    )&#39;</span>
+<span class="s2">    &quot;&quot;&quot;</span>
+<span class="o">}</span>
+
+<span class="n">process</span><span class="w"> </span><span class="n">mp</span><span class="w"> </span><span class="o">{</span>
+<span class="w">    </span><span class="nl">input:</span>
+<span class="w">    </span><span class="n">path</span><span class="w"> </span><span class="n">inheritance</span>
+
+<span class="w">    </span><span class="nl">output:</span>
+<span class="w">    </span><span class="n">path</span><span class="w"> </span><span class="s2">&quot;${inheritance.baseName}_mp.tsv&quot;</span>
+
+<span class="w">    </span><span class="nl">script:</span>
+<span class="w">    </span><span class="s2">&quot;&quot;&quot;</span>
+<span class="s2">    Rscript -e &#39;</span>
+<span class="s2">    MCNV2::compute_mp(</span>
+<span class="s2">        inheritance_file = &quot;${inheritance}&quot;,</span>
+<span class="s2">        output_file = &quot;${inheritance.baseName}_mp.tsv&quot;,</span>
+<span class="s2">        transmission_type = &quot;cnv&quot;,</span>
+<span class="s2">        min_size = 30000</span>
+<span class="s2">    )&#39;</span>
+<span class="s2">    &quot;&quot;&quot;</span>
+<span class="o">}</span>
+</pre></div>
+</div>
+</section>
+</section>
+<section id="error-handling">
+<h2>Error handling<a class="headerlink" href="#error-handling" title="Link to this heading"></a></h2>
+<p>Check return codes:</p>
+<div class="highlight-R notranslate"><div class="highlight"><pre><span></span><span class="nf">library</span><span class="p">(</span><span class="n">MCNV2</span><span class="p">)</span>
+
+<span class="c1"># Annotate with error checking</span>
+<span class="n">status</span><span class="w"> </span><span class="o">&lt;-</span><span class="w"> </span><span class="nf">annotate</span><span class="p">(</span>
+<span class="w">  </span><span class="n">cnvs_file</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s">&quot;data/cnvs.tsv&quot;</span><span class="p">,</span>
+<span class="w">  </span><span class="n">prob_regions_file</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s">&quot;data/problematic_regions.bed&quot;</span><span class="p">,</span>
+<span class="w">  </span><span class="n">output_file</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s">&quot;results/annotated.tsv&quot;</span><span class="p">,</span>
+<span class="w">  </span><span class="n">genome_version</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="m">38</span><span class="p">,</span>
+<span class="w">  </span><span class="n">bedtools_path</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s">&quot;/usr/local/bin/bedtools&quot;</span>
+<span class="p">)</span>
+
+<span class="kr">if</span><span class="w"> </span><span class="p">(</span><span class="n">status</span><span class="w"> </span><span class="o">!=</span><span class="w"> </span><span class="m">0</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">  </span><span class="nf">stop</span><span class="p">(</span><span class="s">&quot;Annotation failed. Check input files and bedtools path.&quot;</span><span class="p">)</span>
+<span class="p">}</span>
+
+<span class="c1"># Verify output exists and is not empty</span>
+<span class="kr">if</span><span class="w"> </span><span class="p">(</span><span class="o">!</span><span class="nf">file.exists</span><span class="p">(</span><span class="s">&quot;results/annotated.tsv&quot;</span><span class="p">))</span><span class="w"> </span><span class="p">{</span>
+<span class="w">  </span><span class="nf">stop</span><span class="p">(</span><span class="s">&quot;Output file was not created&quot;</span><span class="p">)</span>
+<span class="p">}</span>
+
+<span class="kr">if</span><span class="w"> </span><span class="p">(</span><span class="nf">file.size</span><span class="p">(</span><span class="s">&quot;results/annotated.tsv&quot;</span><span class="p">)</span><span class="w"> </span><span class="o">==</span><span class="w"> </span><span class="m">0</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">  </span><span class="nf">stop</span><span class="p">(</span><span class="s">&quot;Output file is empty&quot;</span><span class="p">)</span>
+<span class="p">}</span>
+
+<span class="nf">message</span><span class="p">(</span><span class="s">&quot;Annotation completed successfully&quot;</span><span class="p">)</span>
+</pre></div>
+</div>
+</section>
+<section id="performance-considerations">
+<h2>Performance considerations<a class="headerlink" href="#performance-considerations" title="Link to this heading"></a></h2>
+<p><strong>Memory requirements:</strong></p>
+<ul class="simple">
+<li><p>Annotation: ~4 GB for 100,000 CNVs</p></li>
+<li><p>Inheritance: ~8 GB for 100,000 CNVs in 1,000 trios</p></li>
+<li><p>MP calculation: ~2 GB</p></li>
+</ul>
+<p><strong>Runtime (approximate):</strong></p>
+<ul class="simple">
+<li><p>Annotation: ~5 min for 100,000 CNVs</p></li>
+<li><p>Inheritance: ~10 min for 100,000 CNVs in 1,000 trios</p></li>
+<li><p>MP calculation: ~1 min</p></li>
+</ul>
+<p><strong>Recommendations:</strong></p>
+<ul class="simple">
+<li><p>For large datasets (&gt;500,000 CNVs), consider splitting by chromosome</p></li>
+<li><p>Use parallel processing for batch analysis of multiple cohorts</p></li>
+<li><p>Ensure sufficient disk space for intermediate files</p></li>
+</ul>
+</section>
+<section id="see-also">
+<h2>See also<a class="headerlink" href="#see-also" title="Link to this heading"></a></h2>
+<ul class="simple">
+<li><p><a class="reference internal" href="../user-guide/preprocessing.html"><span class="doc">Preprocessing</span></a> — Preprocessing steps explained</p></li>
+<li><p><a class="reference internal" href="../user-guide/inheritance.html"><span class="doc">Inheritance status</span></a> — Inheritance calculation details</p></li>
+<li><p><a class="reference internal" href="../user-guide/mendelian_precision.html"><span class="doc">Mendelian Precision</span></a> — MP calculation and interpretation</p></li>
+<li><p><a class="reference internal" href="../user-guide/filtering.html"><span class="doc">Filtering strategies</span></a> — Filtering strategies</p></li>
+</ul>
+</section>
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="index.html" class="btn btn-neutral float-left" title="Tutorials" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="shiny_tutorial.html" class="btn btn-neutral float-right" title="Shiny tutorial" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2026, Mame Seynabou Diop.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

@@ -1,0 +1,344 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="../">
+<head>
+  <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Preprocessing &mdash; MCNV2 Toolbox 1.0 documentation</title>
+      <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=b86133f3" />
+      <link rel="stylesheet" type="text/css" href="../_static/css/theme.css?v=9edc463e" />
+      <link rel="stylesheet" type="text/css" href="../_static/sphinx-design.min.css?v=95c83b7e" />
+      <link rel="stylesheet" type="text/css" href="../_static/custom.css?v=9ad6ce3d" />
+
+  
+    <link rel="shortcut icon" href="../_static/mcnv2_icon.svg"/>
+      <script src="../_static/jquery.js?v=5d32c60e"></script>
+      <script src="../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="../_static/documentation_options.js?v=f2a433a1"></script>
+      <script src="../_static/doctools.js?v=9a2dae69"></script>
+      <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
+      <script src="../_static/design-tabs.js?v=f930bc37"></script>
+    <script src="../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="Inheritance status" href="inheritance.html" />
+    <link rel="prev" title="Input formats" href="input_formats.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../index.html" class="icon icon-home">
+            MCNV2 Toolbox
+              <img src="../_static/mcnv2_logo.png" class="logo" alt="Logo"/>
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Getting Started</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../getting-started/index.html">Getting Started</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">User Guide</span></p>
+<ul class="current">
+<li class="toctree-l1 current"><a class="reference internal" href="index.html">User Guide</a><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="input_formats.html">Input formats</a></li>
+<li class="toctree-l2 current"><a class="current reference internal" href="#">Preprocessing</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#overview">Overview</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#input-files">Input files</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#parameters-for-inheritance-calculation">Parameters for inheritance calculation</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#workflow">Workflow</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#annotation-process">Annotation process</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#annotated-cnv-table">Annotated CNV table</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#inheritance-status-calculation">Inheritance status calculation</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#inheritance-status-table">Inheritance status table</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#next-step-mendelian-precision-analysis">Next step: Mendelian Precision analysis</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#tips">Tips</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#troubleshooting">Troubleshooting</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="inheritance.html">Inheritance status</a></li>
+<li class="toctree-l2"><a class="reference internal" href="mendelian_precision.html">Mendelian Precision</a></li>
+<li class="toctree-l2"><a class="reference internal" href="filtering.html">Filtering strategies</a></li>
+<li class="toctree-l2"><a class="reference internal" href="outputs.html">Outputs</a></li>
+</ul>
+</li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Tutorials</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../tutorials/index.html">Tutorials</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Reference</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../reference/index.html">Reference</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">About</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../about/index.html">About</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../index.html">MCNV2 Toolbox</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="index.html">User Guide</a></li>
+      <li class="breadcrumb-item active">Preprocessing</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="../_sources/user-guide/preprocessing.rst.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="preprocessing">
+<h1>Preprocessing<a class="headerlink" href="#preprocessing" title="Link to this heading"></a></h1>
+<p>The <strong>Preprocessing</strong> tab is the first step in the MCNV2 workflow. It performs CNV annotation and inheritance status calculation.</p>
+<section id="overview">
+<h2>Overview<a class="headerlink" href="#overview" title="Link to this heading"></a></h2>
+<p>This tab allows you to:</p>
+<ol class="arabic simple">
+<li><p>Upload input files (CNV calls, pedigree, problematic regions)</p></li>
+<li><p>Set inheritance parameters (overlap threshold, genome build)</p></li>
+<li><p>Annotate CNVs with genes, LOEUF scores, and problematic regions</p></li>
+<li><p>Calculate inheritance status (transmitted vs non-transmitted)</p></li>
+<li><p>View annotated results</p></li>
+</ol>
+</section>
+<section id="input-files">
+<h2>Input files<a class="headerlink" href="#input-files" title="Link to this heading"></a></h2>
+<p><strong>CNV file</strong> (mandatory)</p>
+<p>Tab-delimited file with columns: CHR, START, STOP, TYPE (DEL/DUP), SAMPLE_ID</p>
+<p>See <a class="reference internal" href="input_formats.html"><span class="doc">Input formats</span></a> for detailed specifications.</p>
+<p><strong>Pedigree file</strong> (mandatory)</p>
+<p>Three-column file: SAMPLE_ID, FATHER_ID, MOTHER_ID</p>
+<p>Only complete trios are analyzed.</p>
+<p><strong>Problematic regions file</strong> (optional, BED format)</p>
+<p>BED file with problematic genomic regions:</p>
+<ul class="simple">
+<li><p>Segmental duplications</p></li>
+<li><p>Centromeres</p></li>
+<li><p>Telomeres</p></li>
+<li><p>HLA region</p></li>
+</ul>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>A default file is provided. You can replace it with your own BED file if needed.</p>
+</div>
+</section>
+<section id="parameters-for-inheritance-calculation">
+<h2>Parameters for inheritance calculation<a class="headerlink" href="#parameters-for-inheritance-calculation" title="Link to this heading"></a></h2>
+<p><strong>Inheritance threshold (child CNV proportion)</strong></p>
+<p>Default: <strong>0.5</strong> (50%)</p>
+<p>This parameter defines the minimum reciprocal overlap required between a child CNV and a parental CNV to consider the child CNV as inherited.</p>
+<ul class="simple">
+<li><p><strong>Value range:</strong> 0.01 to 1.0 (1% to 100%)</p></li>
+<li><p><strong>Interpretation:</strong> If ≥X% of a child CNV overlaps with a parental CNV (father or mother), the CNV is classified as <strong>inherited (True)</strong></p></li>
+<li><p><strong>Example:</strong> With threshold=0.5, a child CNV is inherited if at least 50% of it overlaps with a CNV in at least one parent</p></li>
+</ul>
+<p><strong>Genome build</strong></p>
+<ul class="simple">
+<li><p><strong>Default:</strong> GRCh38/hg38</p></li>
+<li><p><strong>Planned:</strong> GRCh37/hg19 (not yet implemented)</p></li>
+</ul>
+</section>
+<section id="workflow">
+<h2>Workflow<a class="headerlink" href="#workflow" title="Link to this heading"></a></h2>
+<p><strong>Step 1: Upload files</strong></p>
+<p>Upload your CNV file, pedigree file, and optionally a custom problematic regions file.</p>
+<p><strong>Step 2: Set parameters</strong></p>
+<ul class="simple">
+<li><p><strong>Inheritance threshold:</strong> Adjust the reciprocal overlap percentage (default 50%)</p></li>
+<li><p><strong>Genome build:</strong> Select GRCh38/hg38</p></li>
+</ul>
+<p><strong>Step 3: Submit</strong></p>
+<p>Click <strong>Submit</strong> to start annotation and inheritance calculation.</p>
+</section>
+<section id="annotation-process">
+<h2>Annotation process<a class="headerlink" href="#annotation-process" title="Link to this heading"></a></h2>
+<p>MCNV2 annotates each CNV with:</p>
+<p><strong>Gene annotation</strong></p>
+<p>Each CNV is intersected with gene coordinates (Gencode v45):</p>
+<ul class="simple">
+<li><p><strong>GeneName</strong> — HGNC gene symbol</p></li>
+<li><p><strong>GeneID</strong> — Ensembl gene ID</p></li>
+<li><p><strong>Transcript</strong> — Ensembl transcript ID</p></li>
+</ul>
+<p>If a CNV overlaps multiple genes, one row is created per gene (CNV-gene pairs).</p>
+<p><strong>LOEUF scores</strong> (gnomAD v4)</p>
+<p>LOEUF (Loss-of-function Observed/Expected Upper bound Fraction) quantifies gene constraint:</p>
+<ul class="simple">
+<li><p><strong>Low LOEUF</strong> (≤0.6): Highly constrained genes (intolerant to loss-of-function)</p></li>
+<li><p><strong>High LOEUF</strong> (&gt;0.6): Less constrained genes</p></li>
+</ul>
+<p>LOEUF is used for:</p>
+<ul class="simple">
+<li><p>Stratifying Mendelian Precision by gene constraint</p></li>
+<li><p>Optional filtering (exclude constrained genes to focus on technical precision)</p></li>
+</ul>
+<p><strong>Problematic regions overlap</strong></p>
+<p>Percentage of CNV overlapping with problematic regions:</p>
+<ul class="simple">
+<li><p>Segmental duplications</p></li>
+<li><p>Centromeres</p></li>
+<li><p>Telomeres</p></li>
+<li><p>HLA region</p></li>
+</ul>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>This percentage is used in the filtering step to exclude CNVs with high overlap (e.g., &gt;50%).</p>
+</div>
+</section>
+<section id="annotated-cnv-table">
+<h2>Annotated CNV table<a class="headerlink" href="#annotated-cnv-table" title="Link to this heading"></a></h2>
+<p>After clicking <strong>Submit</strong>, the first table displays annotated CNVs:</p>
+<p><strong>Columns:</strong></p>
+<ul class="simple">
+<li><p>Original CNV file columns (CHR, START, STOP, TYPE, SAMPLE_ID, quality scores, etc.)</p></li>
+<li><p><strong>GeneName</strong> — Overlapping gene name</p></li>
+<li><p><strong>GeneID</strong> — Ensembl gene ID</p></li>
+<li><p><strong>Transcript</strong> — Ensembl transcript ID</p></li>
+<li><p><strong>LOEUF</strong> — Constraint score</p></li>
+<li><p><strong>problematic_region_overlap</strong> — Percentage overlap with problematic regions</p></li>
+</ul>
+<p><strong>Table navigation:</strong></p>
+<ul class="simple">
+<li><p>Show 10, 50, 100, or all entries</p></li>
+<li><p>Scroll horizontally to view all columns</p></li>
+</ul>
+<p><strong>File path:</strong></p>
+<p>The file path where the annotated table is saved is displayed below the table.</p>
+</section>
+<section id="inheritance-status-calculation">
+<h2>Inheritance status calculation<a class="headerlink" href="#inheritance-status-calculation" title="Link to this heading"></a></h2>
+<p>Click <strong>Proceed to inheritance status</strong> to calculate transmission for each CNV.</p>
+<p>MCNV2 uses two complementary approaches to determine inheritance:</p>
+<ol class="arabic simple">
+<li><p><strong>Transmitted_CNV</strong> (coordinate-based) — Based on genomic coordinate overlap</p></li>
+<li><p><strong>Transmitted_gene</strong> (gene-based) — Based on shared affected genes</p></li>
+</ol>
+<div class="admonition seealso">
+<p class="admonition-title">See also</p>
+<p>See <a class="reference internal" href="inheritance.html"><span class="doc">Inheritance status</span></a> for a comprehensive explanation of the two inheritance matching approaches.</p>
+</div>
+<p><strong>Column values in the inheritance table:</strong></p>
+<ul class="simple">
+<li><p><strong>Transmitted_CNV:</strong> True / False</p></li>
+<li><p><strong>Transmitted_gene:</strong> True / False / intergenic</p></li>
+</ul>
+</section>
+<section id="inheritance-status-table">
+<h2>Inheritance status table<a class="headerlink" href="#inheritance-status-table" title="Link to this heading"></a></h2>
+<p>The second table displays inheritance results:</p>
+<p><strong>Columns:</strong></p>
+<ul class="simple">
+<li><p>All columns from the annotated CNV table</p></li>
+<li><p><strong>Transmitted_CNV</strong> — True/False (coordinate-based inheritance)</p></li>
+<li><p><strong>Transmitted_gene</strong> — True/False/intergenic (gene-based inheritance)</p></li>
+</ul>
+<p><strong>Interpretation:</strong></p>
+<ul class="simple">
+<li><p><strong>True (both columns):</strong> CNV is inherited from at least one parent</p></li>
+<li><p><strong>False (Transmitted_CNV):</strong> Candidate <em>de novo</em> CNV (no parental overlap)</p></li>
+<li><p><strong>False (Transmitted_gene):</strong> Gene not affected in parents</p></li>
+<li><p><strong>“intergenic” (Transmitted_gene):</strong> CNV does not overlap any gene</p></li>
+</ul>
+<p><strong>File path:</strong></p>
+<p>The file path where the inheritance table is saved is displayed below the table.</p>
+</section>
+<section id="next-step-mendelian-precision-analysis">
+<h2>Next step: Mendelian Precision analysis<a class="headerlink" href="#next-step-mendelian-precision-analysis" title="Link to this heading"></a></h2>
+<p>Once inheritance status is calculated, click <strong>Go to Mendelian Precision analysis</strong> to:</p>
+<ul class="simple">
+<li><p>Compute Mendelian Precision across size ranges and quality thresholds</p></li>
+<li><p>Apply filters (quality scores, problematic regions, LOEUF, caller concordance)</p></li>
+<li><p>Generate publication-ready plots</p></li>
+</ul>
+<p>See <a class="reference internal" href="mendelian_precision.html"><span class="doc">Mendelian Precision</span></a> for details on the MP analysis workflow.</p>
+</section>
+<section id="tips">
+<h2>Tips<a class="headerlink" href="#tips" title="Link to this heading"></a></h2>
+<p><strong>Understanding the two inheritance approaches</strong></p>
+<p>Both <strong>Transmitted_CNV</strong> (coordinate-based) and <strong>Transmitted_gene</strong> (gene-based) have different strengths:</p>
+<ul class="simple">
+<li><p><strong>Transmitted_CNV</strong> requires an overlap threshold but works for all CNVs</p></li>
+<li><p><strong>Transmitted_gene</strong> is more robust to breakpoint and CNV fragmentation but only works for genic CNVs</p></li>
+</ul>
+<p><strong>Recommendation:</strong> Use both approaches to get a comprehensive view of CNV inheritance.</p>
+<p>See <a class="reference internal" href="inheritance.html"><span class="doc">Inheritance status</span></a> for detailed comparison, advantages, limitations, and use cases.</p>
+<p><strong>Filtering intergenic CNVs</strong></p>
+<p>Intergenic CNVs can only be evaluated using coordinate-based matching (Transmitted_CNV).</p>
+<p><strong>Table too large to display</strong></p>
+<p>Use pagination (show 10/50/100 entries).</p>
+</section>
+<section id="troubleshooting">
+<h2>Troubleshooting<a class="headerlink" href="#troubleshooting" title="Link to this heading"></a></h2>
+<p><strong>Error: “No complete trios found”</strong></p>
+<p>Check that:</p>
+<ul class="simple">
+<li><p>Pedigree file has correct format (SAMPLE_ID, FATHER_ID, MOTHER_ID)</p></li>
+<li><p>All three IDs (child, father, mother) are present in the pedigree file</p></li>
+<li><p>Sample IDs are consistent between CNV and pedigree files</p></li>
+</ul>
+<p><strong>Warning: “Some samples in pedigree not found in CNV file”</strong></p>
+<p>This is normal. If a sample has no detected CNVs, it won’t appear in the CNV file. The trio is still valid.</p>
+<p><strong>Table too large to display</strong></p>
+<p>Use pagination (show 10/50/100 entries) or download the full table for offline analysis.</p>
+</section>
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="input_formats.html" class="btn btn-neutral float-left" title="Input formats" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="inheritance.html" class="btn btn-neutral float-right" title="Inheritance status" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2026, Mame Seynabou Diop.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

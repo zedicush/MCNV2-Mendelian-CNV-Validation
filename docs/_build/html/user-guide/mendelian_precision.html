@@ -1,0 +1,447 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="../">
+<head>
+  <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Mendelian Precision &mdash; MCNV2 Toolbox 1.0 documentation</title>
+      <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=b86133f3" />
+      <link rel="stylesheet" type="text/css" href="../_static/css/theme.css?v=9edc463e" />
+      <link rel="stylesheet" type="text/css" href="../_static/sphinx-design.min.css?v=95c83b7e" />
+      <link rel="stylesheet" type="text/css" href="../_static/custom.css?v=9ad6ce3d" />
+
+  
+    <link rel="shortcut icon" href="../_static/mcnv2_icon.svg"/>
+      <script src="../_static/jquery.js?v=5d32c60e"></script>
+      <script src="../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="../_static/documentation_options.js?v=f2a433a1"></script>
+      <script src="../_static/doctools.js?v=9a2dae69"></script>
+      <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
+      <script src="../_static/design-tabs.js?v=f930bc37"></script>
+      <script async="async" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+    <script src="../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="Filtering strategies" href="filtering.html" />
+    <link rel="prev" title="Inheritance status" href="inheritance.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../index.html" class="icon icon-home">
+            MCNV2 Toolbox
+              <img src="../_static/mcnv2_logo.png" class="logo" alt="Logo"/>
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Getting Started</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../getting-started/index.html">Getting Started</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">User Guide</span></p>
+<ul class="current">
+<li class="toctree-l1 current"><a class="reference internal" href="index.html">User Guide</a><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="input_formats.html">Input formats</a></li>
+<li class="toctree-l2"><a class="reference internal" href="preprocessing.html">Preprocessing</a></li>
+<li class="toctree-l2"><a class="reference internal" href="inheritance.html">Inheritance status</a></li>
+<li class="toctree-l2 current"><a class="current reference internal" href="#">Mendelian Precision</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#interpretation">Interpretation</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#transmission-types">Transmission types</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#mp-stratification">MP stratification</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#by-cnv-size">By CNV size</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#by-cnv-type">By CNV type</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#by-quality-score">By quality score</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="#filtering-strategies">Filtering strategies</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#cnv-level-filters">CNV-level filters</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#gene-level-filters">Gene-level filters</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="#optimal-threshold-identification">Optimal threshold identification</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#technical-vs-biological-non-inheritance">Technical vs biological non-inheritance</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#global-vs-stratified-mp">Global vs stratified MP</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#limitations">Limitations</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#see-also">See also</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="filtering.html">Filtering strategies</a></li>
+<li class="toctree-l2"><a class="reference internal" href="outputs.html">Outputs</a></li>
+</ul>
+</li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Tutorials</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../tutorials/index.html">Tutorials</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Reference</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../reference/index.html">Reference</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">About</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../about/index.html">About</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../index.html">MCNV2 Toolbox</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="index.html">User Guide</a></li>
+      <li class="breadcrumb-item active">Mendelian Precision</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="../_sources/user-guide/mendelian_precision.rst.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="mendelian-precision">
+<h1>Mendelian Precision<a class="headerlink" href="#mendelian-precision" title="Link to this heading"></a></h1>
+<p>Mendelian Precision (MP) is the core quality metric in MCNV2, quantifying the proportion of CNV calls that follow Mendelian inheritance patterns in parent–offspring trios.</p>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>Mendelian Precision is defined as:</p>
+<div class="math notranslate nohighlight">
+\[\text{MP} = \frac{I}{N} = 1 - \frac{E}{N}\]</div>
+<p>where:</p>
+<ul class="simple">
+<li><p><strong>N</strong> = Total number of CNVs detected in offspring</p></li>
+<li><p><strong>I</strong> = Number of inherited CNVs (found in at least one parent)</p></li>
+<li><p><strong>E</strong> = Number of non-inherited CNVs (not found in parents)</p></li>
+</ul>
+</div>
+<p><strong>Rationale:</strong></p>
+<p>Given the low expected rate of genuine <em>de novo</em> CNVs (typically 1.92% per individual), non-inherited CNVs are predominantly false positives. MP therefore provides a biologically grounded estimate of CNV call precision without requiring an external reference callset.</p>
+<section id="interpretation">
+<h2>Interpretation<a class="headerlink" href="#interpretation" title="Link to this heading"></a></h2>
+<p><strong>High MP (≥80%):</strong></p>
+<ul class="simple">
+<li><p>Most CNVs are inherited → High call quality</p></li>
+<li><p>Few false positives</p></li>
+<li><p>Callset suitable for downstream analyses</p></li>
+</ul>
+<p><strong>Moderate MP (50-80%):</strong></p>
+<ul class="simple">
+<li><p>Mixed quality</p></li>
+<li><p>May benefit from additional filtering</p></li>
+<li><p>Investigate size-specific or quality-score-specific patterns</p></li>
+</ul>
+<p><strong>Low MP (&lt;50%):</strong></p>
+<ul class="simple">
+<li><p>High false positive rate</p></li>
+<li><p>Requires aggressive filtering or caller parameter tuning</p></li>
+<li><p>Consider alternative CNV calling methods</p></li>
+</ul>
+</section>
+<section id="transmission-types">
+<h2>Transmission types<a class="headerlink" href="#transmission-types" title="Link to this heading"></a></h2>
+<p>MCNV2 calculates MP using two complementary approaches:</p>
+<ol class="arabic simple">
+<li><p><strong>CNV-level matching</strong> (coordinate-based) — Based on genomic coordinate overlap</p></li>
+<li><p><strong>Gene-level matching</strong> (gene-based) — Based on shared affected genes</p></li>
+</ol>
+<div class="admonition seealso">
+<p class="admonition-title">See also</p>
+<p>See <a class="reference internal" href="inheritance.html"><span class="doc">Inheritance status</span></a> for detailed algorithms, advantages, and limitations
+of each approach.</p>
+</div>
+<p><strong>MP calculation:</strong></p>
+<p>MP can be computed separately using each approach:</p>
+<div class="math notranslate nohighlight">
+\[\text{MP}_{\text{CNV}} = \frac{\text{True (Transmitted_CNV)}}{\text{Total CNVs}}\]</div>
+<div class="math notranslate nohighlight">
+\[\text{MP}_{\text{gene}} = \frac{\text{True (Transmitted_gene)}}{\text{Total genic CNVs}}\]</div>
+<p><strong>Why use both:</strong></p>
+<ul class="simple">
+<li><p>CNV-level works for all CNVs (including intergenic)</p></li>
+<li><p>Gene-level is robust to breakpoint variability (genic CNVs only)</p></li>
+<li><p>The two approaches provide complementary quality assessments</p></li>
+</ul>
+<p><strong>Recommendation:</strong></p>
+<p>Compute MP using both approaches. Differences between MP_CNV and MP_gene
+reflect the interplay of breakpoint precision and CNV fragmentation in
+your specific dataset.</p>
+</section>
+<section id="mp-stratification">
+<h2>MP stratification<a class="headerlink" href="#mp-stratification" title="Link to this heading"></a></h2>
+<p>To identify quality issues and optimization strategies, MP should be computed across multiple dimensions:</p>
+<section id="by-cnv-size">
+<h3>By CNV size<a class="headerlink" href="#by-cnv-size" title="Link to this heading"></a></h3>
+<p><strong>Size ranges:</strong></p>
+<ul class="simple">
+<li><p>1-30 kb</p></li>
+<li><p>30-50 kb</p></li>
+<li><p>50-100 kb</p></li>
+<li><p>100-200 kb</p></li>
+<li><p>200-500 kb</p></li>
+<li><p>500 kb-1 Mb</p></li>
+<li><p>&gt;1 Mb</p></li>
+</ul>
+<p><strong>Typical pattern:</strong></p>
+<ul class="simple">
+<li><p>Small CNVs (&lt;30 kb): Low MP (high false positive rate)</p></li>
+<li><p>Medium CNVs (50-200 kb): Moderate to high MP</p></li>
+<li><p>Large CNVs (&gt;500 kb): High MP (more reliable)</p></li>
+</ul>
+<p><strong>Interpretation:</strong></p>
+<p>If MP increases dramatically with size, consider applying a minimum size filter.</p>
+</section>
+<section id="by-cnv-type">
+<h3>By CNV type<a class="headerlink" href="#by-cnv-type" title="Link to this heading"></a></h3>
+<p><strong>DEL vs DUP:</strong></p>
+<p>MP is calculated separately for deletions and duplications, as they often have different precision profiles.</p>
+</section>
+<section id="by-quality-score">
+<h3>By quality score<a class="headerlink" href="#by-quality-score" title="Link to this heading"></a></h3>
+<p><strong>Quality metrics:</strong></p>
+<p>MP can be stratified by various quality scores:</p>
+<ul class="simple">
+<li><p><strong>Score</strong> — Caller-specific quality score</p></li>
+<li><p><strong>SNP</strong> — Number of supporting SNPs (array data)</p></li>
+<li><p><strong>% Overlap</strong> — Reciprocal overlap percentage between CNVs detected by multiple algorithms</p></li>
+</ul>
+<p><strong>Typical pattern:</strong></p>
+<p>MP increases with quality score, often plateauing at a certain threshold. This plateau identifies the optimal filtering threshold.</p>
+<p><strong>Example:</strong></p>
+<ul class="simple">
+<li><p>Score ≥10: MP = 65%</p></li>
+<li><p>Score ≥30: MP  780%</p></li>
+<li><p>Score ≥50: MP= 90%</p></li>
+<li><p>Score ≥200: M = 9 2% (plateau)</p></li>
+</ul>
+<p><strong>Optimal threshold:</strong> 50 (additional filtering beyond this point provides no MP improvement)</p>
+</section>
+</section>
+<section id="filtering-strategies">
+<h2>Filtering strategies<a class="headerlink" href="#filtering-strategies" title="Link to this heading"></a></h2>
+<p>To maximize MP while retaining biologically relevant CNVs, MCNV2 supports multiple filtering approaches:</p>
+<section id="cnv-level-filters">
+<h3>CNV-level filters<a class="headerlink" href="#cnv-level-filters" title="Link to this heading"></a></h3>
+<p><strong>Size filters:</strong></p>
+<ul class="simple">
+<li><p>Minimum size (bp)</p></li>
+<li><p>Maximum size (bp)</p></li>
+<li><p>Target specific size ranges</p></li>
+</ul>
+<p><strong>Quality score filters:</strong></p>
+<ul class="simple">
+<li><p>Minimum quality score</p></li>
+<li><p>Minimum number of supporting probes/reads</p></li>
+<li><p>Minimum caller concordance</p></li>
+</ul>
+<div class="admonition important">
+<p class="admonition-title">Important</p>
+<p><strong>Highly recommended:</strong> Apply problematic region filters to all datasets.</p>
+<p>CNVs in these regions are enriched for false positives due to:</p>
+<ul class="simple">
+<li><p>Read mismapping (segmental duplications)</p></li>
+<li><p>Poor mappability (centromeres, telomeres)</p></li>
+<li><p>Genuine polymorphism (HLA region)</p></li>
+</ul>
+<p>Recommended threshold: Exclude CNVs with &gt;50% overlap.</p>
+</div>
+</section>
+<section id="gene-level-filters">
+<h3>Gene-level filters<a class="headerlink" href="#gene-level-filters" title="Link to this heading"></a></h3>
+<p><strong>Exclusion lists:</strong></p>
+<ul class="simple">
+<li><p>Upload a list of genes to exclude (e.g., immunoglobulin genes, olfactory receptors)</p></li>
+<li><p>Useful for removing genes prone to technical artifacts</p></li>
+</ul>
+<p><strong>Gene constraint filters (LOEUF):</strong></p>
+<ul class="simple">
+<li><p>Exclude CNVs affecting highly constrained genes (LOEUF &lt; threshold)</p></li>
+<li><p>Rationale: CNVs in constrained genes may be genuine <em>de novo</em> events, reducing technical MP</p></li>
+</ul>
+<div class="admonition important">
+<p class="admonition-title">Important</p>
+<p><strong>LOEUF filter for MP calculation only</strong></p>
+<p>Excluding CNVs in constrained genes (low LOEUF) helps distinguish:</p>
+<ul class="simple">
+<li><p><strong>Technical MP</strong> — Precision excluding likely <em>de novo</em> events</p></li>
+<li><p><strong>Overall MP</strong> — Precision including all non-inherited CNVs</p></li>
+</ul>
+<p>CNVs affecting constrained genes are enriched for genuine <em>de novo</em> events,
+which reduce MP but are biologically real. Excluding them from MP calculation
+provides a cleaner assessment of <strong>technical false positive rate</strong>.</p>
+<p><strong>Critical:</strong> These CNVs must be <strong>retained</strong> in your final dataset for
+downstream analyses (disease association, burden tests) as they may represent
+pathogenic variants.</p>
+</div>
+<p>See <a class="reference internal" href="filtering.html"><span class="doc">Filtering strategies</span></a> for detailed filtering strategies and optimization approaches.</p>
+</section>
+</section>
+<section id="optimal-threshold-identification">
+<h2>Optimal threshold identification<a class="headerlink" href="#optimal-threshold-identification" title="Link to this heading"></a></h2>
+<p><strong>Strategy:</strong></p>
+<ol class="arabic simple">
+<li><p>Plot MP versus quality score threshold (line plot)</p></li>
+<li><p>Identify where MP plateaus</p></li>
+<li><p>Use the lowest threshold at which MP reaches plateau</p></li>
+</ol>
+<p><strong>Example:</strong></p>
+<div class="highlight-text notranslate"><div class="highlight"><pre><span></span>For deletions 50-100kb:
+- Score ≥30  → MP = 75% (n = 500)
+- Score ≥50 → MP = 85% (n = 300)
+- Score ≥70 → MP = 92% (n = 150)  ← Plateau starts
+- Score ≥70 → MP = 92% (n = 140)  ← No further MP gain
+
+Optimal threshold: 150 (plateau reached, retains 150 CNVs)
+</pre></div>
+</div>
+</section>
+<section id="technical-vs-biological-non-inheritance">
+<h2>Technical vs biological non-inheritance<a class="headerlink" href="#technical-vs-biological-non-inheritance" title="Link to this heading"></a></h2>
+<p><strong>Challenge:</strong></p>
+<p>Non-inherited CNVs include both:</p>
+<ol class="arabic simple">
+<li><p><strong>Technical false positives</strong> (reduce MP, should be filtered)</p></li>
+<li><p><strong>Genuine *de novo* CNVs</strong> (reduce MP, should be retained)</p></li>
+</ol>
+<p><strong>Solution:</strong></p>
+<p>Use gene constraint (LOEUF) to distinguish these two categories:</p>
+<ul class="simple">
+<li><p>CNVs affecting constrained genes (low LOEUF) → Enriched for <em>de novo</em> events</p></li>
+<li><p>CNVs affecting unconstrained genes → Enriched for false positives</p></li>
+</ul>
+<p><strong>Workflow:</strong></p>
+<ol class="arabic simple">
+<li><p>Calculate <strong>MP (all CNVs)</strong> → Includes both technical and biological non-inheritance</p></li>
+<li><p>Calculate <strong>MP (excluding LOEUF &lt; 0.6)</strong> → Focuses on technical precision only</p></li>
+<li><p>Compare the two values:</p>
+<ul class="simple">
+<li><p><strong>Large difference (&gt;10%):</strong> High <em>de novo</em> rate in constrained genes</p></li>
+<li><p><strong>Small difference (&lt;5%):</strong> Most non-inherited CNVs are false positives</p></li>
+</ul>
+</li>
+</ol>
+<div class="admonition important">
+<p class="admonition-title">Important</p>
+<p><strong>LOEUF exclusion is for assessment only</strong></p>
+</div>
+<p><strong>Example:</strong></p>
+<div class="highlight-text notranslate"><div class="highlight"><pre><span></span>1000 CNVs total:
+- MP (all CNVs) = 85% → 150 non-inherited
+- MP (LOEUF ≥ 0.6) = 92% → 80 non-inherited (970 CNVs after excluding 30)
+
+Interpretation:
+- ~30 CNVs (3%) likely genuine *de novo* in constrained genes
+- ~120 CNVs (12%) technical false positives
+- Keep all 1000 CNVs for downstream analysis
+- Apply quality filters to remove the 120 false positives
+</pre></div>
+</div>
+</section>
+<section id="global-vs-stratified-mp">
+<h2>Global vs stratified MP<a class="headerlink" href="#global-vs-stratified-mp" title="Link to this heading"></a></h2>
+<p><strong>Global MP:</strong></p>
+<ul class="simple">
+<li><p>Single value for all CNVs (or all DEL, all DUP)</p></li>
+<li><p>Simple summary metric</p></li>
+<li><p>May mask quality issues in specific size ranges or quality bins</p></li>
+</ul>
+<p><strong>Stratified MP:</strong></p>
+<ul class="simple">
+<li><p>MP computed for each size range and/or quality threshold</p></li>
+<li><p>Reveals patterns (e.g., low MP for small CNVs)</p></li>
+<li><p>Enables targeted filtering strategies</p></li>
+</ul>
+<p><strong>Best practice:</strong> Always examine stratified MP before applying filters.</p>
+<div class="admonition-use-cases-for-mendelian-precision admonition">
+<p class="admonition-title">Use cases for Mendelian Precision</p>
+<p><strong>1. CNV caller evaluation</strong></p>
+<p>Compare MP across different callers or parameter settings to identify the best configuration.</p>
+<p><strong>2. Quality control</strong></p>
+<p>Assess CNV call quality in a new dataset.</p>
+<p><strong>3. Filter optimization</strong></p>
+<p>Systematically evaluate the impact of different filters on MP to maximize precision while retaining CNVs.</p>
+<p><strong>4. Method development</strong></p>
+<p>Use MP as an optimization criterion when developing new CNV calling methods.</p>
+<p><strong>5. Publication</strong></p>
+<p>Report MP alongside standard metrics (sensitivity, specificity) to provide a biologically grounded quality assessment.</p>
+</div>
+</section>
+<section id="limitations">
+<h2>Limitations<a class="headerlink" href="#limitations" title="Link to this heading"></a></h2>
+<p><strong>Assumptions:</strong></p>
+<ul class="simple">
+<li><p>Parents are biological parents (not step-parents or adoption)</p></li>
+<li><p>Trio relationships are correctly specified in pedigree file</p></li>
+<li><p><em>De novo</em> CNV rate is low (~1.92%)</p></li>
+</ul>
+<p><strong>Caveats:</strong></p>
+<ul class="simple">
+<li><p>MP does not distinguish between technical false positives and genuine <em>de novo</em> events</p></li>
+<li><p>MP is not a measure of sensitivity (cannot detect false negatives)</p></li>
+</ul>
+</section>
+<section id="see-also">
+<h2>See also<a class="headerlink" href="#see-also" title="Link to this heading"></a></h2>
+<ul class="simple">
+<li><p><a class="reference internal" href="preprocessing.html"><span class="doc">Preprocessing</span></a> — How inheritance status is calculated</p></li>
+<li><p><a class="reference internal" href="inheritance.html"><span class="doc">Inheritance status</span></a> — CNV-level vs gene-level matching in detail</p></li>
+<li><p><a class="reference internal" href="filtering.html"><span class="doc">Filtering strategies</span></a> — Filtering strategies to optimize MP</p></li>
+<li><p><a class="reference internal" href="outputs.html"><span class="doc">Outputs</span></a> — Visualizations and tables</p></li>
+</ul>
+</section>
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="inheritance.html" class="btn btn-neutral float-left" title="Inheritance status" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="filtering.html" class="btn btn-neutral float-right" title="Filtering strategies" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2026, Mame Seynabou Diop.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

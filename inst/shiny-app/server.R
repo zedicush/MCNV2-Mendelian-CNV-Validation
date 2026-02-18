@@ -139,6 +139,9 @@ function(input, output, session) {
 			
 			incProgress(0.5, detail = "Annotating CNVs...")
 			
+			tmp <- readr::read_tsv(cnvs_file, show_col_types = FALSE)
+			message("CNVs in input: ", nrow(tmp))
+			
 			ret <- MCNV2::annotate(cnvs_file = cnvs_file, 
 														 prob_regions_file = prob_regions_file, 
 														 output_file = annot_output_file(), 
@@ -1060,12 +1063,72 @@ function(input, output, session) {
 		))
 	})
 	
+	# Bouton zoom - ouvrir le modal
+	observeEvent(input$zoom_after_add_filters, {
+	  showModal(modalDialog(
+	    title = "MP - after additional filters",
+	    size = "xl",
+	    plotlyOutput("after_add_filters_zoomed", height = "100%"),
+	    footer = tagList(
+	      downloadButton("download_after_add_filters_tab",
+	                     "Download table", 
+	                     class = "btn-success"),
+	      modalButton("Close")
+	    ),
+	    easyClose = TRUE
+	  ))
+	})
+	# Bouton zoom - ouvrir le modal
+	observeEvent(input$zoom_after_add_filters, {
+	  showModal(modalDialog(
+	    title = "MP - after additional filters",
+	    size = "xl",
+	    plotlyOutput("after_add_filters_zoomed1", height = "100%"),
+	    footer = tagList(
+	      downloadButton("download_after_add_filters_tab",
+	                     "Download table", 
+	                     class = "btn-success"),
+	      modalButton("Close")
+	    ),
+	    easyClose = TRUE
+	  ))
+	})
+	# Bouton zoom - ouvrir le modal
+	observeEvent(input$zoom_after_add_filters, {
+	  showModal(modalDialog(
+	    title = "MP - after additional filters",
+	    size = "xl",
+	    plotlyOutput("after_add_filters_zoomed2", height = "100%"),
+	    footer = tagList(
+	      downloadButton("download_after_add_filters_tab",
+	                     "Download table", 
+	                     class = "btn-success"),
+	      modalButton("Close")
+	    ),
+	    easyClose = TRUE
+	  ))
+	})
+	
 	# Plot zoomé dans le modal
 	output$before_add_filters_zoomed <- renderPlotly({
 		req(panel_plot1())
 		panel_plot1() %>% layout()
 	})
-	
+	# Plot zoomé dans le modal
+	output$after_add_filters_zoomed <- renderPlotly({
+	  req(panel_plot2())
+	  panel_plot2() %>% layout()
+	})
+	# Plot zoomé dans le modal
+	output$after_add_filters_zoomed1 <- renderPlotly({
+	  req(panel_plot3())
+	  panel_plot3() %>% layout()
+	})
+	# Plot zoomé dans le modal
+	output$after_add_filters_zoomed2 <- renderPlotly({
+	  req(panel_plot4())
+	  panel_plot4() %>% layout()
+	})
 	observeEvent(input$goback_mpexploration, {
 		updateTabItems(session, "tabs", "mp_exploration")  # move to the "mp_exploration" tab
 	})

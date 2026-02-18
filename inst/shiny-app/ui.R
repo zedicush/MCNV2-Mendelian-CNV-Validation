@@ -247,7 +247,9 @@ body <- dashboardBody(
 																 	),
 																 	column(6,
 																 				 h5(tags$b("After additional filters")),
-																 				 plotlyOutput("after_add_filters")
+																 				 plotlyOutput("after_add_filters"),
+																 				 br(),
+																 				 actionButton("zoom_after_add_filters", "", icon = icon("search-plus"))
 																 	)
 																 ),
 																 hr(),
@@ -260,7 +262,9 @@ body <- dashboardBody(
 																 				 							 						"No excluded genes" = "no_excluded_genes",
 																 				 							 						"No constrained genes (LOEUF < 1)" = "no_constrained_genes"),
 																 				 							 selected = "genic_only"),
-																 				 plotlyOutput("comp_plot1")
+																 				 plotlyOutput("comp_plot1"),
+																 				 br(),
+																 				 actionButton("zoom_after_add_filters1", "", icon = icon("search-plus"))
 																 	),
 																 	column(6,
 																 				 selectizeInput("comp_plot2_type", 
@@ -270,7 +274,9 @@ body <- dashboardBody(
 																 				 							 						"No excluded genes" = "no_excluded_genes",
 																 				 							 						"No constrained genes (LOEUF < 1)" = "no_constrained_genes"),
 																 				 							 selected = "intergenic_only"),
-																 				 plotlyOutput("comp_plot2")
+																 				 plotlyOutput("comp_plot2"),
+																 				 br(),
+																 				 actionButton("zoom_after_add_filters", "", icon = icon("search-plus"))
 																 	)
 																 ),
 																 hr(),

@@ -1,0 +1,619 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="../">
+<head>
+  <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Filtering strategies &mdash; MCNV2 Toolbox 1.0 documentation</title>
+      <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=b86133f3" />
+      <link rel="stylesheet" type="text/css" href="../_static/css/theme.css?v=9edc463e" />
+      <link rel="stylesheet" type="text/css" href="../_static/sphinx-design.min.css?v=95c83b7e" />
+      <link rel="stylesheet" type="text/css" href="../_static/custom.css?v=9ad6ce3d" />
+
+  
+    <link rel="shortcut icon" href="../_static/mcnv2_icon.svg"/>
+      <script src="../_static/jquery.js?v=5d32c60e"></script>
+      <script src="../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="../_static/documentation_options.js?v=f2a433a1"></script>
+      <script src="../_static/doctools.js?v=9a2dae69"></script>
+      <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
+      <script src="../_static/design-tabs.js?v=f930bc37"></script>
+    <script src="../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="Outputs" href="outputs.html" />
+    <link rel="prev" title="Mendelian Precision" href="mendelian_precision.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../index.html" class="icon icon-home">
+            MCNV2 Toolbox
+              <img src="../_static/mcnv2_logo.png" class="logo" alt="Logo"/>
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Getting Started</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../getting-started/index.html">Getting Started</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">User Guide</span></p>
+<ul class="current">
+<li class="toctree-l1 current"><a class="reference internal" href="index.html">User Guide</a><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="input_formats.html">Input formats</a></li>
+<li class="toctree-l2"><a class="reference internal" href="preprocessing.html">Preprocessing</a></li>
+<li class="toctree-l2"><a class="reference internal" href="inheritance.html">Inheritance status</a></li>
+<li class="toctree-l2"><a class="reference internal" href="mendelian_precision.html">Mendelian Precision</a></li>
+<li class="toctree-l2 current"><a class="current reference internal" href="#">Filtering strategies</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#overview">Overview</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#filter-categories">Filter categories</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#size-based-filters">Size-based filters</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#quality-score-filters">Quality score filters</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#problematic-region-filters">Problematic region filters</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#transcript-overlap-filters">Transcript overlap filters</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#gene-based-filters">Gene-based filters</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="#mp-exploration-filters">MP Exploration filters</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#fine-tuning-filters">Fine-tuning filters</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#optimization-strategies">Optimization strategies</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#plateau-based-optimization">Plateau-based optimization</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#size-specific-optimization">Size-specific optimization</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#type-specific-optimization">Type-specific optimization</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#gene-constraint-consideration">Gene constraint consideration</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="#balancing-precision-and-sensitivity">Balancing precision and sensitivity</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#see-also">See also</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="outputs.html">Outputs</a></li>
+</ul>
+</li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Tutorials</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../tutorials/index.html">Tutorials</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Reference</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../reference/index.html">Reference</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">About</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../about/index.html">About</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../index.html">MCNV2 Toolbox</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="index.html">User Guide</a></li>
+      <li class="breadcrumb-item active">Filtering strategies</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="../_sources/user-guide/filtering.rst.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="filtering-strategies">
+<h1>Filtering strategies<a class="headerlink" href="#filtering-strategies" title="Link to this heading"></a></h1>
+<p>Filtering is essential to maximize Mendelian Precision while retaining biologically relevant CNVs. MCNV2 provides flexible filtering options across multiple dimensions.</p>
+<section id="overview">
+<h2>Overview<a class="headerlink" href="#overview" title="Link to this heading"></a></h2>
+<p><strong>Goal of filtering:</strong></p>
+<ul class="simple">
+<li><p>Increase Mendelian Precision by removing false positives</p></li>
+<li><p>Balance precision and sensitivity</p></li>
+</ul>
+<div class="admonition-two-stage-approach admonition">
+<p class="admonition-title"><strong>Two-stage approach:</strong></p>
+<ol class="arabic simple">
+<li><p><strong>MP Exploration</strong> — Apply broad filters to assess baseline quality</p></li>
+<li><p><strong>Fine-tuning</strong> — Refine filters systematically to identify optimal thresholds</p></li>
+</ol>
+</div>
+<p><strong>Key principles:</strong></p>
+<ul class="simple">
+<li><p>Calculate MP separately for deletions and duplications</p></li>
+<li><p>Stratify by CNV size (small vs large CNVs have different quality profiles)</p></li>
+<li><p>Consider quality metrics</p></li>
+<li><p>Consider gene constraint when evaluating MP</p></li>
+</ul>
+</section>
+<section id="filter-categories">
+<h2>Filter categories<a class="headerlink" href="#filter-categories" title="Link to this heading"></a></h2>
+<section id="size-based-filters">
+<h3>Size-based filters<a class="headerlink" href="#size-based-filters" title="Link to this heading"></a></h3>
+<p><strong>CNV size (bp):</strong></p>
+<ul class="simple">
+<li><p><strong>Minimum size:</strong> Exclude very small CNVs (e.g., &lt;10 kb)</p></li>
+<li><p><strong>Maximum size:</strong> Optionally exclude very large CNVs (rare, may be artifacts)</p></li>
+</ul>
+<p><strong>Rationale:</strong></p>
+<p>Small CNVs (&lt;30 kb) typically have lower Mendelian Precision due to:</p>
+<ul class="simple">
+<li><p>Lower signal-to-noise ratio</p></li>
+<li><p>Difficulty distinguishing from technical noise</p></li>
+<li><p>Higher breakpoint uncertainty</p></li>
+<li><p>Example: Analyse CNV from ≥30 kb</p></li>
+</ul>
+<div class="admonition important">
+<p class="admonition-title">Important</p>
+<p><strong>Do not apply the same quality score threshold to all CNV sizes.</strong> Small CNVs
+require more stringent filtering than large CNVs. Always examine MP stratified
+by size before setting filters.</p>
+</div>
+</section>
+<section id="quality-score-filters">
+<h3>Quality score filters<a class="headerlink" href="#quality-score-filters" title="Link to this heading"></a></h3>
+<p><strong>Available metrics:</strong></p>
+<ul class="simple">
+<li><p><strong>Score</strong> — Caller-specific quality score (higher = more confident)</p></li>
+<li><p><strong>SNP</strong> — Number of SNP probes supporting the CNV (array data)</p></li>
+<li><p><strong>%overlap</strong> — Reciprocal overlap percentage between CNVs from different algorithms</p></li>
+<li><p><strong>NbreAlgos</strong> — Number of algorithms that detected the CNV (1, 2, 3, etc.)</p></li>
+</ul>
+<p><strong>Rationale:</strong>
+Higher quality scores correlate with higher Mendelian Precision. The relationship is often non-linear, with MP plateauing at a certain threshold.</p>
+<p><strong>Typical strategy:</strong></p>
+<ol class="arabic simple">
+<li><p>Plot MP versus quality score threshold</p></li>
+<li><p>Observe the trade-off between quality and quantity</p></li>
+<li><p>Select the quality score that meets your requirements</p></li>
+</ol>
+<p><strong>Example:</strong></p>
+<div class="highlight-text notranslate"><div class="highlight"><pre><span></span>Deletions 50-100kb:
+
+Score ≥10  → MP = 60% (n = 800)
+Score ≥50  → MP = 75% (n = 500)
+Score ≥100 → MP = 85% (n = 300)
+Score ≥150 → MP = 91% (n = 150)
+Score ≥200 → MP = 92% (n = 145)
+
+Optimal threshold: 150 (trade-off between MP (quality) and CNV count (quantity))
+</pre></div>
+</div>
+<p><strong>Caller concordance (if available):</strong></p>
+<p>When merging CNV callsets from multiple algorithms, two metrics quantify caller agreement:</p>
+<p><strong>1. NbreAlgos</strong> — Number of algorithms detecting the CNV</p>
+<ul class="simple">
+<li><p>NbreAlgos = 1 → Detected by single algorithm only</p></li>
+<li><p>NbreAlgos = 2 → Detected by 2 algorithms</p></li>
+<li><p>NbreAlgos = 3 → Detected by 3 algorithms</p></li>
+</ul>
+<p><strong>2. %overlap</strong> — Reciprocal overlap percentage between detections</p>
+<ul class="simple">
+<li><p>%overlap = 0% → No overlap (NbreAlgos = 1)</p></li>
+<li><p>%overlap = 50% → 50% reciprocal overlap between algorithm calls</p></li>
+<li><p>%overlap = 100% → Perfect overlap between algorithm calls</p></li>
+</ul>
+<p><strong>Relationship:</strong></p>
+<ul class="simple">
+<li><p>If <strong>NbreAlgos = 1</strong> → <strong>%overlap = 0%</strong> (no concordance possible)</p></li>
+<li><p>If <strong>NbreAlgos ≥ 2</strong> → <strong>%overlap</strong> can range from 0.1% to 100%</p></li>
+</ul>
+<p><strong>Filtering strategy:</strong></p>
+<p>Apply a minimum <strong>%overlap</strong> threshold to require caller concordance:</p>
+<div class="highlight-text notranslate"><div class="highlight"><pre><span></span>Filter                Meaning
+%overlap ≥ 0%        All CNVs (including single-caller)
+%overlap ≥ 50%       ≥2 algos with ≥50% overlap
+%overlap ≥ 70%       ≥2 algos with ≥70% overlap
+%overlap ≥ 90%       ≥2 algos with ≥90% overlap
+</pre></div>
+</div>
+<p><strong>Note:</strong> Filtering by <strong>%overlap ≥ 50%</strong> implicitly requires <strong>NbreAlgos ≥ 2</strong>
+(since single-caller CNVs have 0% overlap).</p>
+<p><strong>Typical strategy:</strong></p>
+<ul class="simple">
+<li><p><strong>Balanced approach:</strong> %overlap ≥ 50% (moderate concordance, retains more CNVs)</p></li>
+<li><p><strong>High precision:</strong> %overlap ≥ 70% or ≥ 80% (strong concordance required)</p></li>
+</ul>
+<p><strong>Rationale:</strong></p>
+<p>CNVs detected independently by multiple algorithms with high reciprocal overlap
+are more likely to be genuine. Each caller has different sensitivities to
+artifacts, so concordance helps filter out caller-specific false positives.</p>
+<div class="admonition tip">
+<p class="admonition-title">Tip</p>
+<p>When working with merged callsets, <strong>caller concordance (%overlap ≥ 50%)</strong>
+is often an effective filter. Apply this before optimizing other quality scores.</p>
+</div>
+</section>
+<section id="problematic-region-filters">
+<h3>Problematic region filters<a class="headerlink" href="#problematic-region-filters" title="Link to this heading"></a></h3>
+<p><strong>Genomic regions prone to artifacts:</strong></p>
+<ul class="simple">
+<li><p><strong>Segmental duplications</strong> — Highly similar sequences causing misalignment</p></li>
+<li><p><strong>Centromeres</strong> — Repetitive, poorly mappable</p></li>
+<li><p><strong>Telomeres</strong> — Repetitive, highly variable</p></li>
+<li><p><strong>HLA region</strong> — Extreme polymorphism</p></li>
+<li><p><strong>Low mappability regions</strong> — Reads cannot be uniquely placed</p></li>
+</ul>
+<div class="admonition important">
+<p class="admonition-title">Important</p>
+<p><strong>Highly recommended:</strong> Apply problematic region filters to all CNV datasets.</p>
+<p>CNVs overlapping these regions have substantially lower Mendelian Precision
+due to technical artifacts:</p>
+<ul class="simple">
+<li><p>Read mismapping to paralogous sequences (segmental duplications)</p></li>
+<li><p>Low coverage and poor mappability (centromeres, telomeres)</p></li>
+<li><p>High genuine copy number variation (HLA region)</p></li>
+</ul>
+</div>
+<p><strong>Filter approach:</strong></p>
+<ul class="simple">
+<li><p><strong>Percent overlap threshold:</strong> Exclude CNVs with &gt;X% overlap with problematic regions</p></li>
+<li><p><strong>Binary filter:</strong> Exclude any CNV overlapping problematic regions</p></li>
+<li><p><strong>Recommended strategy:</strong> Apply 50% threshold (exclude CNVs with &gt;50% overlap)</p></li>
+</ul>
+</section>
+<section id="transcript-overlap-filters">
+<h3>Transcript overlap filters<a class="headerlink" href="#transcript-overlap-filters" title="Link to this heading"></a></h3>
+<p><strong>Percent transcript overlap:</strong></p>
+<ul class="simple">
+<li><p>Exclude CNVs with low genic content (e.g., &lt;10% overlap with transcripts)</p></li>
+</ul>
+<p><strong>Use case:</strong></p>
+<ul class="simple">
+<li><p>When prioritizing functional variants</p></li>
+</ul>
+</section>
+<section id="gene-based-filters">
+<h3>Gene-based filters<a class="headerlink" href="#gene-based-filters" title="Link to this heading"></a></h3>
+<p><strong>Exclusion lists:</strong></p>
+<p>Upload a file of Ensembl Gene IDs to exclude <strong>from MP calculation only</strong>.</p>
+<p><strong>Purpose:</strong></p>
+<p>Based on published studies, you may identify genes known to be highly constrained and enriched for genuine <em>de novo</em> CNVs. Excluding these genes from MP calculation helps assess <strong>technical precision</strong> separately from biological <em>de novo</em> events.</p>
+<p><strong>Examples:</strong></p>
+<ul class="simple">
+<li><p>Severe neurodevelopmental genes (<em>MECP2</em>, <em>SCN1A</em>, <em>CDKL5</em>)</p></li>
+<li><p>Haploinsufficient genes from disease databases (ClinGen, DDG2P)</p></li>
+<li><p>Genes with extreme constraint (pLI &gt; 0.99)</p></li>
+</ul>
+<p><strong>File format:</strong></p>
+<p>Plain text file with one Ensembl Gene ID per line (no header):</p>
+<div class="highlight-text notranslate"><div class="highlight"><pre><span></span>ENSG00000169057
+ENSG00000198712
+ENSG00000130164
+</pre></div>
+</div>
+<div class="admonition important">
+<p class="admonition-title">Important</p>
+<p><strong>Exclusion is for MP assessment only</strong></p>
+<p>These CNVs must be <strong>retained</strong> in your final dataset for downstream analyses
+as they may represent pathogenic <em>de novo</em> variants.</p>
+</div>
+<p><strong>Workflow:</strong></p>
+<ol class="arabic simple">
+<li><p>Calculate MP (all CNVs) → e.g., 82%</p></li>
+<li><p>Calculate MP (excluding gene list) → e.g., 90%</p></li>
+<li><p>Difference (8%) estimates <em>de novo</em> contribution</p></li>
+</ol>
+<p><strong>Gene constraint filters (LOEUF):</strong></p>
+<p>Exclude CNVs affecting highly constrained genes (LOEUF &lt; threshold, e.g., 0.6) <strong>from MP calculation only</strong>.</p>
+<p><strong>Rationale:</strong></p>
+<p>CNVs affecting constrained genes are enriched for genuine <em>de novo</em> events. These events reduce MP but are biologically valid. Excluding them from MP calculation allows you to:</p>
+<ol class="arabic simple">
+<li><p><strong>Assess technical precision</strong> — MP without likely <em>de novo</em> events</p></li>
+<li><p><strong>Estimate *de novo* rate</strong> — Difference between filtered and unfiltered MP</p></li>
+</ol>
+<div class="admonition important">
+<p class="admonition-title">Important</p>
+<p><strong>LOEUF filter for MP calculation only</strong></p>
+<p>Excluding CNVs in constrained genes (low LOEUF) helps distinguish:</p>
+<ul class="simple">
+<li><p><strong>Technical MP</strong> — Precision excluding likely <em>de novo</em> events</p></li>
+<li><p><strong>Overall MP</strong> — Precision including all non-inherited CNVs</p></li>
+</ul>
+<p>CNVs affecting constrained genes are enriched for genuine <em>de novo</em> events,
+which reduce MP but are biologically real. Excluding them from MP calculation
+provides a cleaner assessment of <strong>technical false positive rate</strong>.</p>
+<p><strong>Critical:</strong> These CNVs must be <strong>retained</strong> in your final dataset for
+downstream analyses (disease association, burden tests) as they may represent
+pathogenic variants.</p>
+</div>
+<p><strong>Typical workflow:</strong></p>
+<ol class="arabic simple">
+<li><p>Calculate MP (all CNVs) → e.g., 85% (technical + biological)</p></li>
+<li><p>Calculate MP (LOEUF ≥ 0.6) → e.g., 92% (technical only)</p></li>
+<li><p>Difference (92% - 85% = 7%) estimates genuine <em>de novo</em> contribution</p></li>
+</ol>
+</section>
+</section>
+<section id="mp-exploration-filters">
+<h2>MP Exploration filters<a class="headerlink" href="#mp-exploration-filters" title="Link to this heading"></a></h2>
+<p><strong>Purpose:</strong></p>
+<p>Assess baseline MP and identify broad filtering needs.</p>
+<p><strong>Available filters:</strong></p>
+<ul class="simple">
+<li><p>CNV size (slider)</p></li>
+<li><p>Minimum % transcript overlap (slider)</p></li>
+<li><p>Maximum % problematic regions overlap (slider)</p></li>
+<li><p>Gene exclusion list (upload)</p></li>
+<li><p>LOEUF threshold (slider)</p></li>
+</ul>
+<p><strong>Workflow:</strong></p>
+<ol class="arabic simple">
+<li><p>Load preprocessed file</p></li>
+<li><p>Choose transmission type (CNV-level or Gene-level)</p></li>
+<li><p>Apply filters via sliders</p></li>
+<li><p>Observe impact on MP (via plots and summary cards)</p></li>
+<li><p>Proceed to Fine-tuning for detailed optimization</p></li>
+</ol>
+<p><strong>Output:</strong></p>
+<ul class="simple">
+<li><p>MP by size range or MP by quality score stratified by size range</p></li>
+<li><p>Filtered table with Download option</p></li>
+</ul>
+</section>
+<section id="fine-tuning-filters">
+<h2>Fine-tuning filters<a class="headerlink" href="#fine-tuning-filters" title="Link to this heading"></a></h2>
+<p><strong>Purpose:</strong></p>
+<p>Systematically optimize MP.</p>
+<p><strong>Available filters:</strong></p>
+<ul class="simple">
+<li><p><strong>CNV type:</strong> DEL or DUP (analyzed separately)</p></li>
+<li><p><strong>Quality metrics:</strong> Score, SNP, % overlap, nbre_algo</p></li>
+<li><p><strong>Operators:</strong> ≥, ≤, = (combine multiple conditions)</p></li>
+<li><p><strong>Additional filters:</strong> bp_overlap, LOEUF , t_Stop, t_Start</p></li>
+</ul>
+<p><strong>Workflow:</strong></p>
+<p>1. Apply filters
+3. Compare “Before” vs “After” plots
+4. Evaluate subset analyses (Genic only, Intergenic only, etc.)
+5. Iterate until optimal threshold identified</p>
+<p><strong>Output:</strong></p>
+<ul class="simple">
+<li><p>4 comparative plots:
+* Before additional filters
+* After additional filters
+* After + Genic CNVs only
+* After + Intergenic CNVs only</p></li>
+<li><p>Downloadable tables for each plot</p></li>
+</ul>
+<p><strong>Subset analyses:</strong></p>
+<ul class="simple">
+<li><p><strong>Genic CNVs only</strong> — CNVs overlapping at least one gene</p></li>
+<li><p><strong>Intergenic CNVs only</strong> — CNVs in non-genic regions</p></li>
+<li><p><strong>No excluded genes</strong> — Exclude CNVs in user-provided gene list</p></li>
+<li><p><strong>No constrained genes (LOEUF &lt; 1)</strong> — Exclude CNVs in constrained genes</p></li>
+</ul>
+<p><strong>Use cases:</strong></p>
+<ul class="simple">
+<li><p>Compare genic vs intergenic MP</p></li>
+<li><p>Assess impact of gene exclusion lists</p></li>
+<li><p>Evaluate technical MP (excluding constrained genes)</p></li>
+</ul>
+</section>
+<section id="optimization-strategies">
+<h2>Optimization strategies<a class="headerlink" href="#optimization-strategies" title="Link to this heading"></a></h2>
+<section id="plateau-based-optimization">
+<h3>Plateau-based optimization<a class="headerlink" href="#plateau-based-optimization" title="Link to this heading"></a></h3>
+<p><strong>Approach:</strong></p>
+<ol class="arabic simple">
+<li><p>Plot MP versus quality score threshold</p></li>
+<li><p>Identify plateau (where MP stops increasing)</p></li>
+<li><p>Use lowest threshold at plateau</p></li>
+</ol>
+<p><strong>Example:</strong></p>
+<div class="highlight-text notranslate"><div class="highlight"><pre><span></span>Threshold → MP      → CNVs retained
+≥50       → 75%     → 1000
+≥100      → 85%     → 600
+≥150      → 92%     → 300  ← Plateau starts
+≥200      → 92%     → 280  ← No further MP gain
+
+Optimal threshold: 150
+</pre></div>
+</div>
+<p><strong>Rationale:</strong></p>
+<p>Beyond the plateau, additional filtering removes genuine CNVs without improving MP.</p>
+</section>
+<section id="size-specific-optimization">
+<h3>Size-specific optimization<a class="headerlink" href="#size-specific-optimization" title="Link to this heading"></a></h3>
+<p><strong>Approach:</strong></p>
+<p>Optimize filters separately for each size range. Different size categories require different quality score thresholds.</p>
+<div class="admonition important">
+<p class="admonition-title">Important</p>
+<p><strong>Critical:</strong> Do not apply the same quality threshold to all CNV sizes.
+This is a common mistake that leads to either:</p>
+<ul class="simple">
+<li><p>Over-filtering large CNVs (losing genuine events)</p></li>
+<li><p>Under-filtering small CNVs (retaining false positives)</p></li>
+</ul>
+</div>
+<p><strong>Example:</strong></p>
+<div class="highlight-text notranslate"><div class="highlight"><pre><span></span>Size range      Optimal Score threshold    MP after filtering
+1-30kb          ≥200                       85%
+30-50kb         ≥150                       90%
+50-100kb        ≥100                       92%
+100-200kb       ≥50                        94%
+&gt;200kb          ≥20                        95%
+</pre></div>
+</div>
+<p><strong>Rationale:</strong></p>
+<p>Small CNVs have lower signal-to-noise ratio and require more stringent filtering to achieve comparable MP. Large CNVs are inherently more reliable and can pass with lower quality scores.</p>
+<p><strong>Workflow:</strong></p>
+<ol class="arabic simple">
+<li><p>Stratify MP by size range</p></li>
+<li><p>For each size range, plot MP vs quality threshold</p></li>
+<li><p>Identify plateau for each size range</p></li>
+<li><p>Apply size-specific thresholds</p></li>
+</ol>
+</section>
+<section id="type-specific-optimization">
+<h3>Type-specific optimization<a class="headerlink" href="#type-specific-optimization" title="Link to this heading"></a></h3>
+<p><strong>Approach:</strong></p>
+<p>Optimize filters separately for deletions (DEL) and duplications (DUP).</p>
+<div class="admonition tip">
+<p class="admonition-title">Tip</p>
+<p>Always analyze DEL and DUP separately. They have different baseline MP values
+and respond differently to filtering.</p>
+</div>
+<p><strong>Typical patterns:</strong></p>
+<ul class="simple">
+<li><p><strong>Deletions:</strong> Higher baseline MP (signal easier to detect)</p></li>
+<li><p><strong>Duplications:</strong> Lower baseline MP (signal harder to detect, more ambiguous)</p></li>
+</ul>
+<p><strong>Implications for filtering:</strong></p>
+<ul class="simple">
+<li><p>Deletions may achieve high MP (≥90%) with moderate filtering</p></li>
+<li><p>Duplications may require more aggressive filtering to reach similar MP</p></li>
+</ul>
+<p><strong>Example:</strong></p>
+<div class="highlight-text notranslate"><div class="highlight"><pre><span></span>CNV type    Size range    Optimal threshold    MP after filtering
+DEL         50-100kb      Score ≥100           92%
+DUP         50-100kb      Score ≥150           88%
+</pre></div>
+</div>
+<p><strong>Rationale:</strong></p>
+<p>Duplications are technically harder to detect than deletions. CNV callers typically have:</p>
+<ul class="simple">
+<li><p>Higher sensitivity for deletions (easier to detect copy number loss)</p></li>
+<li><p>Lower sensitivity for duplications (copy number gain harder to distinguish from noise)</p></li>
+</ul>
+<p>This difference in detection difficulty translates to different optimal filtering thresholds.</p>
+</section>
+<section id="gene-constraint-consideration">
+<h3>Gene constraint consideration<a class="headerlink" href="#gene-constraint-consideration" title="Link to this heading"></a></h3>
+<p><strong>Approach:</strong></p>
+<p>When evaluating filtering strategies, separate technical precision from biological <em>de novo</em> rate using LOEUF.</p>
+<p><strong>Workflow:</strong></p>
+<ol class="arabic simple">
+<li><p>Apply your candidate filter strategy</p></li>
+<li><p>Calculate MP (all CNVs)</p></li>
+<li><p>Calculate MP (excluding LOEUF &lt; 0.6)</p></li>
+<li><p>If the difference is large (&gt;10%), many non-inherited CNVs may be genuine <em>de novo</em> events</p></li>
+</ol>
+<p><strong>Example:</strong></p>
+<div class="highlight-text notranslate"><div class="highlight"><pre><span></span>Filter: Score ≥100, Size ≥30kb
+
+MP (all CNVs) = 85%
+MP (LOEUF ≥ 0.6) = 92%
+
+Interpretation:
+- Technical precision: 92% (good)
+- Estimated *de novo* rate: 7% (reasonable)
+- Filter strategy is appropriate
+</pre></div>
+</div>
+<p>vs.</p>
+<div class="highlight-text notranslate"><div class="highlight"><pre><span></span>Filter: Score ≥50, Size ≥10kb
+
+MP (all CNVs) = 70%
+MP (LOEUF ≥ 0.6) = 72%
+
+Interpretation:
+- Technical precision: 72% (poor)
+- Estimated *de novo* rate: 2%
+- High false positive rate → More aggressive filtering needed
+</pre></div>
+</div>
+<p><strong>Rationale:</strong></p>
+<p>This approach helps you distinguish:</p>
+<ul class="simple">
+<li><p>Low MP due to technical false positives (requires filtering)</p></li>
+<li><p>Low MP due to genuine <em>de novo</em> events (biologically expected)</p></li>
+</ul>
+</section>
+</section>
+<section id="balancing-precision-and-sensitivity">
+<h2>Balancing precision and sensitivity<a class="headerlink" href="#balancing-precision-and-sensitivity" title="Link to this heading"></a></h2>
+<p><strong>Trade-off:</strong></p>
+<ul class="simple">
+<li><p><strong>More aggressive filtering</strong> → Higher MP, fewer CNVs</p></li>
+<li><p><strong>Lenient filtering</strong> → Lower MP, more CNVs</p></li>
+</ul>
+<p><strong>Considerations:</strong></p>
+<ul class="simple">
+<li><p><strong>For discovery studies:</strong> Prioritize sensitivity (lenient filtering, MP ≥70%)</p></li>
+<li><p><strong>For clinical validation:</strong> Prioritize precision (aggressive filtering, MP ≥90%)</p></li>
+<li><p><strong>For method comparison:</strong> Use consistent filters across methods</p></li>
+</ul>
+<p><strong>Recommended approach:</strong></p>
+<ol class="arabic simple">
+<li><p>Start with minimal filters to assess baseline quality</p></li>
+<li><p>Identify optimal thresholds via Fine-tuning</p></li>
+<li><p>Apply filters that achieve MP ≥85% while retaining sufficient CNVs</p></li>
+<li><p>For clinical applications, target MP ≥90%</p></li>
+</ol>
+<div class="admonition-best-practices admonition">
+<p class="admonition-title">Best practices</p>
+<ol class="arabic simple">
+<li><p><strong>Always stratify by size</strong> before filtering — Do not apply uniform thresholds</p></li>
+<li><p><strong>Always calculate MP separately for DEL and DUP</strong> — They have different quality profiles</p></li>
+<li><p><strong>Apply problematic region filters</strong> — Highly recommended for all datasets</p></li>
+<li><p><strong>Consider gene constraint (LOEUF)</strong> — Distinguish technical FP from biological <em>de novo</em></p></li>
+<li><p><strong>Caller concordance (if available):</strong> Require ≥2 algorithms with ≥50% reciprocal overlap</p></li>
+<li><p><strong>Balance quality and quantity</strong> — Visualize the trade-off between MP (quality) and CNV count (quantity) to make informed filtering decisions based on your study goals</p></li>
+</ol>
+</div>
+</section>
+<section id="see-also">
+<h2>See also<a class="headerlink" href="#see-also" title="Link to this heading"></a></h2>
+<ul class="simple">
+<li><p><a class="reference internal" href="mendelian_precision.html"><span class="doc">Mendelian Precision</span></a> — Understanding the MP metric</p></li>
+<li><p><a class="reference internal" href="preprocessing.html"><span class="doc">Preprocessing</span></a> — Pre-filtering annotation and inheritance calculation</p></li>
+<li><p><a class="reference internal" href="outputs.html"><span class="doc">Outputs</span></a> — Visualizing filtering impact and downloading filtered tables</p></li>
+</ul>
+</section>
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="mendelian_precision.html" class="btn btn-neutral float-left" title="Mendelian Precision" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="outputs.html" class="btn btn-neutral float-right" title="Outputs" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2026, Mame Seynabou Diop.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

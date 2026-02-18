@@ -1,0 +1,51 @@
+/* Custom CSS for MCNV2 Documentation */
+
+/* Improve code block styling */
+.highlight {
+    background-color: #f8f8f8;
+    border-radius: 4px;
+    padding: 12px;
+}
+
+/* Better admonition styling */
+.admonition {
+    margin: 1em 0;
+    padding: 12px;
+    border-left: 4px solid #2980b9;
+}
+
+.admonition.note {
+    border-left-color: #2980b9;
+    background-color: #e7f2fa;
+}
+
+.admonition.warning {
+    border-left-color: #f39c12;
+    background-color: #fef5e7;
+}
+
+.admonition.tip {
+    border-left-color: #27ae60;
+    background-color: #e8f8f5;
+}
+
+/* Logo sizing - IMPROVED VISIBILITY */
+.wy-side-nav-search .wy-dropdown > a img.logo,
+.wy-side-nav-search > a img.logo {
+    max-height: 100px !important;
+    width: auto !important;
+    margin: 10px auto !important;
+    display: block !important;
+}
+
+/* Make logo area taller and more prominent */
+.wy-side-nav-search {
+    background-color: #2980b9 !important;
+    padding: 20px 10px !important;
+}
+
+/* Ensure logo link is visible */
+.wy-side-nav-search > a {
+    display: block !important;
+    margin-bottom: 15px !important;
+}

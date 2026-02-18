@@ -1,0 +1,321 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="../">
+<head>
+  <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Input formats &mdash; MCNV2 Toolbox 1.0 documentation</title>
+      <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=b86133f3" />
+      <link rel="stylesheet" type="text/css" href="../_static/css/theme.css?v=9edc463e" />
+      <link rel="stylesheet" type="text/css" href="../_static/sphinx-design.min.css?v=95c83b7e" />
+      <link rel="stylesheet" type="text/css" href="../_static/custom.css?v=9ad6ce3d" />
+
+  
+    <link rel="shortcut icon" href="../_static/mcnv2_icon.svg"/>
+      <script src="../_static/jquery.js?v=5d32c60e"></script>
+      <script src="../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="../_static/documentation_options.js?v=f2a433a1"></script>
+      <script src="../_static/doctools.js?v=9a2dae69"></script>
+      <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
+      <script src="../_static/design-tabs.js?v=f930bc37"></script>
+    <script src="../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="Preprocessing" href="preprocessing.html" />
+    <link rel="prev" title="User Guide" href="index.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../index.html" class="icon icon-home">
+            MCNV2 Toolbox
+              <img src="../_static/mcnv2_logo.png" class="logo" alt="Logo"/>
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Getting Started</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../getting-started/index.html">Getting Started</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">User Guide</span></p>
+<ul class="current">
+<li class="toctree-l1 current"><a class="reference internal" href="index.html">User Guide</a><ul class="current">
+<li class="toctree-l2 current"><a class="current reference internal" href="#">Input formats</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#cnv-callset-file">CNV callset file</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#pedigree-file">Pedigree file</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#sample-id-matching">Sample ID matching</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#reference-annotations">Reference annotations</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#file-validation">File validation</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="preprocessing.html">Preprocessing</a></li>
+<li class="toctree-l2"><a class="reference internal" href="inheritance.html">Inheritance status</a></li>
+<li class="toctree-l2"><a class="reference internal" href="mendelian_precision.html">Mendelian Precision</a></li>
+<li class="toctree-l2"><a class="reference internal" href="filtering.html">Filtering strategies</a></li>
+<li class="toctree-l2"><a class="reference internal" href="outputs.html">Outputs</a></li>
+</ul>
+</li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Tutorials</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../tutorials/index.html">Tutorials</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Reference</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../reference/index.html">Reference</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">About</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../about/index.html">About</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../index.html">MCNV2 Toolbox</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="index.html">User Guide</a></li>
+      <li class="breadcrumb-item active">Input formats</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="../_sources/user-guide/input_formats.rst.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="input-formats">
+<h1>Input formats<a class="headerlink" href="#input-formats" title="Link to this heading"></a></h1>
+<p>MCNV2 requires two main input files: a <strong>CNV callset</strong> and a <strong>pedigree file</strong>.</p>
+<div class="admonition important">
+<p class="admonition-title">Important</p>
+<p><strong>Column order is critical.</strong> Column names are flexible, but the position of each column must be respected exactly as described below.</p>
+</div>
+<section id="cnv-callset-file">
+<h2>CNV callset file<a class="headerlink" href="#cnv-callset-file" title="Link to this heading"></a></h2>
+<p><strong>Format:</strong> Tab-delimited file</p>
+<p>File extension can be <code class="docutils literal notranslate"><span class="pre">.txt</span></code>, <code class="docutils literal notranslate"><span class="pre">.tsv</span></code>, <code class="docutils literal notranslate"><span class="pre">.bed</span></code>, <code class="docutils literal notranslate"><span class="pre">.xls</span></code>, or any other extension, as long as the content is tab-delimited.</p>
+<p><strong>Required columns (in order):</strong></p>
+<ol class="arabic simple">
+<li><p><strong>CHR</strong> — Chromosome (e.g., chr1, 1, chrX)</p></li>
+<li><p><strong>START</strong> — CNV start position (integer)</p></li>
+<li><p><strong>STOP</strong> — CNV end position (integer)</p></li>
+<li><p><strong>TYPE</strong> — CNV type: <code class="docutils literal notranslate"><span class="pre">DEL</span></code> (deletion) or <code class="docutils literal notranslate"><span class="pre">DUP</span></code> (duplication)</p></li>
+<li><p><strong>SAMPLE_ID</strong> — Sample identifier</p></li>
+</ol>
+<p><strong>Optional columns (after the required 5):</strong></p>
+<ul class="simple">
+<li><p><strong>Quality score (highly recommended)</strong> — Caller-specific likelihood score (e.g., PennCNV quality score)</p></li>
+<li><p>Number of probes</p></li>
+<li><p>Caller concordance percentage (if CNVs are merged from multiple callers)</p></li>
+<li><p>Any other metadata</p></li>
+</ul>
+<div class="admonition important">
+<p class="admonition-title">Important</p>
+<p><strong>Quality score (column 6) is highly recommended.</strong></p>
+<p>While optional, the quality score enables generation of <strong>MP versus quality score curves</strong>, which are essential for identifying optimal quality thresholds. Without this column, only size-stratified bar plots will be available.</p>
+</div>
+<p><strong>Example:</strong></p>
+<div class="highlight-text notranslate"><div class="highlight"><pre><span></span>chr1    1000000    1050000    DEL    child001    32.5    150
+chr1    2000000    2100000    DUP    child001    45.2    220
+chr2    5000000    5080000    DEL    child002    28.1    95
+
+# Column 6 (32.5, 45.2, 28.1) = Quality scores ← Highly recommended!
+</pre></div>
+</div>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<ul class="simple">
+<li><p>Column names can be anything (e.g., <code class="docutils literal notranslate"><span class="pre">chromosome</span></code>, <code class="docutils literal notranslate"><span class="pre">chr</span></code>, <code class="docutils literal notranslate"><span class="pre">chrom</span></code> are all acceptable)</p></li>
+<li><p><strong>Column order cannot change</strong> — position 1 = chromosome, position 2 = start, etc.</p></li>
+<li><p>Optional columns can include quality scores, probe counts, or any other metadata</p></li>
+<li><p><strong>Caller concordance:</strong> If CNVs from multiple callers are merged, you can include an overlap percentage (e.g., 70% concordance between two callers) as an optional column</p></li>
+</ul>
+</div>
+</section>
+<section id="pedigree-file">
+<h2>Pedigree file<a class="headerlink" href="#pedigree-file" title="Link to this heading"></a></h2>
+<p><strong>Format:</strong> Tab-delimited text file with <strong>exactly 3 columns</strong></p>
+<p><strong>Required columns (in order):</strong></p>
+<ol class="arabic simple">
+<li><p><strong>SAMPLE_ID</strong> — Offspring/proband sample ID (<strong>must be first column</strong>)</p></li>
+<li><p><strong>FATHER_ID</strong> — Father sample ID</p></li>
+<li><p><strong>MOTHER_ID</strong> — Mother sample ID</p></li>
+</ol>
+<div class="admonition important">
+<p class="admonition-title">Important</p>
+<ul class="simple">
+<li><p><strong>SampleID MUST be in the first column</strong></p></li>
+<li><p>The order of FatherID and MotherID (columns 2-3) can be swapped if needed</p></li>
+<li><p>The file must have <strong>exactly 3 columns</strong> (no additional columns)</p></li>
+<li><p>All three IDs must form a <strong>complete trio</strong> (no missing parents or offspring)</p></li>
+</ul>
+</div>
+<p><strong>Example (correct format):</strong></p>
+<div class="highlight-text notranslate"><div class="highlight"><pre><span></span>child001    father001    mother001
+child002    father002    mother002
+child003    father003    mother003
+</pre></div>
+</div>
+<p><strong>PLINK .fam and KING .kin files:</strong></p>
+<p>If your pedigree file comes from PLINK (<code class="docutils literal notranslate"><span class="pre">.fam</span></code>) or KING (<code class="docutils literal notranslate"><span class="pre">.kin</span></code>), you <strong>must reformat it to 3 columns</strong> before using MCNV2.</p>
+<p>PLINK <code class="docutils literal notranslate"><span class="pre">.fam</span></code> files typically contain 6 columns:</p>
+<div class="highlight-text notranslate"><div class="highlight"><pre><span></span>FAM001    child001    father001    mother001    1    2
+FAM002    child002    father002    mother002    2    1
+</pre></div>
+</div>
+<p><strong>To use with MCNV2, extract only columns 2-4:</strong></p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span class="c1"># Extract columns 2, 3, 4 from PLINK .fam file</span>
+cut<span class="w"> </span>-f2,3,4<span class="w"> </span>pedigree.fam<span class="w"> </span>&gt;<span class="w"> </span>pedigree_mcnv2.txt
+</pre></div>
+</div>
+<p><strong>Result (correct 3-column format):</strong></p>
+<div class="highlight-text notranslate"><div class="highlight"><pre><span></span>child001    father001    mother001
+child002    father002    mother002
+</pre></div>
+</div>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<ul class="simple">
+<li><p>Column names (headers) are optional</p></li>
+<li><p>Only <strong>complete trios</strong> are analyzed</p></li>
+<li><p>Incomplete trios in the pedigree file are excluded with a warning</p></li>
+</ul>
+</div>
+</section>
+<section id="sample-id-matching">
+<h2>Sample ID matching<a class="headerlink" href="#sample-id-matching" title="Link to this heading"></a></h2>
+<p><strong>Critical requirement:</strong> The pedigree file must contain <strong>complete trios only</strong>.</p>
+<p><strong>Complete trio definition:</strong></p>
+<p>A trio is complete when the pedigree file contains all three entries:</p>
+<ol class="arabic simple">
+<li><p>Offspring sample ID</p></li>
+<li><p>Father sample ID</p></li>
+<li><p>Mother sample ID</p></li>
+</ol>
+<div class="admonition important">
+<p class="admonition-title">Important</p>
+<p><strong>Incomplete trios are excluded:</strong></p>
+<ul class="simple">
+<li><p>❌ Father and mother without offspring</p></li>
+<li><p>❌ Offspring with only one parent</p></li>
+<li><p>❌ Any trio missing one of the three IDs</p></li>
+</ul>
+<p><strong>All three IDs must be present in the pedigree file.</strong></p>
+</div>
+<p><strong>CNV file presence:</strong></p>
+<p>It is <strong>normal</strong> for a sample to be absent from the CNV file. This simply means the caller did not detect any CNVs for that individual.</p>
+<p><strong>Example scenario:</strong></p>
+<div class="highlight-text notranslate"><div class="highlight"><pre><span></span># Pedigree file (complete trio)
+child001    father001    mother001
+
+# CNV file (only father and child have detected CNVs)
+chr1    1000000    1050000    DEL    child001
+chr2    2000000    2100000    DUP    father001
+# mother001 has NO CNVs detected → this is NORMAL
+</pre></div>
+</div>
+<p>✅ This trio is <strong>valid</strong> because all three IDs are present in the pedigree file, even though the mother has no detected CNVs.</p>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>The absence of CNVs for a sample in the CNV file indicates that the caller found no variants for that individual. This does not invalidate the trio.</p>
+</div>
+</section>
+<section id="reference-annotations">
+<h2>Reference annotations<a class="headerlink" href="#reference-annotations" title="Link to this heading"></a></h2>
+<p>MCNV2 uses the following reference files (provided with the package):</p>
+<p><strong>Problematic regions</strong> (UCSC-based, BED format):</p>
+<ul class="simple">
+<li><p>Segmental duplications</p></li>
+<li><p>Centromeres</p></li>
+<li><p>Telomeres</p></li>
+<li><p>HLA region</p></li>
+</ul>
+<p><strong>Gene annotations</strong> (tab-delimited or BED):</p>
+<ul class="simple">
+<li><p>Gene coordinates (from GTF/GFF)</p></li>
+<li><p>LOEUF scores (gnomAD v4) — loss-of-function constraint metric</p></li>
+</ul>
+<p><strong>Gene exclusion list</strong> (optional, tab-delimited):</p>
+<ul class="simple">
+<li><p>Ensembl gene IDs to exclude from Mendelian Precision calculation</p></li>
+</ul>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p><strong>Genome build:</strong> hg38 is supported in this release. hg19/GRCh37 support is planned.</p>
+</div>
+</section>
+<section id="file-validation">
+<h2>File validation<a class="headerlink" href="#file-validation" title="Link to this heading"></a></h2>
+<p>Before running MCNV2, verify:</p>
+<ol class="arabic simple">
+<li><p>✅ CNV file has correct column order (chr, start, stop, type, sample_id, optional…)</p></li>
+<li><p>✅ Pedigree file has <strong>exactly 3 columns</strong> (offspring, father, mother)</p></li>
+<li><p>✅ Pedigree file contains <strong>only complete trios</strong> (all 3 IDs present for each trio)</p></li>
+<li><p>✅ CNV file is tab-delimited (not comma-separated)</p></li>
+<li><p>✅ Chromosome names are consistent (e.g., always <code class="docutils literal notranslate"><span class="pre">chr1</span></code> or always <code class="docutils literal notranslate"><span class="pre">1</span></code>)</p></li>
+<li><p>✅ CNV types are <code class="docutils literal notranslate"><span class="pre">DEL</span></code> or <code class="docutils literal notranslate"><span class="pre">DUP</span></code> (case-insensitive)</p></li>
+</ol>
+<div class="admonition tip">
+<p class="admonition-title">Tip</p>
+<p>Use the Shiny interface to upload files — MCNV2 will automatically validate formats and report any issues.</p>
+</div>
+</section>
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="index.html" class="btn btn-neutral float-left" title="User Guide" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="preprocessing.html" class="btn btn-neutral float-right" title="Preprocessing" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2026, Mame Seynabou Diop.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

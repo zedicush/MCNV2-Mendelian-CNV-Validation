@@ -1,0 +1,823 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="../">
+<head>
+  <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Shiny tutorial &mdash; MCNV2 Toolbox 1.0 documentation</title>
+      <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=b86133f3" />
+      <link rel="stylesheet" type="text/css" href="../_static/css/theme.css?v=9edc463e" />
+      <link rel="stylesheet" type="text/css" href="../_static/sphinx-design.min.css?v=95c83b7e" />
+      <link rel="stylesheet" type="text/css" href="../_static/custom.css?v=9ad6ce3d" />
+
+  
+    <link rel="shortcut icon" href="../_static/mcnv2_icon.svg"/>
+      <script src="../_static/jquery.js?v=5d32c60e"></script>
+      <script src="../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="../_static/documentation_options.js?v=f2a433a1"></script>
+      <script src="../_static/doctools.js?v=9a2dae69"></script>
+      <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
+      <script src="../_static/design-tabs.js?v=f930bc37"></script>
+    <script src="../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="Reference" href="../reference/index.html" />
+    <link rel="prev" title="CLI tutorial" href="cli_tutorial.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../index.html" class="icon icon-home">
+            MCNV2 Toolbox
+              <img src="../_static/mcnv2_logo.png" class="logo" alt="Logo"/>
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Getting Started</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../getting-started/index.html">Getting Started</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">User Guide</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../user-guide/index.html">User Guide</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Tutorials</span></p>
+<ul class="current">
+<li class="toctree-l1 current"><a class="reference internal" href="index.html">Tutorials</a><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="cli_tutorial.html">CLI tutorial</a></li>
+<li class="toctree-l2 current"><a class="current reference internal" href="#">Shiny tutorial</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#launching-the-app">Launching the app</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#step-1-preprocessing-tab">Step 1: Preprocessing tab</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#upload-files-and-set-parameters">Upload files and set parameters</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#input-cnv-file-format">Input CNV file format</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#annotate-cnvs">Annotate CNVs</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#compute-inheritance-status">Compute inheritance status</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="#step-2-mp-exploration-tab">Step 2: MP Exploration tab</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#interface-overview-and-access-methods">Interface overview and access methods</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#transmission-type-selection">Transmission type selection</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#filtering-criteria">Filtering criteria</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#mp-representation">MP representation</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#summary-cards-and-filtered-table">Summary cards and filtered table</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#mp-by-cnv-size-visualization">MP by CNV size visualization</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#mp-by-quality-metric-visualization">MP by quality metric visualization</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#next-steps">Next steps</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="#step-3-fine-tuning-tab">Step 3: Fine-tuning tab</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#overview">Overview</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#interface-layout">Interface layout</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#cnv-type-selection">CNV type selection</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#cnv-filtering-criteria">CNV filtering criteria</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#comparative-plots">Comparative plots</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#subset-analyses">Subset analyses</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#plot-modal-enlarged-view">Plot modal (enlarged view)</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#optimal-threshold-identification">Optimal threshold identification</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#download-filtered-tables">Download filtered tables</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#see-also">See also</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="#tips-and-tricks">Tips and tricks</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#efficient-filtering-workflow">Efficient filtering workflow</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="#id1">See also</a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Reference</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../reference/index.html">Reference</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">About</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../about/index.html">About</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../index.html">MCNV2 Toolbox</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="index.html">Tutorials</a></li>
+      <li class="breadcrumb-item active">Shiny tutorial</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="../_sources/tutorials/shiny_tutorial.rst.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="shiny-tutorial">
+<h1>Shiny tutorial<a class="headerlink" href="#shiny-tutorial" title="Link to this heading"></a></h1>
+<p>This tutorial walks you through the MCNV2 Shiny application with step-by-step instructions.</p>
+<p>The Shiny app provides <strong>interactive Mendelian Precision exploration</strong> with real-time filtering, visualization, and export capabilities.</p>
+<section id="launching-the-app">
+<h2>Launching the app<a class="headerlink" href="#launching-the-app" title="Link to this heading"></a></h2>
+<p><strong>From R console:</strong></p>
+<div class="highlight-r notranslate"><div class="highlight"><pre><span></span><span class="nf">library</span><span class="p">(</span><span class="n">reticulate</span><span class="p">)</span>
+<span class="nf">use_virtualenv</span><span class="p">(</span><span class="s">&quot;r-MCNV2&quot;</span><span class="p">,</span><span class="w"> </span><span class="n">required</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="kc">TRUE</span><span class="p">)</span>
+
+<span class="nf">library</span><span class="p">(</span><span class="n">MCNV2</span><span class="p">)</span>
+<span class="n">MCNV2</span><span class="o">::</span><span class="nf">launch</span><span class="p">(</span>
+<span class="w">  </span><span class="n">bedtools_path</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nf">Sys.which</span><span class="p">(</span><span class="s">&quot;bedtools&quot;</span><span class="p">),</span>
+<span class="w">  </span><span class="n">results_dir</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s">&quot;~/mcnv2_results&quot;</span>
+<span class="p">)</span>
+</pre></div>
+</div>
+<p><strong>Parameters:</strong></p>
+<ul class="simple">
+<li><p><strong>bedtools_path</strong> — Path to bedtools executable (required for annotation)</p></li>
+<li><p><strong>results_dir</strong> — Directory to save output files (default: temporary directory)</p></li>
+</ul>
+<p><strong>The app will open in your default web browser.</strong></p>
+<p>—</p>
+</section>
+<section id="step-1-preprocessing-tab">
+<h2>Step 1: Preprocessing tab<a class="headerlink" href="#step-1-preprocessing-tab" title="Link to this heading"></a></h2>
+<p>The Preprocessing tab handles CNV annotation and inheritance calculation.</p>
+<section id="upload-files-and-set-parameters">
+<h3>Upload files and set parameters<a class="headerlink" href="#upload-files-and-set-parameters" title="Link to this heading"></a></h3>
+<figure class="align-center" id="id2">
+<a class="reference internal image-reference" href="../_images/01_preprocessing_input_panel.png"><img alt="Upload and parameters panel" src="../_images/01_preprocessing_input_panel.png" style="width: 600px;" />
+</a>
+<figcaption>
+<p><span class="caption-text">Input files panel with three file upload buttons and parameters section</span><a class="headerlink" href="#id2" title="Link to this image"></a></p>
+</figcaption>
+</figure>
+<p><strong>Required files:</strong></p>
+<ol class="arabic simple">
+<li><p><strong>CNV file</strong> (tab-delimited) - Required columns: CHR, START, STOP, TYPE, SAMPLE_ID</p></li>
+<li><p><strong>Pedigree file</strong> (tab-delimited, no header) - Three columns: SAMPLE_ID, FATHER_ID, MOTHER_ID</p></li>
+</ol>
+<p><strong>Optional file:</strong></p>
+<ol class="arabic simple" start="3">
+<li><p><strong>Problematic regions</strong> (BED format) - Default file provided if not uploaded</p></li>
+</ol>
+<p><strong>Parameters:</strong></p>
+<ul class="simple">
+<li><p><strong>Inheritance threshold:</strong> Minimum overlap for a CNV to be considered inherited (default: 0.5)</p></li>
+<li><p><strong>Genome build:</strong> GRCh38/hg38 or hg19</p></li>
+</ul>
+<p><strong>Upload workflow:</strong></p>
+<ol class="arabic simple">
+<li><p>Click <strong>Browse</strong> next to each file type</p></li>
+<li><p>Select your files</p></li>
+<li><p>Set inheritance threshold (0.5 recommended)</p></li>
+<li><p>Click <strong>Submit</strong> to start annotation</p></li>
+</ol>
+</section>
+<section id="input-cnv-file-format">
+<h3>Input CNV file format<a class="headerlink" href="#input-cnv-file-format" title="Link to this heading"></a></h3>
+<p>Your input CNV file should contain the required columns plus any optional quality metrics:</p>
+<figure class="align-center" id="id3">
+<a class="reference internal image-reference" href="../_images/02_input_cnv_columns.png"><img alt="Input CNV file columns" src="../_images/02_input_cnv_columns.png" style="width: 90%;" />
+</a>
+<figcaption>
+<p><span class="caption-text">Example input CNV file showing required columns (Chr, Start, Stop, Type, SampleID)
+and optional quality columns (Score, SNP, NbreAlgos, Algos, ThreeAlgos, TwoAlgos, OneAlgo)</span><a class="headerlink" href="#id3" title="Link to this image"></a></p>
+</figcaption>
+</figure>
+<p><strong>Column descriptions:</strong></p>
+<ul class="simple">
+<li><p><strong>Chr, Start, Stop</strong> — CNV genomic coordinates (required)</p></li>
+<li><p><strong>Type</strong> — DEL or DUP (required)</p></li>
+<li><p><strong>SampleID</strong> — Sample identifier matching pedigree file (required)</p></li>
+<li><p><strong>Score</strong> — Quality score from CNV caller (optional)</p></li>
+<li><p><strong>SNP</strong> — Number of supporting probes (optional, array data)</p></li>
+<li><p><strong>NbreAlgos</strong> — Number of algorithms detecting the CNV (optional, merged callsets)</p></li>
+<li><p><strong>Algos</strong> — Algorithm names (optional, e.g., “PC, QS”)</p></li>
+<li><p><strong>ThreeAlgos, TwoAlgos, OneAlgo</strong> — Boolean flags for algorithm counts (optional)</p></li>
+</ul>
+</section>
+<section id="annotate-cnvs">
+<h3>Annotate CNVs<a class="headerlink" href="#annotate-cnvs" title="Link to this heading"></a></h3>
+<p>Click <strong>Submit</strong> to start annotation. The app will:</p>
+<ol class="arabic simple">
+<li><p>Intersect CNVs with gene coordinates (Gencode)</p></li>
+<li><p>Add LOEUF constraint scores (gnomAD v4)</p></li>
+<li><p>Calculate problematic region overlap</p></li>
+</ol>
+<p><strong>Output: Annotation table</strong></p>
+<p>The annotation process adds new columns to your CNV file:</p>
+<figure class="align-center" id="id4">
+<a class="reference internal image-reference" href="../_images/03_annotation_added_columns.png"><img alt="Annotation added columns" src="../_images/03_annotation_added_columns.png" style="width: 90%;" />
+</a>
+<figcaption>
+<p><span class="caption-text">Columns added by annotation: gene information (gene_name, transcript, GeneID),
+constraint scores (LOEUF), and problematic region overlap percentage</span><a class="headerlink" href="#id4" title="Link to this image"></a></p>
+</figcaption>
+</figure>
+<p><strong>New columns added:</strong></p>
+<ul class="simple">
+<li><p><strong>Size</strong> — CNV size in bp (Stop - Start)</p></li>
+<li><p><strong>gene_type</strong> — Type of gene overlapped (e.g., protein_coding)</p></li>
+<li><p><strong>transcript</strong> — Ensembl transcript ID (e.g., ENST00000616016)</p></li>
+<li><p><strong>gene_name</strong> — HGNC gene symbol (e.g., SAMD11, NOC2L)</p></li>
+<li><p><strong>bp_overlap</strong> — Base pairs overlapping the gene</p></li>
+<li><p><strong>LOEUF</strong> — Loss-of-function constraint score (gnomAD v4)</p></li>
+<li><p><strong>t_Start, t_Stop</strong> — Transcript coordinates</p></li>
+<li><p><strong>GeneID</strong> — Ensembl gene ID (e.g., ENSG00000187634)</p></li>
+<li><p><strong>cnv_problematic_region_overlap</strong> — Percentage overlap with problematic regions</p></li>
+</ul>
+<p><strong>Note:</strong> If a CNV overlaps multiple genes, one row per gene is created. Intergenic CNVs have
+gene fields set to -1 or 0.</p>
+</section>
+<section id="compute-inheritance-status">
+<h3>Compute inheritance status<a class="headerlink" href="#compute-inheritance-status" title="Link to this heading"></a></h3>
+<p>Click <strong>Proceed to Inheritance calculation</strong> to calculate transmission status.</p>
+<p><strong>What happens:</strong></p>
+<ol class="arabic simple">
+<li><p><strong>CNV-level matching</strong> — Coordinate-based comparison (reciprocal overlap ≥ threshold)</p></li>
+<li><p><strong>Gene-level matching</strong> — Gene-based comparison (at least one shared gene)</p></li>
+</ol>
+<p>See <a class="reference internal" href="../user-guide/inheritance.html"><span class="doc">Inheritance status</span></a> for detailed algorithm explanation.</p>
+<p><strong>Output: Inheritance table</strong></p>
+<p>The inheritance calculation adds transmission status columns:</p>
+<figure class="align-center" id="id5">
+<a class="reference internal image-reference" href="../_images/04_inheritance_transmitted_columns.png"><img alt="Inheritance transmission columns" src="../_images/04_inheritance_transmitted_columns.png" style="width: 90%;" />
+</a>
+<figcaption>
+<p><span class="caption-text">Key columns added: transmitted_cnv (true/false) and transmitted_gene (True/False/intergenic)
+showing inheritance status for each CNV</span><a class="headerlink" href="#id5" title="Link to this image"></a></p>
+</figcaption>
+</figure>
+<p><strong>New columns added:</strong></p>
+<ul class="simple">
+<li><p><strong>TrioKey</strong> — Trio identifier (father_mother_child sample IDs)</p></li>
+<li><p><strong>family_statue</strong> — Role in trio (typically “child”)</p></li>
+<li><p><strong>cnv_id</strong> — Unique CNV identifier</p></li>
+<li><p><strong>transmitted_cnv</strong> — Coordinate-based inheritance status:</p>
+<ul>
+<li><p><strong>true</strong> — CNV inherited from at least one parent</p></li>
+<li><p><strong>false</strong> — Candidate <em>de novo</em> CNV</p></li>
+</ul>
+</li>
+<li><p><strong>transmitted_gene</strong> — Gene-based inheritance status:</p>
+<ul>
+<li><p><strong>True</strong> — At least one overlapping gene is inherited</p></li>
+<li><p><strong>False</strong> — No overlapping genes are inherited (candidate <em>de novo</em>)</p></li>
+<li><p><strong>intergenic</strong> — CNV does not overlap any genes</p></li>
+</ul>
+</li>
+</ul>
+<p><strong>Interpretation examples from screenshot:</strong></p>
+<ul class="simple">
+<li><p>Row 1: transmitted_cnv=**true**, transmitted_gene=**intergenic** → Inherited CNV, no genes affected</p></li>
+<li><p>Rows 2-6: transmitted_cnv=**true**, transmitted_gene=**True** → Inherited CNV and genes</p></li>
+<li><p>Row 7: transmitted_cnv=**false**, transmitted_gene=**intergenic** → Candidate <em>de novo</em>, intergenic</p></li>
+<li><p>Rows 8-9: transmitted_cnv=**false**, transmitted_gene=**False** → Candidate <em>de novo</em>, affecting genes</p></li>
+</ul>
+<p><strong>Next step:</strong></p>
+<p>Click <strong>Go to Mendelian Precision analysis</strong> to proceed to the MP Exploration tab where you can
+apply filters and visualize Mendelian Precision.</p>
+<p>—</p>
+</section>
+</section>
+<section id="step-2-mp-exploration-tab">
+<h2>Step 2: MP Exploration tab<a class="headerlink" href="#step-2-mp-exploration-tab" title="Link to this heading"></a></h2>
+<p>The MP Exploration tab provides interactive Mendelian Precision analysis with real-time filtering and visualization.</p>
+<section id="interface-overview-and-access-methods">
+<h3>Interface overview and access methods<a class="headerlink" href="#interface-overview-and-access-methods" title="Link to this heading"></a></h3>
+<p>The MP Exploration tab can be accessed in two ways and provides comprehensive filtering options:</p>
+<figure class="align-center" id="id6">
+<a class="reference internal image-reference" href="../_images/mp_exploration_access_methods.png"><img alt="MP Exploration interface overview" src="../_images/mp_exploration_access_methods.png" style="width: 100%;" />
+</a>
+<figcaption>
+<p><span class="caption-text"><strong>Panel A:</strong> Direct access via MP Exploration tab (file auto-loaded from Preprocessing).
+<strong>Panel B:</strong> Manual file upload when accessing tab directly.
+<strong>Panel C:</strong> Complete interface showing transmission type selection, CNV filtering criteria,
+gene exclusion options, and plot type selection.</span><a class="headerlink" href="#id6" title="Link to this image"></a></p>
+</figcaption>
+</figure>
+<p><strong>Access methods:</strong></p>
+<ul class="simple">
+<li><p><strong>Method 1 (Panel A):</strong> After Preprocessing, click <strong>Go to Mendelian Precision analysis</strong> → File automatically loaded</p></li>
+<li><p><strong>Method 2 (Panel B):</strong> Navigate directly to MP Exploration tab → Manual file upload required</p></li>
+</ul>
+<p><strong>Interface components (Panel C):</strong></p>
+<ul class="simple">
+<li><p><strong>Transmission type:</strong> CNV level vs Gene level</p></li>
+<li><p><strong>CNV-level inclusion criteria:</strong> Size filters, transcript overlap, problematic regions</p></li>
+<li><p><strong>Gene-level exclusion criteria:</strong> Gene lists, LOEUF threshold</p></li>
+<li><p><strong>MP representation:</strong> Plot type selection (Size vs Quality metric)</p></li>
+</ul>
+</section>
+<section id="transmission-type-selection">
+<h3>Transmission type selection<a class="headerlink" href="#transmission-type-selection" title="Link to this heading"></a></h3>
+<p>Choose how inheritance is evaluated:</p>
+<ul class="simple">
+<li><p><strong>CNV level</strong> — Uses Transmitted_CNV (coordinate-based matching)</p></li>
+<li><p><strong>Gene level</strong> — Uses Transmitted_gene (gene-based matching)</p></li>
+</ul>
+<p><strong>When to use each:</strong></p>
+<ul class="simple">
+<li><p><strong>CNV level:</strong> Evaluates transmission based on genomic coordinates (reciprocal overlap)</p></li>
+<li><p><strong>Gene level:</strong> Evaluates transmission based on shared genes between child and parents</p></li>
+</ul>
+<p>See <a class="reference internal" href="../user-guide/inheritance.html"><span class="doc">Inheritance status</span></a> for detailed explanation of the two approaches.</p>
+</section>
+<section id="filtering-criteria">
+<h3>Filtering criteria<a class="headerlink" href="#filtering-criteria" title="Link to this heading"></a></h3>
+<p>Apply filters to focus the MP analysis. <strong>These filters are available regardless of transmission type (CNV level vs Gene level):</strong></p>
+<p><strong>Size and overlap filters:</strong></p>
+<ul class="simple">
+<li><p><strong>CNV size filter:</strong></p>
+<ul>
+<li><p>Slider range: 1 bp to &gt;1 Mb</p></li>
+<li><p>Use to filter out very small or very large CNVs</p></li>
+<li><p>Example: Set minimum to 30 kb to focus on medium-large CNVs</p></li>
+</ul>
+</li>
+<li><p><strong>Min. % transcript overlap:</strong></p>
+<ul>
+<li><p>Range: 0-100%</p></li>
+<li><p>Minimum percentage of CNV overlapping a gene transcript</p></li>
+<li><p>Useful to focus on genic CNVs (set to &gt;0%)</p></li>
+</ul>
+</li>
+<li><p><strong>Max. % problematic regions overlap:</strong></p>
+<ul>
+<li><p>Range: 0-100%</p></li>
+<li><p>Maximum allowed overlap with problematic regions</p></li>
+<li><p>Recommended: ≤50% to exclude low-confidence regions</p></li>
+</ul>
+</li>
+</ul>
+<p><strong>Gene-based exclusion filters:</strong></p>
+<ul class="simple">
+<li><p><strong>Exclusion list (Ensembl Gene IDs):</strong></p>
+<ul>
+<li><p>Upload a text file with one Ensembl Gene ID per line</p></li>
+<li><p>CNVs overlapping these genes will be excluded from MP calculation</p></li>
+<li><p>Use case: Exclude known highly polymorphic genes</p></li>
+</ul>
+</li>
+<li><p><strong>Exclude genes with LOEUF &lt;:</strong></p>
+<ul>
+<li><p>Slider range: 0-1</p></li>
+<li><p>Excludes constrained genes (low LOEUF values)</p></li>
+<li><p>Recommended: 0.6 to focus on technical MP (excluding likely <em>de novo</em>)</p></li>
+<li><p>See <a class="reference internal" href="../user-guide/filtering.html"><span class="doc">Filtering strategies</span></a> for LOEUF guidance</p></li>
+</ul>
+</li>
+</ul>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p><strong>CNV level vs Gene level affects only transmission evaluation.</strong>
+Both transmission modes can use the same filtering criteria because CNV annotation
+includes gene information regardless of how transmission is calculated.</p>
+</div>
+</section>
+<section id="mp-representation">
+<h3>MP representation<a class="headerlink" href="#mp-representation" title="Link to this heading"></a></h3>
+<p>Choose the plot type to visualize:</p>
+<p><strong>MP x CNV size (default):</strong></p>
+<ul class="simple">
+<li><p>Bar plots showing MP for each size range</p></li>
+<li><p>Separate plots for DEL and DUP</p></li>
+<li><p>X-axis: 7 size bins (1-30kb, 30-50kb, 50-100kb, 100-200kb, 200-500kb, 500kb-1Mb, &gt;1Mb)</p></li>
+<li><p>Y-axis: Mendelian Precision (%)</p></li>
+<li><p>Numbers on bars: CNV count (n)</p></li>
+</ul>
+<p><strong>MP x Quality metric:</strong></p>
+<ul class="simple">
+<li><p>Line plots showing MP vs quality score threshold</p></li>
+<li><p>Separate plots for DEL and DUP</p></li>
+<li><p>X-axis: Score threshold (≥)</p></li>
+<li><p>Y-axis: Mendelian Precision (%)</p></li>
+<li><p>Multiple lines: One per size range</p></li>
+<li><p>Interactive tooltips: Hover to see MP, n, size range, threshold</p></li>
+</ul>
+<p>Click <strong>Apply filters</strong> to generate the analysis.</p>
+</section>
+<section id="summary-cards-and-filtered-table">
+<h3>Summary cards and filtered table<a class="headerlink" href="#summary-cards-and-filtered-table" title="Link to this heading"></a></h3>
+<p>After applying filters, three summary cards display global statistics:</p>
+<figure class="align-center" id="id7">
+<a class="reference internal image-reference" href="../_images/04_mp_summary_cards_and_table.png"><img alt="Summary cards and filtered CNV table" src="../_images/04_mp_summary_cards_and_table.png" style="width: 100%;" />
+</a>
+<figcaption>
+<p><span class="caption-text">Summary cards showing total CNV count, Global MP (DEL), and Global MP (DUP),
+followed by the filtered CNV table with all annotation and inheritance columns.</span><a class="headerlink" href="#id7" title="Link to this image"></a></p>
+</figcaption>
+</figure>
+<p><strong>Summary cards:</strong></p>
+<ul class="simple">
+<li><p><strong>Purple card:</strong> Filtered CNV count (e.g., 32,390 CNVs passing filters out of 33,827 total)</p></li>
+<li><p><strong>Red card:</strong> Global Mendelian Precision for deletions (%)</p></li>
+<li><p><strong>Cyan card:</strong> Global Mendelian Precision for duplications (%)</p></li>
+</ul>
+<p><strong>Filtered table:</strong></p>
+<ul class="simple">
+<li><p><strong>Overview tab:</strong> Summary statistics</p></li>
+<li><p><strong>Filtered table tab:</strong> Complete CNV table with all columns</p></li>
+<li><p>Shows only CNVs passing the applied filters</p></li>
+<li><p>Pagination: Navigate through results (10/50/100 entries per page)</p></li>
+<li><p>Search: Use search box to find specific samples, genes, or coordinates</p></li>
+<li><p>Download: Click <strong>Download CSV</strong> to export filtered CNVs</p></li>
+</ul>
+<p><strong>Action buttons:</strong></p>
+<ul class="simple">
+<li><p><strong>Download CSV:</strong> Export filtered CNV table</p></li>
+<li><p><strong>Go to Fine-tuning analysis:</strong> Proceed to quality threshold optimization</p></li>
+</ul>
+</section>
+<section id="mp-by-cnv-size-visualization">
+<h3>MP by CNV size visualization<a class="headerlink" href="#mp-by-cnv-size-visualization" title="Link to this heading"></a></h3>
+<p>When <strong>MP x CNV size</strong> is selected, bar plots display MP for each size range:</p>
+<figure class="align-center" id="id8">
+<a class="reference internal image-reference" href="../_images/05_mp_by_size_plots.png"><img alt="MP by CNV size bar plots" src="../_images/05_mp_by_size_plots.png" style="width: 100%;" />
+</a>
+<figcaption>
+<p><span class="caption-text">Bar plots showing Mendelian Precision for each size range, separately for
+deletions (top) and duplications (bottom). Numbers on bars indicate CNV count.</span><a class="headerlink" href="#id8" title="Link to this image"></a></p>
+</figcaption>
+</figure>
+<p><strong>Plot features:</strong></p>
+<ul class="simple">
+<li><p><strong>Two panels:</strong> Top = Deletions (DEL), Bottom = Duplications (DUP)</p></li>
+<li><p><strong>X-axis:</strong> 7 size ranges (1-30kb, 30-50kb, 50-100kb, 100-200kb, 200-500kb, 500kb-1Mb, &gt;1Mb)</p></li>
+<li><p><strong>Y-axis:</strong> Mendelian Precision (0-100%)</p></li>
+<li><p><strong>Bar colors:</strong> Different color per size range (visual distinction)</p></li>
+<li><p><strong>Numbers on bars:</strong> CNV count (n) for that size range</p></li>
+<li><p><strong>Legend:</strong> Size ranges with color coding</p></li>
+</ul>
+<p><strong>Interpretation:</strong></p>
+<ul class="simple">
+<li><p><strong>Low MP for small CNVs:</strong> 1-30kb typically shows lower MP (~30-35%)</p></li>
+<li><p><strong>Higher MP for large CNVs:</strong> &gt;100kb typically shows higher MP (&gt;75%)</p></li>
+</ul>
+<p><strong>Interactive features:</strong></p>
+<ul class="simple">
+<li><p>Hover over bars to see exact MP value</p></li>
+<li><p>Toolbar icons: Zoom, pan, download PNG</p></li>
+<li><p>Click plot title to open modal for enlarged view</p></li>
+</ul>
+</section>
+<section id="mp-by-quality-metric-visualization">
+<h3>MP by quality metric visualization<a class="headerlink" href="#mp-by-quality-metric-visualization" title="Link to this heading"></a></h3>
+<p>When <strong>MP x Quality metric</strong> is selected, line plots display MP vs score threshold:</p>
+<figure class="align-center" id="id9">
+<a class="reference internal image-reference" href="../_images/06_mp_by_quality_plots.png"><img alt="MP by quality metric line plots" src="../_images/06_mp_by_quality_plots.png" style="width: 100%;" />
+</a>
+<figcaption>
+<p><span class="caption-text">Line plots showing Mendelian Precision as a function of quality score threshold,
+separately for deletions (top) and duplications (bottom). Each line represents
+a different size range.</span><a class="headerlink" href="#id9" title="Link to this image"></a></p>
+</figcaption>
+</figure>
+<p><strong>Plot features:</strong></p>
+<ul class="simple">
+<li><p><strong>Two panels:</strong> Top = Deletions (DEL), Bottom = Duplications (DUP)</p></li>
+<li><p><strong>X-axis:</strong> Score threshold (≥ values from 0 to 200)</p></li>
+<li><p><strong>Y-axis:</strong> Mendelian Precision (0-100%)</p></li>
+<li><p><strong>Multiple lines:</strong> One line per size range (7 lines + “All” line)
+* <strong>7 size-specific lines:</strong> 1-30kb, 30-50kb, 50-100kb, 100-200kb, 200-500kb, 500kb-1Mb, &gt;1Mb
+* <strong>“All” line:</strong> All size ranges combined together</p></li>
+<li><p><strong>Line colors:</strong> Match size range colors from bar plots</p></li>
+<li><p><strong>Star markers:</strong> Indicate specific threshold points</p></li>
+<li><p><strong>Interactive tooltips:</strong> Hover to see detailed info (threshold, MP, n, size range)</p></li>
+</ul>
+<p><strong>Interpretation:</strong></p>
+<ul class="simple">
+<li><p><strong>Trend observation:</strong> MP generally increases with higher score thresholds</p></li>
+<li><p><strong>Plateau identification:</strong> Look for where MP stops improving significantly</p></li>
+<li><p><strong>Size-specific patterns:</strong> Small CNVs (1-30kb) require higher thresholds for good MP</p></li>
+<li><p><strong>Trade-off assessment:</strong> Balance MP improvement vs CNV count loss</p></li>
+</ul>
+</section>
+<section id="next-steps">
+<h3>Next steps<a class="headerlink" href="#next-steps" title="Link to this heading"></a></h3>
+<p>From the MP Exploration tab, you can:</p>
+<ol class="arabic simple">
+<li><p><strong>Download filtered CNVs:</strong> Click <strong>Download CSV</strong> to export the table</p></li>
+<li><p><strong>Refine analysis:</strong> Adjust filters and re-run to explore different scenarios</p></li>
+<li><p><strong>Proceed to Fine-tuning:</strong> Click <strong>Go to Fine-tuning analysis</strong> for systematic quality threshold optimization</p></li>
+</ol>
+<p>—</p>
+</section>
+</section>
+<section id="step-3-fine-tuning-tab">
+<h2>Step 3: Fine-tuning tab<a class="headerlink" href="#step-3-fine-tuning-tab" title="Link to this heading"></a></h2>
+<p>The Fine-tuning tab enables systematic optimization of quality score thresholds through
+comparative visualization.</p>
+<section id="overview">
+<h3>Overview<a class="headerlink" href="#overview" title="Link to this heading"></a></h3>
+<p>Fine-tuning allows you to:</p>
+<ul class="simple">
+<li><p>Define specific filtering thresholds based on CNV file columns and annotation data</p></li>
+<li><p>Compare MP <strong>before</strong> and <strong>after</strong> applying these thresholds</p></li>
+<li><p>Evaluate subset analyses (Genic CNVs, Intergenic CNVs, No excluded genes, No constrained genes)</p></li>
+<li><p>Identify optimal thresholds via visual inspection</p></li>
+<li><p>Download filtered tables for each scenario</p></li>
+</ul>
+<div class="admonition important">
+<p class="admonition-title">Important</p>
+<p><strong>Analyze deletions and duplications separately</strong> for optimal results. Use the CNV type
+selector to focus on DEL or DUP, as they have different quality profiles.</p>
+</div>
+</section>
+<section id="interface-layout">
+<h3>Interface layout<a class="headerlink" href="#interface-layout" title="Link to this heading"></a></h3>
+<figure class="align-center" id="id10">
+<a class="reference internal image-reference" href="../_images/01_finetuning_full_interface.png"><img alt="Fine-tuning interface with filters and comparative plots" src="../_images/01_finetuning_full_interface.png" style="width: 100%;" />
+</a>
+<figcaption>
+<p><span class="caption-text">Complete Fine-tuning interface showing CNV filtering criteria (left), four comparative plots
+(Before / After / Genic / Intergenic), and subset selection dropdown.</span><a class="headerlink" href="#id10" title="Link to this image"></a></p>
+</figcaption>
+</figure>
+<p>The interface consists of:</p>
+<ul class="simple">
+<li><p><strong>Left panel:</strong> CNV filtering criteria with operators and values</p></li>
+<li><p><strong>Main area:</strong> Four comparative line plots showing MP vs Score threshold</p></li>
+<li><p><strong>Subset dropdown:</strong> Select additional analyses (Genic, Intergenic, No excluded genes, etc.)</p></li>
+</ul>
+</section>
+<section id="cnv-type-selection">
+<h3>CNV type selection<a class="headerlink" href="#cnv-type-selection" title="Link to this heading"></a></h3>
+<p><strong>Select the CNV type to analyze:</strong></p>
+<ul class="simple">
+<li><p><strong>DEL</strong> — Analyze deletions only</p></li>
+<li><p><strong>DUP</strong> — Analyze duplications only</p></li>
+</ul>
+<p><strong>Recommendation:</strong> Optimize DEL and DUP separately to identify type-specific thresholds.</p>
+</section>
+<section id="cnv-filtering-criteria">
+<h3>CNV filtering criteria<a class="headerlink" href="#cnv-filtering-criteria" title="Link to this heading"></a></h3>
+<p>Define filtering criteria using CNV characteristics from your original file plus annotation data added during preprocessing.</p>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p><strong>Available filters include:</strong> (1) columns from your original CNV file, and (2) annotation columns added during the Preprocessing step. The app automatically detects which columns can be used for filtering.</p>
+</div>
+<p><strong>Always available (from Preprocessing annotation):</strong></p>
+<ul class="simple">
+<li><p><strong>bp_overlap</strong> — Base pair overlap with genes (added by gene annotation)</p></li>
+<li><p><strong>LOEUF</strong> — Gene constraint score (added by gene annotation)</p></li>
+<li><p><strong>cnv_problematic_region_overlap</strong> — Problematic regions overlap (added by annotation)</p></li>
+<li><p><strong>size</strong> — CNV size in bp (calculated during annotation)</p></li>
+</ul>
+<p><strong>Required in your original CNV file:</strong></p>
+<ul class="simple">
+<li><p>CHR, START, STOP, TYPE, SAMPLE_ID</p></li>
+</ul>
+<p><strong>Commonly available from your CNV file:</strong></p>
+<ul class="simple">
+<li><p><strong>Score</strong> — Caller-specific quality score (strongly recommended)</p></li>
+</ul>
+<p><strong>User-specific columns (variable):</strong></p>
+<ul class="simple">
+<li><p>Any additional columns in your original CNV file</p></li>
+<li><p>Custom quality metrics, caller-specific fields, etc.</p></li>
+</ul>
+<p><strong>Operators:</strong></p>
+<ul class="simple">
+<li><p><strong>≥</strong> (greater than or equal)</p></li>
+<li><p><strong>≤</strong> (less than or equal)</p></li>
+<li><p><strong>=</strong> (equal)</p></li>
+<li><p><strong>-</strong> (no filter applied)</p></li>
+</ul>
+<p><strong>Example filtering strategy:</strong></p>
+<div class="highlight-text notranslate"><div class="highlight"><pre><span></span>CNV type: DEL
+Score ≥ 15                              # From your CNV file (if present)
+bp_overlap ≥ 1000                       # From annotation (always available)
+LOEUF ≥ 0.6                            # From annotation (always available)
+cnv_problematic_region_overlap ≤ 0.5   # From annotation (always available)
+</pre></div>
+</div>
+<p><strong>Apply filters:</strong></p>
+<p>Click <strong>Apply filters</strong> to generate the comparative plots using the available columns.</p>
+</section>
+<section id="comparative-plots">
+<h3>Comparative plots<a class="headerlink" href="#comparative-plots" title="Link to this heading"></a></h3>
+<p>Four plots are displayed to compare MP under different filtering scenarios:</p>
+<p><strong>Plot organization:</strong></p>
+<ul class="simple">
+<li><p><strong>Top left:</strong> Before additional filters (baseline from MP Exploration)</p></li>
+<li><p><strong>Top right:</strong> After additional filters (with quality thresholds applied)</p></li>
+<li><p><strong>Bottom left:</strong> After additional filters + subset analysis (default: Genic CNVs only)</p></li>
+<li><p><strong>Bottom right:</strong> After additional filters + subset analysis (default: Intergenic CNVs only)</p></li>
+</ul>
+<p><strong>Plot features:</strong></p>
+<ul class="simple">
+<li><p><strong>X-axis:</strong> Score threshold (≥ values)</p></li>
+<li><p><strong>Y-axis:</strong> Mendelian Precision (0-100%)</p></li>
+<li><p><strong>Multiple lines:</strong> One per size range (1-30kb, 30-50kb, …, &gt;1Mb, All)</p></li>
+<li><p><strong>Variable marker shapes:</strong> Marker size represents CNV count at that threshold
+* Stars, triangles, circles, etc.
+* <strong>Larger markers</strong> = More CNVs at that threshold
+* <strong>Smaller markers</strong> = Fewer CNVs at that threshold</p></li>
+<li><p><strong>Interactive:</strong> Hover for detailed tooltips</p></li>
+</ul>
+<p><strong>Interpretation:</strong></p>
+<ul class="simple">
+<li><p><strong>Before vs After:</strong> Compare top-left (baseline) with top-right (filtered) to assess improvement</p></li>
+<li><p><strong>MP increase:</strong> Look for how much MP improves with quality filtering</p></li>
+<li><p><strong>CNV count:</strong> Tooltips show “n” (count) — assess trade-off between quality and quantity</p></li>
+<li><p><strong>Genic vs Intergenic:</strong> Bottom plots reveal if intergenic CNVs have lower quality</p></li>
+</ul>
+</section>
+<section id="subset-analyses">
+<h3>Subset analyses<a class="headerlink" href="#subset-analyses" title="Link to this heading"></a></h3>
+<p>Use the dropdown menu in the bottom plots to select additional subset analyses:</p>
+<p><strong>Available subsets:</strong></p>
+<ul class="simple">
+<li><p><strong>Genic CNVs only</strong> — CNVs overlapping genes</p></li>
+<li><p><strong>Intergenic CNVs only</strong> — CNVs not overlapping any genes</p></li>
+<li><p><strong>No excluded genes</strong> — Exclude CNVs overlapping genes in exclusion list</p></li>
+<li><p><strong>No constrained genes (LOEUF &lt; 1)</strong> — Exclude CNVs in highly constrained genes</p></li>
+</ul>
+<p><strong>Use cases:</strong></p>
+<ul class="simple">
+<li><p><strong>Genic vs Intergenic:</strong> Identify if intergenic CNVs have systematically lower MP</p></li>
+<li><p><strong>No excluded genes:</strong> Assess impact of excluding specific gene sets</p></li>
+<li><p><strong>No constrained genes:</strong> Estimate <strong>technical MP</strong> by removing likely true <em>de novo</em> events</p></li>
+</ul>
+<p><strong>Example workflow:</strong></p>
+<ol class="arabic simple">
+<li><p>Apply quality filters (e.g., Score ≥15)</p></li>
+<li><p>Compare “After” plot (all CNVs) vs “No constrained genes” plot</p></li>
+<li><p>If MP is similar → filters are effective (removing technical false positives)</p></li>
+<li><p>If MP differs substantially → filters may be removing genuine <em>de novo</em> CNVs in constrained genes</p></li>
+</ol>
+</section>
+<section id="plot-modal-enlarged-view">
+<h3>Plot modal (enlarged view)<a class="headerlink" href="#plot-modal-enlarged-view" title="Link to this heading"></a></h3>
+<p>Click any plot title to open an enlarged modal view:</p>
+<figure class="align-center" id="id11">
+<a class="reference internal image-reference" href="../_images/02_finetuning_plot_modal.png"><img alt="Enlarged plot modal with download option" src="../_images/02_finetuning_plot_modal.png" style="width: 90%;" />
+</a>
+<figcaption>
+<p><span class="caption-text">Modal view showing enlarged “MP - before additional filters” plot with full legend,
+Download table button, and Close button.</span><a class="headerlink" href="#id11" title="Link to this image"></a></p>
+</figcaption>
+</figure>
+<p><strong>Modal features:</strong></p>
+<ul class="simple">
+<li><p><strong>Larger plot:</strong> Better visibility of lines and trends</p></li>
+<li><p><strong>Full legend:</strong> All size ranges visible on the right</p></li>
+<li><p><strong>Download table:</strong> Export data for this specific plot as CSV</p></li>
+<li><p><strong>Close button:</strong> Return to main Fine-tuning view</p></li>
+</ul>
+<p><strong>Download table:</strong></p>
+<p>Click <strong>Download table</strong> to export the underlying data for the displayed plot. The table
+includes Score threshold, MP values, and CNV counts for each size range.</p>
+</section>
+<section id="optimal-threshold-identification">
+<h3>Optimal threshold identification<a class="headerlink" href="#optimal-threshold-identification" title="Link to this heading"></a></h3>
+<p><strong>Strategy for finding optimal thresholds:</strong></p>
+<ol class="arabic simple">
+<li><p><strong>Start with baseline:</strong> Observe “Before” plot MP values</p></li>
+<li><p><strong>Apply lenient threshold:</strong> Set low threshold (e.g., Score ≥10)</p></li>
+<li><p><strong>Observe improvement:</strong> Compare “Before” vs “After” plots</p></li>
+<li><p><strong>Increase gradually:</strong> Incrementally raise threshold (Score ≥15, ≥20, ≥30, etc.)</p></li>
+<li><p><strong>Identify plateau:</strong> Look for point where MP stops improving significantly</p></li>
+<li><p><strong>Balance trade-off:</strong> Choose lowest threshold at plateau to maximize CNV retention</p></li>
+</ol>
+<p><strong>Example decision process:</strong></p>
+<p>From the screenshot, for deletions:</p>
+<div class="highlight-text notranslate"><div class="highlight"><pre><span></span>Score ≥15:
+- &quot;All&quot; line shows MP ~30-70% depending on size
+- Small CNVs (1-30kb) still show low MP ~30%
+- Large CNVs (50-100kb) show high MP ~90%
+
+Interpretation:
+- Score ≥15 is effective for medium-large CNVs
+- Small CNVs may require higher thresholds or additional filters
+- Consider size-specific thresholds in downstream analyses
+</pre></div>
+</div>
+<p><strong>What to look for:</strong></p>
+<ul class="simple">
+<li><p><strong>Steep slope:</strong> MP increasing rapidly → threshold is effective</p></li>
+<li><p><strong>Plateau region:</strong> MP stops improving → increasing threshold further loses CNVs without gain</p></li>
+<li><p><strong>Size-specific patterns:</strong> Different size ranges may plateau at different thresholds</p></li>
+</ul>
+</section>
+<section id="download-filtered-tables">
+<h3>Download filtered tables<a class="headerlink" href="#download-filtered-tables" title="Link to this heading"></a></h3>
+<p>Each plot has an associated filtered table that can be downloaded:</p>
+<p><strong>Available downloads:</strong></p>
+<ul class="simple">
+<li><p><strong>Before filters:</strong> Baseline CNV table (from MP Exploration filters only)</p></li>
+<li><p><strong>After filters:</strong> CNV table with quality thresholds applied</p></li>
+<li><p><strong>Genic only:</strong> CNVs overlapping genes</p></li>
+<li><p><strong>Intergenic only:</strong> CNVs not overlapping genes</p></li>
+<li><p><strong>No excluded genes:</strong> CNVs excluding specified gene list</p></li>
+<li><p><strong>No constrained genes:</strong> CNVs excluding LOEUF &lt; threshold</p></li>
+</ul>
+<p><strong>How to download:</strong></p>
+<ol class="arabic simple">
+<li><p>Click plot title to open modal</p></li>
+<li><p>Click <strong>Download table</strong> button</p></li>
+<li><p>CSV file is saved to your downloads folder</p></li>
+</ol>
+<p><strong>File format:</strong></p>
+<p>Tab-delimited CSV with all CNV columns plus:</p>
+<ul class="simple">
+<li><p>Annotation columns (genes, LOEUF, etc.)</p></li>
+<li><p>Inheritance columns (Transmitted_CNV, Transmitted_gene)</p></li>
+<li><p>Only CNVs passing the specific filter scenario</p></li>
+</ul>
+<p><strong>Strategy 4: Size-aware filtering</strong></p>
+<div class="highlight-text notranslate"><div class="highlight"><pre><span></span>For 1-30kb CNVs: Score ≥ 200
+For 30-100kb CNVs: Score ≥ 100
+For &gt;100kb CNVs: Score ≥ 50
+# Size-specific thresholds (apply offline after download)
+</pre></div>
+</div>
+</section>
+<section id="see-also">
+<h3>See also<a class="headerlink" href="#see-also" title="Link to this heading"></a></h3>
+<ul class="simple">
+<li><p><a class="reference internal" href="../user-guide/filtering.html"><span class="doc">Filtering strategies</span></a> — Detailed filtering strategies</p></li>
+<li><p><a class="reference internal" href="../user-guide/mendelian_precision.html"><span class="doc">Mendelian Precision</span></a> — MP calculation methods</p></li>
+<li><p><a class="reference internal" href="../user-guide/outputs.html"><span class="doc">Outputs</span></a> — Output file formats</p></li>
+<li><p><a class="reference internal" href="cli_tutorial.html"><span class="doc">CLI tutorial</span></a> — Command-line workflow alternative</p></li>
+</ul>
+</section>
+</section>
+<section id="tips-and-tricks">
+<h2>Tips and tricks<a class="headerlink" href="#tips-and-tricks" title="Link to this heading"></a></h2>
+<section id="efficient-filtering-workflow">
+<h3>Efficient filtering workflow<a class="headerlink" href="#efficient-filtering-workflow" title="Link to this heading"></a></h3>
+<ol class="arabic simple">
+<li><p><strong>Start broad</strong> — Use MP Exploration with minimal filters to assess baseline</p></li>
+<li><p><strong>Identify issues</strong> — Look for size ranges or types with low MP</p></li>
+<li><p><strong>Optimize systematically</strong> — Use Fine-tuning to test quality thresholds</p></li>
+<li><p><strong>Balance quality vs quantity</strong> — Target MP ≥85% while retaining sufficient CNVs</p></li>
+</ol>
+</section>
+</section>
+<section id="id1">
+<h2>See also<a class="headerlink" href="#id1" title="Link to this heading"></a></h2>
+<ul class="simple">
+<li><p><a class="reference internal" href="../user-guide/preprocessing.html"><span class="doc">Preprocessing</span></a> — Preprocessing steps explained</p></li>
+<li><p><a class="reference internal" href="../user-guide/filtering.html"><span class="doc">Filtering strategies</span></a> — Filtering strategies</p></li>
+<li><p><a class="reference internal" href="../user-guide/outputs.html"><span class="doc">Outputs</span></a> — Output formats and interpretation</p></li>
+<li><p><a class="reference internal" href="cli_tutorial.html"><span class="doc">CLI tutorial</span></a> — Command-line workflow alternative</p></li>
+</ul>
+</section>
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="cli_tutorial.html" class="btn btn-neutral float-left" title="CLI tutorial" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="../reference/index.html" class="btn btn-neutral float-right" title="Reference" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2026, Mame Seynabou Diop.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

@@ -1,0 +1,328 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="../">
+<head>
+  <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Outputs &mdash; MCNV2 Toolbox 1.0 documentation</title>
+      <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=b86133f3" />
+      <link rel="stylesheet" type="text/css" href="../_static/css/theme.css?v=9edc463e" />
+      <link rel="stylesheet" type="text/css" href="../_static/sphinx-design.min.css?v=95c83b7e" />
+      <link rel="stylesheet" type="text/css" href="../_static/custom.css?v=9ad6ce3d" />
+
+  
+    <link rel="shortcut icon" href="../_static/mcnv2_icon.svg"/>
+      <script src="../_static/jquery.js?v=5d32c60e"></script>
+      <script src="../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="../_static/documentation_options.js?v=f2a433a1"></script>
+      <script src="../_static/doctools.js?v=9a2dae69"></script>
+      <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
+      <script src="../_static/design-tabs.js?v=f930bc37"></script>
+    <script src="../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="Tutorials" href="../tutorials/index.html" />
+    <link rel="prev" title="Filtering strategies" href="filtering.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../index.html" class="icon icon-home">
+            MCNV2 Toolbox
+              <img src="../_static/mcnv2_logo.png" class="logo" alt="Logo"/>
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Getting Started</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../getting-started/index.html">Getting Started</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">User Guide</span></p>
+<ul class="current">
+<li class="toctree-l1 current"><a class="reference internal" href="index.html">User Guide</a><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="input_formats.html">Input formats</a></li>
+<li class="toctree-l2"><a class="reference internal" href="preprocessing.html">Preprocessing</a></li>
+<li class="toctree-l2"><a class="reference internal" href="inheritance.html">Inheritance status</a></li>
+<li class="toctree-l2"><a class="reference internal" href="mendelian_precision.html">Mendelian Precision</a></li>
+<li class="toctree-l2"><a class="reference internal" href="filtering.html">Filtering strategies</a></li>
+<li class="toctree-l2 current"><a class="current reference internal" href="#">Outputs</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#visualizations">Visualizations</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#mp-by-size-range-bar-plots">MP by size range (bar plots)</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#mp-versus-quality-score-line-plots">MP versus quality score (line plots)</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#plot-interactivity">Plot interactivity</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#comparative-plots-fine-tuning">Comparative plots (Fine-tuning)</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="#downloadable-tables">Downloadable tables</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#mp-exploration-table">MP Exploration table</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="#export-workflow">Export workflow</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#mp-exploration">MP Exploration</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#fine-tuning">Fine-tuning</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="#see-also">See also</a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Tutorials</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../tutorials/index.html">Tutorials</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Reference</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../reference/index.html">Reference</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">About</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../about/index.html">About</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../index.html">MCNV2 Toolbox</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="index.html">User Guide</a></li>
+      <li class="breadcrumb-item active">Outputs</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="../_sources/user-guide/outputs.rst.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="outputs">
+<h1>Outputs<a class="headerlink" href="#outputs" title="Link to this heading"></a></h1>
+<p>MCNV2 generates two types of outputs: <strong>visualizations</strong> (plots) for exploring Mendelian Precision patterns, and <strong>downloadable tables</strong> for downstream analyses.</p>
+<section id="visualizations">
+<h2>Visualizations<a class="headerlink" href="#visualizations" title="Link to this heading"></a></h2>
+<p>MCNV2 provides interactive plots to assess CNV quality and identify optimal filtering strategies.</p>
+<section id="mp-by-size-range-bar-plots">
+<h3>MP by size range (bar plots)<a class="headerlink" href="#mp-by-size-range-bar-plots" title="Link to this heading"></a></h3>
+<p><strong>Description:</strong></p>
+<p>Bar plots showing Mendelian Precision for each CNV size range.</p>
+<p><strong>Axes:</strong></p>
+<ul class="simple">
+<li><p><strong>X-axis:</strong> Size ranges (1-30kb, 30-50kb, 50-100kb, 100-200kb, 200-500kb, 500kb-1Mb, &gt;1Mb)</p></li>
+<li><p><strong>Y-axis:</strong> Mendelian Precision (%)</p></li>
+</ul>
+<p><strong>Data displayed:</strong></p>
+<ul class="simple">
+<li><p>Separate plots for deletions (DEL) and duplications (DUP)</p></li>
+<li><p>Bar height represents MP</p></li>
+<li><p>Number on top of each bar shows CNV count (n)</p></li>
+</ul>
+<p><strong>Use case:</strong></p>
+<p>Identify size ranges with low MP that may benefit from filtering or exclusion.</p>
+</section>
+<section id="mp-versus-quality-score-line-plots">
+<h3>MP versus quality score (line plots)<a class="headerlink" href="#mp-versus-quality-score-line-plots" title="Link to this heading"></a></h3>
+<p><strong>Description:</strong></p>
+<p>Line plots showing Mendelian Precision as a function of quality score threshold stratified by size range.</p>
+<p><strong>Axes:</strong></p>
+<ul class="simple">
+<li><p><strong>X-axis:</strong> Quality score threshold (e.g., Score ≥ 0, 10, 20, …, 200)</p></li>
+<li><p><strong>Y-axis:</strong> Mendelian Precision (%)</p></li>
+</ul>
+<p><strong>Data displayed:</strong></p>
+<ul class="simple">
+<li><p>One line per size range (color-coded as above)</p></li>
+<li><p>Each point represents MP when applying quality score threshold ≥ X</p></li>
+<li><p>Separate plots for deletions (DEL) and duplications (DUP)</p></li>
+</ul>
+<p><strong>Legend:</strong></p>
+<p>Right side of plot shows:</p>
+<ul class="simple">
+<li><p><strong>n</strong> — Total CNV count for each size range</p></li>
+<li><p><strong>CNV Length</strong> — Size range label with marker symbol</p></li>
+<li><p>Marker symbols: circles, triangles, plus signs, crosses, diamonds, etc.</p></li>
+</ul>
+<p><strong>Interpretation:</strong></p>
+<ul class="simple">
+<li><p><strong>Plateau pattern:</strong> MP increases rapidly, then plateaus</p></li>
+<li><p><strong>Optimal threshold:</strong> Lowest value where plateau is reached</p></li>
+<li><p><strong>Divergent curves:</strong> Different size ranges require different thresholds</p></li>
+</ul>
+<p><strong>Interactive features:</strong></p>
+<ul class="simple">
+<li><p><strong>Hover:</strong> Tooltip shows threshold value, MP, size range, and CNV count</p></li>
+<li><p><strong>Click legend:</strong> Show/hide specific size range curves</p></li>
+<li><p><strong>Zoom:</strong> Select area to zoom in</p></li>
+<li><p><strong>Download:</strong> Export as PNG, PDF, or SVG</p></li>
+</ul>
+<p><strong>Use case:</strong></p>
+<p>Identify optimal quality score thresholds for each size range.</p>
+</section>
+<section id="plot-interactivity">
+<h3>Plot interactivity<a class="headerlink" href="#plot-interactivity" title="Link to this heading"></a></h3>
+<p><strong>Hover tooltips:</strong></p>
+<p>When hovering over data points, a tooltip displays:</p>
+<ul class="simple">
+<li><p><strong>threshold:</strong> Quality score value</p></li>
+<li><p><strong>MP:</strong> Mendelian Precision at this threshold</p></li>
+<li><p><strong>Size_Range:</strong> CNV size category</p></li>
+<li><p><strong>n:</strong> Number of CNVs remaining after applying filter</p></li>
+</ul>
+<p><strong>Multiple simultaneous tooltips:</strong></p>
+<p>Hovering near multiple curves shows tooltips for all size ranges at that threshold, enabling direct comparison.</p>
+<p><strong>Legend interaction:</strong></p>
+<p>Click on size range labels in the legend to show/hide curves. Useful for focusing on specific size categories.</p>
+<p><strong>Zoom and pan:</strong></p>
+<ul class="simple">
+<li><p><strong>Box select:</strong> Click and drag to zoom into a region</p></li>
+<li><p><strong>Reset:</strong> Double-click to reset zoom</p></li>
+<li><p><strong>Pan:</strong> Shift + drag to move view</p></li>
+</ul>
+<p><strong>Download options:</strong></p>
+<p>Click camera icon to download plot as:</p>
+<ul class="simple">
+<li><p>PNG (raster image)</p></li>
+</ul>
+</section>
+<section id="comparative-plots-fine-tuning">
+<h3>Comparative plots (Fine-tuning)<a class="headerlink" href="#comparative-plots-fine-tuning" title="Link to this heading"></a></h3>
+<p><strong>Before vs After:</strong></p>
+<p>Fine-tuning displays up to 4 plots simultaneously:</p>
+<ol class="arabic simple">
+<li><p><strong>Before additional filters</strong> — Baseline MP (from MP Exploration)</p></li>
+<li><p><strong>After additional filters</strong> — MP after applying Fine-tuning filters</p></li>
+<li><p><strong>After + subset 1</strong> — MP after filters + subset (e.g., Genic only)</p></li>
+<li><p><strong>After + subset 2</strong> — MP after filters + subset (e.g., Intergenic only)</p></li>
+</ol>
+<p><strong>Purpose:</strong></p>
+<ul class="simple">
+<li><p>Assess impact of additional filters</p></li>
+<li><p>Compare genic vs intergenic MP</p></li>
+<li><p>Evaluate subset-specific patterns</p></li>
+</ul>
+<p><strong>Zoom modal:</strong></p>
+<p>Click <strong>+</strong> button on any plot to view it enlarged in a modal window with:</p>
+<ul class="simple">
+<li><p>Full-screen visualization</p></li>
+<li><p>Enhanced interactivity</p></li>
+<li><p>Download table button (green)</p></li>
+<li><p>Close button</p></li>
+</ul>
+</section>
+</section>
+<section id="downloadable-tables">
+<h2>Downloadable tables<a class="headerlink" href="#downloadable-tables" title="Link to this heading"></a></h2>
+<p>MCNV2 provides downloadable tables at multiple stages of analysis.</p>
+<section id="mp-exploration-table">
+<h3>MP Exploration table<a class="headerlink" href="#mp-exploration-table" title="Link to this heading"></a></h3>
+<p><strong>Location:</strong></p>
+<p>MP Exploration interface → “Filtered table” tab → Download CSV button</p>
+<p><strong>Content:</strong></p>
+<p>All CNVs passing the applied filters (size, transcript overlap, problematic regions, LOEUF).</p>
+<p><strong>Columns:</strong></p>
+<ul class="simple">
+<li><p><strong>Original CNV columns:</strong> CHR, START, STOP, TYPE, SAMPLE_ID, quality scores</p></li>
+<li><p><strong>Annotation columns:</strong> GeneName, GeneID, Transcript, LOEUF, problematic_region_overlap</p></li>
+<li><p><strong>Inheritance columns:</strong> Transmitted_CNV (True/False), Transmitted_gene (True/False/intergenic)</p></li>
+<li><p><strong>Additional columns:</strong> TrioKey, family_statue, cnv_id, Size_Range, transmission</p></li>
+</ul>
+<p><strong>Row structure:</strong></p>
+<ul class="simple">
+<li><p>One row per CNV-gene pair (CNVs overlapping multiple genes have multiple rows)</p></li>
+<li><p>Intergenic CNVs have empty gene columns</p></li>
+</ul>
+<p><strong>Use case:</strong></p>
+<ul class="simple">
+<li><p>Downstream statistical analyses</p></li>
+<li><p>Manual inspection of specific CNVs</p></li>
+<li><p>Integration with other genomic datasets</p></li>
+</ul>
+</section>
+</section>
+<section id="export-workflow">
+<h2>Export workflow<a class="headerlink" href="#export-workflow" title="Link to this heading"></a></h2>
+<section id="mp-exploration">
+<h3>MP Exploration<a class="headerlink" href="#mp-exploration" title="Link to this heading"></a></h3>
+<p><strong>Step 1:</strong> Apply filters using sliders and dropdowns</p>
+<p><strong>Step 2:</strong> Click “Apply filters” button</p>
+<p><strong>Step 3:</strong> Navigate to “Filtered table” tab</p>
+<p><strong>Step 4:</strong> Click “Download CSV” button</p>
+<p><strong>Step 5:</strong> Save file to desired location</p>
+<p><strong>Filename format:</strong> <cite>cnvs_filtered_&lt;timestamp&gt;.csv</cite></p>
+</section>
+<section id="fine-tuning">
+<h3>Fine-tuning<a class="headerlink" href="#fine-tuning" title="Link to this heading"></a></h3>
+<p><strong>Step 1:</strong> Apply advanced filters using dropdowns and value fields</p>
+<p><strong>Step 2:</strong> Click “Apply filters” button</p>
+<p><strong>Step 3:</strong> Click <strong>+</strong> button on desired plot (Before, After, or subset)</p>
+<p><strong>Step 4:</strong> In enlarged modal, click green “Download table” button</p>
+<p><strong>Step 5:</strong> Save file to desired location</p>
+<p><strong>Filename format:</strong> <cite>cnvs_finetuned_&lt;condition&gt;_&lt;timestamp&gt;.csv</cite></p>
+</section>
+</section>
+<section id="see-also">
+<h2>See also<a class="headerlink" href="#see-also" title="Link to this heading"></a></h2>
+<ul class="simple">
+<li><p><a class="reference internal" href="mendelian_precision.html"><span class="doc">Mendelian Precision</span></a> — Understanding MP metrics</p></li>
+<li><p><a class="reference internal" href="filtering.html"><span class="doc">Filtering strategies</span></a> — Filtering strategies</p></li>
+<li><p><a class="reference internal" href="preprocessing.html"><span class="doc">Preprocessing</span></a> — Pre-export annotation</p></li>
+</ul>
+</section>
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="filtering.html" class="btn btn-neutral float-left" title="Filtering strategies" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="../tutorials/index.html" class="btn btn-neutral float-right" title="Tutorials" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2026, Mame Seynabou Diop.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

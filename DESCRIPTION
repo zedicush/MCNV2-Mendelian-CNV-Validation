@@ -4,8 +4,8 @@ Title: MCNV2 – Mendelian CNV Validation
 Version: 0.1.0
 Authors@R: c(
     person(
-      "Mame", "Seynabou",
-      email = "mame.seynabou.diop@umontreal.ca",
+      "", "",
+      email = "",
       role = c("aut", "cre")
     )
   )

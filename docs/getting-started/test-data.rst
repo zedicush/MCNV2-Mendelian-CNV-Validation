@@ -23,11 +23,20 @@ Download
 Quick Start with Test Data
 --------------------------
 
+.. note::
+
+   The problematic regions file (GRCh38) is bundled with the MCNV2 package and
+   does not need to be downloaded separately. It is accessed via
+   ``system.file("resources", "problematic_regions_GRCh38.bed", package = "MCNV2")``.
+
+**Step 1 — Run the preprocessing pipeline (CLI)**
+
 .. code-block:: r
 
    library(MCNV2)
 
    # 1. Annotate simulated CNVs
+   # The problematic regions file is included in the package — no download needed
    annotate(
      cnvs_file         = "sim_cnvs.tsv",
      prob_regions_file = system.file("resources", "problematic_regions_GRCh38.bed",
@@ -45,11 +54,28 @@ Quick Start with Test Data
      overlap       = 0.5
    )
 
-   # 3. Launch the Shiny app and load sim_cnvs_inheritance.tsv
+**Step 2 — Explore results in the Shiny app**
+
+.. code-block:: r
+
+   # Launch the app
    MCNV2::launch(
      bedtools_path = Sys.which("bedtools"),
      results_dir   = "~/mcnv2_results"
    )
+
+In the **Preprocessing** tab:
+
+- **CNV file** → upload ``sim_cnvs.tsv``
+- **Pedigree file** → upload ``sim_pedigree.tsv``
+- **Problematic regions** → bundled with the package at
+  ``system.file("resources", "problematic_regions_GRCh38.bed", package = "MCNV2")``
+  — no download needed, the app loads it automatically
+
+In the **MP Exploration** tab:
+
+- Upload ``sim_cnvs_inheritance.tsv`` as the preprocessed input file
+- Select a quality metric and click **Submit**
 
 
 Dataset Description

@@ -39,6 +39,7 @@ function(input, output, session) {
 	exclusion_list <- reactiveVal(NULL)
 	
 	quality_metrics <- reactiveVal(NULL)
+	display_filename <- reactiveVal(NULL)
 	
 	#arrow dataset to avoid loading file in memory 
 	complete_ds <- reactiveVal(NULL) # [ALL CNVS]
@@ -53,6 +54,14 @@ function(input, output, session) {
 	panel_plot2 <-  reactiveVal(NULL)
 	panel_plot3 <-  reactiveVal(NULL)
 	panel_plot4 <-  reactiveVal(NULL)
+	# reactive plot data (for download)
+	baseline_DEL_dat <- reactiveVal(NULL)
+	baseline_DUP_dat <- reactiveVal(NULL)
+	panel_dat1 <- reactiveVal(NULL)
+	panel_dat2 <- reactiveVal(NULL)
+	panel_dat3 <- reactiveVal(NULL)
+	panel_dat4 <- reactiveVal(NULL)
+
 	
 	submit_ft_mpviz_button_state <- reactiveVal(0)
 	
@@ -62,7 +71,7 @@ function(input, output, session) {
 		filepath <- input$cnv_tsv$datapath
 		
 		# Essaie de valider le fichier
-		ret <- check_input_file(filepath, file_type = "cnv")
+		ret <- MCNV2:::check_input_file(filepath, file_type = "cnv")
 		cnv_check(ret$status)
 		output$cnv_tsv_status <- renderText(ret$msg)
 	})
@@ -73,7 +82,7 @@ function(input, output, session) {
 		filepath <- input$ped_tsv$datapath
 		
 		# Essaie de valider le fichier
-		ret <- check_input_file(filepath, file_type = "ped")
+		ret <- MCNV2:::check_input_file(filepath, file_type = "ped")
 		ped_check(ret$status)
 		output$ped_tsv_status <- renderText(ret$msg)
 		
@@ -85,7 +94,7 @@ function(input, output, session) {
 		filepath <- input$prb_tsv$datapath
 		
 		# Essaie de valider le fichier
-		ret <- check_input_file(filepath, file_type = "prb")
+		ret <- MCNV2:::check_input_file(filepath, file_type = "prb")
 		prb_check(ret$status)
 		output$prb_tsv_status <- renderText(ret$msg)
 		
@@ -96,7 +105,7 @@ function(input, output, session) {
 		
 		filepath <- input$exclus_genes$datapath
 		
-		ret <- load_gene_ids(filepath)
+		ret <- MCNV2:::load_gene_ids(filepath)
 		genes_check(ret$status)
 		output$exclus_genes_status <- renderText(ret$msg)
 		if(genes_check()){
@@ -116,106 +125,175 @@ function(input, output, session) {
 	
 	observeEvent(input$submit_preprocess, {
 		withProgress(message = "Running analysis...", value = 0, {
-			req(input$cnv_tsv)  # Attend que le fichier soit chargé
-			
+			req(input$cnv_tsv)
+			req(input$ped_tsv)
+
 			cnvs_file <- input$cnv_tsv$datapath
-			
+
 			if(prb_check()){
 				prob_regions_file <- input$prb_tsv$datapath
 			} else {
 				prob_regions_file <- system.file("resources",
-																				 paste0("problematic_regions_GRCh",
-																				 			 input$build,".bed"), 
-																				 package = "MCNV2")
+																 paste0("problematic_regions_GRCh",
+																 			 input$build,".bed"),
+																 package = "MCNV2")
 			}
-			
+
 			out_path <- file.path(
 			  results_dir,
 			  paste0("cnvs_annotated_by_genes_", format(Sys.time(), "%y%m%d%H%M"), ".tsv")
 			)
 			out_path <- normalizePath(out_path, winslash = "/", mustWork = FALSE)
 			annot_output_file(out_path)
-			
-			
-			incProgress(0.5, detail = "Annotating CNVs...")
-			
+
+			# --- Step 1: Annotation ---
+			incProgress(0.2, detail = "Step 1/2 — Annotating CNVs...")
+
 			tmp <- readr::read_tsv(cnvs_file, show_col_types = FALSE)
 			message("CNVs in input: ", nrow(tmp))
-			
-			ret <- MCNV2::annotate(cnvs_file = cnvs_file, 
-														 prob_regions_file = prob_regions_file, 
-														 output_file = annot_output_file(), 
-														 genome_version = input$build, 
-														 bedtools_path = bedtools_path)
-			
+
+			ret <- MCNV2::annotate(cnvs_file = cnvs_file,
+													 prob_regions_file = prob_regions_file,
+													 output_file = annot_output_file(),
+													 genome_version = input$build,
+													 bedtools_path = bedtools_path)
+
 			if(ret == 0){
 				annot_check(TRUE)
 				output$annot_tsv_status <- renderText(paste("✅ Path to annotation file:\n",
-																										annot_output_file()))
+																											annot_output_file()))
 				output$preview_preproc_tbl <- renderDataTable({
 					dat <- readr::read_tsv(annot_output_file(), n_max = 50, show_col_types = FALSE)
 					datatable(dat, options = list(scrollX = TRUE), rownames = FALSE)
 				})
+				showNotification("✅ Annotation complete!", type = "message")
 			} else {
 				annot_check(FALSE)
 				output$annot_tsv_status <- renderText("❌ Gene annotation failed.\nCheck logs")
+				showNotification("❌ Annotation failed. Check logs.", type = "error")
+				return()
 			}
-			showNotification("✅ Annotation complete!", type = "message")
-		})
-	})
-	
-	observeEvent(annot_check(), {
-		if (annot_check()) {
-			updateActionButton(session, "submit_inheritance", disabled = FALSE)
-		} else {
-			updateActionButton(session, "submit_inheritance", disabled = TRUE)
-		}
-	})
-	
-	
-	observeEvent(input$submit_inheritance, {
-		withProgress(message = "Running analysis...", value = 0, {
-			updateCollapse(session, id = "preprocess_panel", 
-										 close = "Annotation table (Preview)")
-			
-			req(annot_output_file()) 
-			req(input$ped_tsv)
-			
-			pedigree_file <- isolate(input$ped_tsv$datapath)
-			required_overlap <- isolate(input$th_cnv)
+
+			# --- Step 2: Inheritance (automatic) ---
+			incProgress(0.6, detail = "Step 2/2 — Computing inheritance...")
+
+			pedigree_file <- input$ped_tsv$datapath
+			required_overlap <- input$th_cnv
+
 			inherit_path <- file.path(
 			  results_dir,
 			  paste0("cnvs_inheritance_", format(Sys.time(), "%y%m%d%H%M"), ".tsv")
 			)
 			inherit_path <- normalizePath(inherit_path, winslash = "/", mustWork = FALSE)
 			inherit_output_file(inherit_path)
-			
-			
-			ret <- MCNV2::compute_inheritance(cnvs_file = annot_output_file(), 
-																				pedigree_file = pedigree_file, 
-																				output_file = inherit_output_file(), 
-																				overlap = required_overlap)
-			
-			incProgress(0.5, detail = "Inheritance calculation...")
-			
-			if(ret == 0){
+			display_filename(basename(inherit_path))
+
+			ret2 <- tryCatch(
+				MCNV2::compute_inheritance(cnvs_file = annot_output_file(),
+																					 pedigree_file = pedigree_file,
+																					 output_file = inherit_output_file(),
+																					 overlap = required_overlap),
+				error = function(e) { message("compute_inheritance error: ", e$message); return(1) }
+			)
+
+			if(ret2 == 0){
 				inherit_check(TRUE)
 				output$inherit_tsv_status <- renderText(paste("✅ Path to inheritance file:\n",
-																											inherit_output_file()))
+																												inherit_output_file()))
 				dat <- readr::read_tsv(inherit_output_file(), n_max = 50, show_col_types = FALSE)
 				output$preview_inherit_tbl <- renderDataTable({
 					datatable(dat, options = list(scrollX = TRUE), rownames = FALSE)
 				})
+				showNotification("✅ Inheritance calculation complete!", type = "message")
 				
+				# --- Preprocessing summary ---
+				tryCatch({
+					dat_full <- readr::read_tsv(inherit_output_file(), show_col_types = FALSE)
+					
+					# Unique CNVs (CHR+START+STOP+TYPE)
+					uniq_cnvs <- dat_full %>% dplyr::distinct(Chr, Start, End, Type)
+					n_del_uniq <- sum(uniq_cnvs$Type == "DEL", na.rm = TRUE)
+					n_dup_uniq <- sum(uniq_cnvs$Type == "DUP", na.rm = TRUE)
+					
+					# CNV-sample pairs (CHR+START+STOP+TYPE+SAMPLEID)
+					uniq_pairs <- dat_full %>% dplyr::distinct(Chr, Start, End, Type, SampleID)
+					n_del_pairs <- sum(uniq_pairs$Type == "DEL", na.rm = TRUE)
+					n_dup_pairs <- sum(uniq_pairs$Type == "DUP", na.rm = TRUE)
+					
+					# Annotated genes
+					gene_col <- intersect(c("gene_name", "GeneName", "gene"), names(dat_full))[1]
+					n_genes <- if (!is.na(gene_col)) length(unique(na.omit(dat_full[[gene_col]]))) else NA
+					
+					# Transmission
+					trans_col <- intersect(c("transmitted_cnv", "inheritance_by_cnv", "transmission"), names(dat_full))[1]
+					if (!is.na(trans_col)) {
+						cnv_trans <- dat_full %>% dplyr::distinct(cnv_id, .data[[trans_col]])
+						n_inherited <- sum(cnv_trans[[trans_col]] == TRUE | cnv_trans[[trans_col]] == "True", na.rm = TRUE)
+						n_denovo   <- sum(cnv_trans[[trans_col]] == FALSE | cnv_trans[[trans_col]] == "False", na.rm = TRUE)
+					} else {
+						n_inherited <- NA; n_denovo <- NA
+					}
+					
+					# Trios
+					trio_col <- intersect(c("TrioKey", "trio_key", "trio"), names(dat_full))[1]
+					n_trios <- if (!is.na(trio_col)) length(unique(na.omit(dat_full[[trio_col]]))) else NA
+					
+					output$preproc_summary <- renderUI({
+						tags$div(class = "preproc-summary",
+							tags$div(class = "summary-card",
+								tags$div(class = "summary-card-title", icon("dna"), " Unique CNVs"),
+								tags$div(class = "summary-card-body",
+									tags$span(class = "badge-del", paste("DEL", format(n_del_uniq, big.mark=","))) ,
+									tags$span(class = "badge-dup", paste("DUP", format(n_dup_uniq, big.mark=",")))
+								)
+							),
+							tags$div(class = "summary-card",
+								tags$div(class = "summary-card-title", icon("users"), " CNV-sample"),
+								tags$div(class = "summary-card-body",
+									tags$span(class = "badge-del", paste("DEL", format(n_del_pairs, big.mark=","))) ,
+									tags$span(class = "badge-dup", paste("DUP", format(n_dup_pairs, big.mark=",")))
+								)
+							),
+							tags$div(class = "summary-card",
+								tags$div(class = "summary-card-title", icon("book-open"), " Annotated genes"),
+								tags$div(class = "summary-card-body",
+									tags$span(class = "summary-big", if (!is.na(n_genes)) format(n_genes, big.mark=",") else "N/A")
+								)
+							),
+							tags$div(class = "summary-card",
+								tags$div(class = "summary-card-title", icon("arrow-right-arrow-left"), " Transmission"),
+								tags$div(class = "summary-card-body",
+									tags$span(class = "badge-inh", paste("Inherited", format(n_inherited, big.mark=","))) ,
+									tags$span(class = "badge-dn",  paste("De novo", format(n_denovo, big.mark=",")))
+								)
+							),
+							tags$div(class = "summary-card",
+								tags$div(class = "summary-card-title", icon("people-group"), " Trios"),
+								tags$div(class = "summary-card-body",
+									tags$span(class = "summary-big", if (!is.na(n_trios)) format(n_trios, big.mark=",") else "N/A")
+								)
+							)
+						)
+					})
+				}, error = function(e) {
+					output$preproc_summary <- renderUI({ NULL })
+				})
 			} else {
 				inherit_check(FALSE)
-				output$inherit_tsv_status <- renderText("❌ Inheritance calculation failed.\nCheck logs")
+				output$inherit_tsv_status <- renderText(paste0(
+					"❌ Inheritance calculation failed.\n",
+					"Common causes:\n",
+					"  • Sample IDs in CNV file do not match pedigree\n",
+					"  • No complete trios in pedigree (child + father + mother required)\n",
+					"  • CNV type not DEL or DUP"
+				))
+				showNotification("❌ Inheritance failed.", type = "error", duration = 10)
 			}
-			
-			showNotification("✅ Inheritance calculation complete!", type = "message")
+
+			incProgress(1, detail = "Done!")
 		})
 	})
-	
+
 	observeEvent(inherit_check(), {
 		if (inherit_check()) {
 			updateActionButton(session, "goto_mpexploration", disabled = FALSE)
@@ -237,30 +315,36 @@ function(input, output, session) {
 	})
 	
 	output$conditional_input <- renderUI({
-		if (inherit_check()) {
-			tagList(
-				tags$p(paste("✅ Loaded inheritance file:\n",
-										 basename(inherit_output_file())))
-			)
-		} else {
-			tagList(
-				fileInput("preproc_file", label = "Preprocessed input (mandatory)"),
-				verbatimTextOutput("preproc_tsv_status")
-			)
-		}
+		tagList(
+			if (inherit_check()) {
+				tags$div(
+					class = "alert alert-success",
+					style = "padding: 8px; margin-bottom: 8px; font-size: 12px;",
+					tags$b("\u2705 Default: last preprocessed file"),
+					tags$br(),
+					tags$small(if(!is.null(display_filename())) display_filename() else basename(inherit_output_file())),
+					tags$br(),
+					tags$small("Upload below to use a different file.")
+				)
+			},
+			fileInput("preproc_file",
+							label = if(inherit_check()) "Override with another file (optional)" else "Preprocessed input (mandatory)"),
+			verbatimTextOutput("preproc_tsv_status")
+		)
 	})
 	
 	observeEvent(input$preproc_file, {
-		req(input$preproc_file)  # Attend que le fichier soit chargé
+		req(input$preproc_file)
 		
 		filepath <- input$preproc_file$datapath
 		
 		# Essaie de valider le fichier
-		ret <- check_input_file(filepath, file_type = "preproc")
+		ret <- MCNV2:::check_input_file(filepath, file_type = "preproc")
 		
 		preproc_check(ret$status)
 		if(preproc_check()){
 			inherit_output_file(filepath)
+			display_filename(input$preproc_file$name)
 			output$preproc_tsv_status <- renderText(ret$msg)
 		} else {
 			output$preproc_tsv_status <- renderText(ret$msg)
@@ -271,11 +355,12 @@ function(input, output, session) {
 	observeEvent(inherit_output_file(), {
 		if (file.exists(inherit_output_file())) {
 			
-			internal_columns <- c("Chr","Start","End", "Exon_Overlap",
-														"t_Start","t_End","STOP",
-														"segmentaldup_Overlap", "Size",
-														"cnv_problematic_region_overlap", 
-														"transcript_length")
+			internal_columns <- c("Chr","Start","End","Stop",
+														"t_Start","t_End","t_Stop","STOP",
+														"Exon_Overlap","segmentaldup_Overlap",
+														"cnv_problematic_region_overlap",
+														"transcript_length","Size",
+														"LOEUF","bp_overlap","GeneID")
 			
 			spec <- readr::spec_tsv(inherit_output_file())
 			
@@ -309,7 +394,7 @@ function(input, output, session) {
 		range_values <- range(dt[[input$quality_metric]], na.rm = TRUE)
 		
 		if(is.numeric(range_values)){
-			rng_infos <- create_dynamic_ticks(range_values)
+			rng_infos <- MCNV2:::create_dynamic_ticks(range_values)
 			tagList(fluidRow(
 				column(6,
 							 numericInput("quality_metric_min", "Min:", value = rng_infos$min, 
@@ -379,8 +464,8 @@ function(input, output, session) {
 			
 			cnv_range <- isolate(input$cnv_range)
 			# convert CNV size range
-			min_cnv_size <- parse_cnv_size_value(cnv_range[1])
-			max_cnv_size <- parse_cnv_size_value(cnv_range[2])
+			min_cnv_size <- MCNV2:::parse_cnv_size_value(cnv_range[1])
+			max_cnv_size <- MCNV2:::parse_cnv_size_value(cnv_range[2])
 			exclusion_list <- isolate(exclusion_list())
 			min_loeuf <- isolate(input$min_loeuf)
 			min_transcript_ov <- isolate(input$min_transcript_ov)
@@ -473,15 +558,15 @@ function(input, output, session) {
 				distinct() %>%
 				group_by(Type, transmission) %>% 
 				summarise(n = n(), .groups = "drop") %>%
-				collect() %>% 
+				dplyr::collect() %>%
 				tidyr::complete(Type, transmission = c(FALSE, TRUE), fill = list(n = 0)) %>%
 				group_by(Type) %>% 
 				summarise(n_de_novo = sum(n[!transmission]), 
 									n_inherited = sum(n[transmission]),
 									prop_inherited = n_inherited / (n_de_novo + n_inherited))
 			
-			n_cnvs_all <- dataset %>% dplyr::select(cnv_id) %>% distinct() %>% summarize(n = n()) %>% collect()
-			n_cnvs_filtered <- filtered_ds() %>% dplyr::select(cnv_id) %>% distinct() %>% summarize(n = n()) %>% collect()
+			n_cnvs_all <- dataset %>% dplyr::select(cnv_id) %>% distinct() %>% dplyr::summarise(n = n()) %>% dplyr::collect()
+			n_cnvs_filtered <- filtered_ds() %>% dplyr::select(cnv_id) %>% distinct() %>% dplyr::summarise(n = n()) %>% dplyr::collect()
 			
 			output$n_filtered_cnvs <- renderValueBox({
 				valueBox(
@@ -494,7 +579,7 @@ function(input, output, session) {
 			output$mp_del <- renderValueBox({
 				valueBox(
 					ifelse(test = !is.null(mp[mp$Type == "DEL",]$prop_inherited),
-								 yes = pct(round(mp[mp$Type == "DEL",]$prop_inherited, digits = 3)),
+								 yes = MCNV2:::pct(round(mp[mp$Type == "DEL",]$prop_inherited, digits = 3)),
 								 no = "NA"), "Global MP (DEL)", icon = icon("square-minus"), 
 					color = "red"
 				)
@@ -503,105 +588,98 @@ function(input, output, session) {
 			output$mp_dup <- renderValueBox({
 				valueBox(
 					ifelse(test = !is.null(mp[mp$Type == "DUP",]$prop_inherited),
-								 yes = pct(round(mp[mp$Type == "DUP",]$prop_inherited, digits = 3)),
+								 yes = MCNV2:::pct(round(mp[mp$Type == "DUP",]$prop_inherited, digits = 3)),
 								 no = "NA"), "Global MP (DUP)", icon = icon("square-plus"), 
 					color = "teal"
 				)
 			})
 			
 			incProgress(0.7, detail = "Plotting deletions in progress...")
-			output$plot_overview_del <- renderPlotly({
-				
+
+			# Compute DEL data outside renderPlotly so reactiveVals can be set
+			if(plot_type == "mp_quality"){
+				dat_del <- rbind(MCNV2:::mp_vs_metric_by_size(ds = filtered_ds() %>% dplyr::filter(Type == "DEL"),
+																	quality_metric = quality_metric,
+																	thresholds = c(min_qty_metric, max_qty_metric),
+																	transmission_col = transmission_col),
+										 MCNV2:::mp_vs_metric(ds = filtered_ds() %>% dplyr::filter(Type == "DEL"),
+																 quality_metric = quality_metric,
+																 thresholds = c(min_qty_metric, max_qty_metric),
+																 transmission_col = transmission_col))
+			} else {
+				dat_del <- MCNV2:::mp_by_size(ds = filtered_ds() %>% dplyr::filter(Type == "DEL"),
+											transmission_col = transmission_col)
+			}
+			if(nrow(dat_del) > 0){
 				if(plot_type == "mp_quality"){
-					dat <- rbind(mp_vs_metric_by_size(ds =  filtered_ds() %>% dplyr::filter(Type == "DEL"),
-																						quality_metric = quality_metric,
-																						thresholds = c(min_qty_metric, max_qty_metric),
-																						transmission_col = transmission_col),
-											 mp_vs_metric(ds = filtered_ds() %>% dplyr::filter(Type == "DEL"),
-											 						 quality_metric = quality_metric,
-											 						 thresholds = c(min_qty_metric, max_qty_metric),
-											 						 transmission_col = transmission_col))
+					p_del <- MCNV2:::plot_mp_vs_metric(dt = dat_del,
+														 title = "Mendelian Precision - DEL",
+														 subtitle = "All filtered CNVs",
+														 y_lab = "Mendelian Precision",
+														 x_lab = paste0(quality_metric, " threshold (≥)"))
 				} else {
-					dat <- mp_by_size(ds = filtered_ds() %>% dplyr::filter(Type == "DEL"),
-														transmission_col = transmission_col)
+					p_del <- MCNV2:::plot_mp_vs_size(dt = dat_del,
+													 title = "Mendelian Precision - DEL",
+													 subtitle = "All filtered CNVs",
+													 y_lab = "Mendelian Precision",
+													 x_lab = "CNV Size (binned)")
 				}
-				
-				
-				if(nrow(dat) > 0){
-					
-					if(plot_type == "mp_quality"){
-						p <- plot_mp_vs_metric(dt = dat,
-																	 title = "Mendelian Precision - DEL",
-																	 subtitle = "All filtered CNVs",
-																	 y_lab = "Mendelian Precision",
-																	 x_lab = paste0(quality_metric, " threshold (≥)"))
-					} else {
-						p <- plot_mp_vs_size(dt = dat,
-																 title = "Mendelian Precision - DEL",
-																 subtitle = "All filtered CNVs",
-																 y_lab = "Mendelian Precision",
-																 x_lab = "CNV Size (binned)")
-					}
-					
-					baseline_DEL_plot(p)
-					ggplotly(p)
-				} else {
-					NULL
-				}
-				
+				baseline_DEL_dat(dat_del)
+				baseline_DEL_plot(p_del)
+			}
+			output$plot_overview_del <- renderPlotly({
+				req(baseline_DEL_plot())
+				ggplotly(baseline_DEL_plot())
 			})
 			
 			incProgress(0.9, detail = "Plotting duplications in progress...")
-			output$plot_overview_dup <- renderPlotly({
-				
+
+			# Compute DUP data outside renderPlotly so reactiveVals can be set
+			if(plot_type == "mp_quality"){
+				dat_dup <- rbind(MCNV2:::mp_vs_metric_by_size(ds = filtered_ds() %>% dplyr::filter(Type == "DUP"),
+																	quality_metric = quality_metric,
+																	thresholds = c(min_qty_metric, max_qty_metric),
+																	transmission_col = transmission_col),
+										 MCNV2:::mp_vs_metric(ds = filtered_ds() %>% dplyr::filter(Type == "DUP"),
+																 quality_metric = quality_metric,
+																 thresholds = c(min_qty_metric, max_qty_metric),
+																 transmission_col = transmission_col))
+			} else {
+				dat_dup <- MCNV2:::mp_by_size(ds = filtered_ds() %>% dplyr::filter(Type == "DUP"),
+											transmission_col = transmission_col)
+			}
+			if(nrow(dat_dup) > 0){
 				if(plot_type == "mp_quality"){
-					dat <- rbind(mp_vs_metric_by_size(ds =  filtered_ds() %>% dplyr::filter(Type == "DUP"),
-																						quality_metric = quality_metric,
-																						thresholds = c(min_qty_metric, max_qty_metric),
-																						transmission_col = transmission_col),
-											 mp_vs_metric(ds = filtered_ds() %>% dplyr::filter(Type == "DUP"),
-											 						 quality_metric = quality_metric,
-											 						 thresholds = c(min_qty_metric, max_qty_metric),
-											 						 transmission_col = transmission_col))
+					p_dup <- MCNV2:::plot_mp_vs_metric(dt = dat_dup,
+														 title = "Mendelian Precision - DUP",
+														 subtitle = "All filtered CNVs",
+														 y_lab = "Mendelian Precision",
+														 x_lab = paste0(quality_metric, " threshold (≥)"))
 				} else {
-					dat <- mp_by_size(ds = filtered_ds() %>% dplyr::filter(Type == "DUP"),
-														transmission_col = transmission_col)
+					p_dup <- MCNV2:::plot_mp_vs_size(dt = dat_dup,
+													 title = "Mendelian Precision - DUP",
+													 subtitle = "All filtered CNVs",
+													 y_lab = "Mendelian Precision",
+													 x_lab = "CNV Size (binned)")
 				}
-				
-				
-				if(nrow(dat) > 0){
-					
-					if(plot_type == "mp_quality"){
-						p <- plot_mp_vs_metric(dt = dat,
-																	 title = "Mendelian Precision - DUP",
-																	 subtitle = "All filtered CNVs",
-																	 y_lab = "Mendelian Precision",
-																	 x_lab = paste0(quality_metric, " threshold (≥)"))
-					} else {
-						p <- plot_mp_vs_size(dt = dat,
-																 title = "Mendelian Precision - DUP",
-																 subtitle = "All filtered CNVs",
-																 y_lab = "Mendelian Precision",
-																 x_lab = "CNV Size (binned)")
-					}
-					
-					baseline_DUP_plot(p)
-					ggplotly(p)
-				} else {
-					NULL
-				}
-				
+				baseline_DUP_dat(dat_dup)
+				baseline_DUP_plot(p_dup)
+			}
+			output$plot_overview_dup <- renderPlotly({
+				req(baseline_DUP_plot())
+				ggplotly(baseline_DUP_plot())
+			})
+			
 			})
 			
 			#TODO: modify so the completion natification appears AFTER plots
 			showNotification("Plotting complete!", type = "message")
 			
 		})
-	})
 	
 	output$filtered_tbl <- renderDataTable({
 		req(filtered_ds())
-		dat <- filtered_ds() %>% head(1000) %>% collect()
+		dat <- filtered_ds() %>% head(1000) %>% dplyr::collect()
 		datatable(dat, options = list(scrollX = TRUE), rownames = FALSE)
 	})
 	
@@ -616,7 +694,7 @@ function(input, output, session) {
 				value = 0, {
 					
 					incProgress(0.2, detail = "Collecting data...")
-					dat <- filtered_ds() %>% collect()
+					dat <- filtered_ds() %>% dplyr::collect()
 					
 					incProgress(0.6, detail = "Writing TSV file...")
 					write.csv(dat, file, row.names = FALSE)
@@ -644,7 +722,7 @@ function(input, output, session) {
 		
 		outputs <- lapply(quality_metrics(), function(metric) {
 			
-			col_vals <- filtered_ds() %>% dplyr::pull(all_of(metric))
+			col_vals <- filtered_ds() %>% dplyr::select(dplyr::all_of(metric)) %>% dplyr::collect() %>% dplyr::pull(1)
 			rng <- range(col_vals, na.rm = TRUE)
 			
 			ns_metric <- paste0("filter_", metric)
@@ -748,7 +826,8 @@ function(input, output, session) {
 					p <- baseline_DUP_plot()
 				}
 				
-				p <- clean_plot_for_plotly(p)
+				p <- MCNV2:::clean_plot_for_plotly(p)
+				panel_dat1(if(cnv_type == "DEL") baseline_DEL_dat() else baseline_DUP_dat())
 				panel_plot1(p)
 				return(p)
 			})
@@ -782,7 +861,7 @@ function(input, output, session) {
 				p <- NULL
 
 				# Aucun chamgement
-				if((filtered_ds() %>% count %>% collect) == (ft_filtered_ds() %>% count %>% collect)){
+				if((filtered_ds() %>% dplyr::count() %>% dplyr::collect() %>% dplyr::pull(n)) == (ft_filtered_ds() %>% dplyr::count() %>% dplyr::collect() %>% dplyr::pull(n))){
 					print("aucun changement")
 					if(cnv_type == "DEL"){
 						p <- baseline_DEL_plot()
@@ -790,36 +869,37 @@ function(input, output, session) {
 						p <- baseline_DUP_plot()
 					}
 
-					p <- clean_plot_for_plotly(p)
+					panel_dat2(if(cnv_type == "DEL") baseline_DEL_dat() else baseline_DUP_dat())
+					p <- MCNV2:::clean_plot_for_plotly(p)
 					panel_plot2(p)
 					return(p)
 				}
 
 				# if any changes
 				if(plot_type == "mp_quality"){
-					dat <- rbind(mp_vs_metric_by_size(ds =  ft_filtered_ds() %>% dplyr::filter(Type == cnv_type),
+					dat <- rbind(MCNV2:::mp_vs_metric_by_size(ds =  ft_filtered_ds() %>% dplyr::filter(Type == cnv_type),
 																						quality_metric = quality_metric,
 																						thresholds = c(min_qty_metric, max_qty_metric),
 																						transmission_col = transmission_col),
-											 mp_vs_metric(ds = ft_filtered_ds() %>% dplyr::filter(Type == cnv_type),
+											 MCNV2:::mp_vs_metric(ds = ft_filtered_ds() %>% dplyr::filter(Type == cnv_type),
 											 						 quality_metric = quality_metric,
 											 						 thresholds = c(min_qty_metric, max_qty_metric),
 											 						 transmission_col = transmission_col))
 				} else {
-					dat <- mp_by_size(ds = ft_filtered_ds() %>% dplyr::filter(Type == cnv_type),
+					dat <- MCNV2:::mp_by_size(ds = ft_filtered_ds() %>% dplyr::filter(Type == cnv_type),
 														transmission_col = transmission_col)
 				}
 
 				if(nrow(dat) > 0){
 
 					if(plot_type == "mp_quality"){
-						p <- plot_mp_vs_metric(dt = dat,
+						p <- MCNV2:::plot_mp_vs_metric(dt = dat,
 																	 title = paste0("Mendelian Precision - ", cnv_type),
 																	 subtitle = "All filtered CNVs",
 																	 y_lab = "Mendelian Precision",
 																	 x_lab = paste0(quality_metric, " threshold (≥)"))
 					} else {
-						p <- plot_mp_vs_size(dt = dat,
+						p <- MCNV2:::plot_mp_vs_size(dt = dat,
 																 title = paste0("Mendelian Precision - ", cnv_type),
 																 subtitle = "All filtered CNVs",
 																 y_lab = "Mendelian Precision",
@@ -827,8 +907,9 @@ function(input, output, session) {
 					}
 
 				}
+				panel_dat2(dat)
 				
-				p <- clean_plot_for_plotly(p)
+				p <- MCNV2:::clean_plot_for_plotly(p)
 				panel_plot2(p)
 				return(p)
 			})
@@ -894,37 +975,37 @@ function(input, output, session) {
 			p <- NULL
 			
 			# Aucun chamgement
-			if( is.null(df1) || (df1 %>% count %>% collect) == 0){
+			if( is.null(df1) || (df1 %>% dplyr::count() %>% dplyr::collect() %>% dplyr::pull(n)) == 0){
 				print("Problem in p3 - no data")
 				return(NULL)
 			}
 			
 			# if any changes
 			if(plot_type == "mp_quality"){
-				dat <- rbind(mp_vs_metric_by_size(ds =  df1 %>% dplyr::filter(Type == cnv_type),
+				dat <- rbind(MCNV2:::mp_vs_metric_by_size(ds =  df1 %>% dplyr::filter(Type == cnv_type),
 																					quality_metric = quality_metric,
 																					thresholds = c(min_qty_metric, max_qty_metric),
 																					transmission_col = transmission_col),
-										 mp_vs_metric(ds = df1 %>% dplyr::filter(Type == cnv_type),
+										 MCNV2:::mp_vs_metric(ds = df1 %>% dplyr::filter(Type == cnv_type),
 										 						 quality_metric = quality_metric,
 										 						 thresholds = c(min_qty_metric, max_qty_metric),
 										 						 transmission_col = transmission_col))
 			} else {
-				dat <- mp_by_size(ds = df1 %>% dplyr::filter(Type == cnv_type),
+				dat <- MCNV2:::mp_by_size(ds = df1 %>% dplyr::filter(Type == cnv_type),
 													transmission_col = transmission_col)
 			}
 			
 			if(nrow(dat) > 0){
 				
 				if(plot_type == "mp_quality"){
-					p <- plot_mp_vs_metric(dt = dat,
+					p <- MCNV2:::plot_mp_vs_metric(dt = dat,
 																 title = paste0("MP - ", 
 																 							 cnv_type, " - ",input$comp_plot1_type),
 																 subtitle = "",
 																 y_lab = "Mendelian Precision",
 																 x_lab = paste0(quality_metric, " threshold (≥)"))
 				} else {
-					p <- plot_mp_vs_size(dt = dat,
+					p <- MCNV2:::plot_mp_vs_size(dt = dat,
 															 title = paste0("MP - ", 
 															 							 cnv_type, " - ",input$comp_plot1_type),
 															 subtitle = "",
@@ -932,9 +1013,10 @@ function(input, output, session) {
 															 x_lab = "CNV Size (binned)")
 				}
 				
+			panel_dat3(dat)
 			}
 			
-			p <- clean_plot_for_plotly(p)
+			p <- MCNV2:::clean_plot_for_plotly(p)
 			panel_plot3(p)
 			return(p)
 		})
@@ -1000,37 +1082,37 @@ function(input, output, session) {
 			p <- NULL
 
 			# Aucun chamgement
-			if( is.null(df1) || (df1 %>% count %>% collect) == 0){
+			if( is.null(df1) || (df1 %>% dplyr::count() %>% dplyr::collect() %>% dplyr::pull(n)) == 0){
 				print("Problem in p4 - no data")
 				return(NULL)
 			}
 
 			# if any changes
 			if(plot_type == "mp_quality"){
-				dat <- rbind(mp_vs_metric_by_size(ds =  df1 %>% dplyr::filter(Type == cnv_type),
+				dat <- rbind(MCNV2:::mp_vs_metric_by_size(ds =  df1 %>% dplyr::filter(Type == cnv_type),
 																					quality_metric = quality_metric,
 																					thresholds = c(min_qty_metric, max_qty_metric),
 																					transmission_col = transmission_col),
-										 mp_vs_metric(ds = df1 %>% dplyr::filter(Type == cnv_type),
+										 MCNV2:::mp_vs_metric(ds = df1 %>% dplyr::filter(Type == cnv_type),
 										 						 quality_metric = quality_metric,
 										 						 thresholds = c(min_qty_metric, max_qty_metric),
 										 						 transmission_col = transmission_col))
 			} else {
-				dat <- mp_by_size(ds = df1 %>% dplyr::filter(Type == cnv_type),
+				dat <- MCNV2:::mp_by_size(ds = df1 %>% dplyr::filter(Type == cnv_type),
 													transmission_col = transmission_col)
 			}
 
 			if(nrow(dat) > 0){
 
 				if(plot_type == "mp_quality"){
-					p <- plot_mp_vs_metric(dt = dat,
+					p <- MCNV2:::plot_mp_vs_metric(dt = dat,
 																 title = paste0("MP - ",
 																 							 cnv_type, " - ",input$comp_plot2_type),
 																 subtitle = "",
 																 y_lab = "Mendelian Precision",
 																 x_lab = paste0(quality_metric, " threshold (≥)"))
 				} else {
-					p <- plot_mp_vs_size(dt = dat,
+					p <- MCNV2:::plot_mp_vs_size(dt = dat,
 															 title = paste0("MP - ",
 															 							 cnv_type, " - ",input$comp_plot2_type),
 															 subtitle = "",
@@ -1040,7 +1122,8 @@ function(input, output, session) {
 
 			}
 			
-			p <- clean_plot_for_plotly(p)
+			p <- MCNV2:::clean_plot_for_plotly(p)
+			panel_dat4(dat)
 			panel_plot4(p)
 			return(p)
 		
@@ -1063,7 +1146,7 @@ function(input, output, session) {
 		))
 	})
 	
-	# Bouton zoom - ouvrir le modal
+	# Bouton zoom - plot 2: after additional filters
 	observeEvent(input$zoom_after_add_filters, {
 	  showModal(modalDialog(
 	    title = "MP - after additional filters",
@@ -1078,31 +1161,27 @@ function(input, output, session) {
 	    easyClose = TRUE
 	  ))
 	})
-	# Bouton zoom - ouvrir le modal
-	observeEvent(input$zoom_after_add_filters, {
+	# Bouton zoom - plot 3: comp_plot1
+	observeEvent(input$zoom_after_add_filters1, {
 	  showModal(modalDialog(
-	    title = "MP - after additional filters",
+	    title = "MP - after additional filters (comp 1)",
 	    size = "xl",
 	    plotlyOutput("after_add_filters_zoomed1", height = "100%"),
 	    footer = tagList(
-	      downloadButton("download_after_add_filters_tab",
-	                     "Download table", 
-	                     class = "btn-success"),
+	      downloadButton("download_plot3_tab", "Download table", class = "btn-success"),
 	      modalButton("Close")
 	    ),
 	    easyClose = TRUE
 	  ))
 	})
-	# Bouton zoom - ouvrir le modal
-	observeEvent(input$zoom_after_add_filters, {
+	# Bouton zoom - plot 4: comp_plot2
+	observeEvent(input$zoom_plot4, {
 	  showModal(modalDialog(
-	    title = "MP - after additional filters",
+	    title = "MP - after additional filters (comp 2)",
 	    size = "xl",
 	    plotlyOutput("after_add_filters_zoomed2", height = "100%"),
 	    footer = tagList(
-	      downloadButton("download_after_add_filters_tab",
-	                     "Download table", 
-	                     class = "btn-success"),
+	      downloadButton("download_plot4_tab", "Download table", class = "btn-success"),
 	      modalButton("Close")
 	    ),
 	    easyClose = TRUE
@@ -1129,6 +1208,56 @@ function(input, output, session) {
 	  req(panel_plot4())
 	  panel_plot4() %>% layout()
 	})
+	output$ddl_finetuned_tbl <- downloadHandler(
+		filename = function() {
+			paste0("MCNV2_finetuned_data_", Sys.Date(), ".csv")
+		},
+		content = function(file) {
+			withProgress(
+				message = 'Preparing dataset...',
+				detail = 'Please wait while we generate your CSV.',
+				value = 0, {
+					incProgress(0.2, detail = "Collecting data...")
+					dat <- ft_filtered_ds()
+					incProgress(0.6, detail = "Writing CSV file...")
+					write.csv(dat, file, row.names = FALSE)
+					incProgress(1, detail = "Done!")
+				}
+			)
+		}
+	)
+
+
+	# ── Download handlers for fine-tuning modal plots ───────────────────────────
+	output$download_before_add_filters_tab <- downloadHandler(
+		filename = function() paste0("MCNV2_plot1_before_filters_", Sys.Date(), ".csv"),
+		content = function(file) {
+			req(panel_dat1())
+			write.csv(panel_dat1(), file, row.names = FALSE)
+		}
+	)
+	output$download_after_add_filters_tab <- downloadHandler(
+		filename = function() paste0("MCNV2_plot2_after_filters_", Sys.Date(), ".csv"),
+		content = function(file) {
+			req(panel_dat2())
+			write.csv(panel_dat2(), file, row.names = FALSE)
+		}
+	)
+	output$download_plot3_tab <- downloadHandler(
+		filename = function() paste0("MCNV2_plot3_comp1_", Sys.Date(), ".csv"),
+		content = function(file) {
+			req(panel_dat3())
+			write.csv(panel_dat3(), file, row.names = FALSE)
+		}
+	)
+	output$download_plot4_tab <- downloadHandler(
+		filename = function() paste0("MCNV2_plot4_comp2_", Sys.Date(), ".csv"),
+		content = function(file) {
+			req(panel_dat4())
+			write.csv(panel_dat4(), file, row.names = FALSE)
+		}
+	)
+
 	observeEvent(input$goback_mpexploration, {
 		updateTabItems(session, "tabs", "mp_exploration")  # move to the "mp_exploration" tab
 	})

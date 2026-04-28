@@ -8,4 +8,5 @@ Learn how to install and use MCNV2 in minutes.
    
    overview
    installation
+   test-data
    quickstart

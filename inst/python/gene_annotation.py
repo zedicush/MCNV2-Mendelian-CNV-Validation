@@ -131,42 +131,35 @@ def _load_prob_regions_flex(path: str, genome_version: str) -> pl.LazyFrame:
         )
 
 def _finalize_order(
-    joined_df: pl.DataFrame,
-    cnv_extras: list[str],
-    gene_schema_cols: list[str]
-) -> pl.DataFrame:
+    joined,
+    cnv_extras: list,
+    gene_schema_cols: list
+):
     """
-    Fixe l’ordre final des colonnes :
+    Fixe l'ordre final des colonnes (fonctionne sur LazyFrame ou DataFrame) :
       Front CNV (5) -> extras CNV -> gene fixed -> autres colonnes gènes (sans t_End) -> cnv_problematic_region_overlap
     """
     front = ["Chr", "Start", "Stop", "Type", "SampleID"]
-
-    # colonnes gène/pRegions fixées, dans cet ordre exact
     gene_fixed = [
         "gene_type", "transcript", "gene_name", "bp_overlap", "gene_id", "LOEUF", "t_Start", "t_Stop"
     ]
-
-    exist = set(joined_df.columns)
-
-    # colonnes CNV extra (uniquement celles effectivement présentes après les joins)
+    # Récupère les noms de colonnes sans collecter en mémoire
+    if isinstance(joined, pl.LazyFrame):
+        exist = set(joined.collect_schema().names())
+    else:
+        exist = set(joined.columns)
     cnv_extra_kept = [c for c in cnv_extras if c in exist]
-
-    # Toutes les colonnes provenant (potentiellement) du fichier gènes qu’on a vues dans le schéma
-    # On supprime ce qui est déjà dans gene_fixed + front + extras, et on exclut explicitement t_End
     already = set(front) | set(cnv_extra_kept) | set(gene_fixed)
     gene_all_present = [c for c in gene_schema_cols if c in exist]
     gene_other = [c for c in gene_all_present if c not in already and c != "t_End"]
-
-    # ‘cnv_problematic_region_overlap’ en dernier (si présent)
     tail = ["cnv_problematic_region_overlap"] if "cnv_problematic_region_overlap" in exist else []
-
     final_cols = [c for c in front if c in exist] \
                + cnv_extra_kept \
                + [c for c in gene_fixed if c in exist] \
                + gene_other \
                + tail
+    return joined.select(final_cols)
 
-    return joined_df.select(final_cols)
 
 # ----- Main pipeline -----
 
@@ -186,28 +179,60 @@ def main():
     cnvLF, cnv_extras = _load_cnv_positional(args.cnv)
     pRegions = _load_prob_regions_flex(args.prob_regions, args.genome_version)
 
+    # --- Check bedtools availability before doing anything ---
+    bt_check = subprocess.run(
+        [args.bedtools_path, "--version"],
+        stdout=subprocess.PIPE, stderr=subprocess.PIPE
+    )
+    if bt_check.returncode != 0:
+        print(
+            f"\n[MCNV2 ERROR] bedtools not found or not executable at: '{args.bedtools_path}'\n"
+            f"  Please install bedtools and provide the correct path via bedtools_path=.\n"
+            f"  On macOS: brew install bedtools\n"
+            f"  On Linux: sudo apt install bedtools  OR  conda install -c bioconda bedtools\n"
+            f"  To find your path: Sys.which('bedtools') in R\n",
+            file=sys.stderr
+        )
+        sys.exit(1)
+
     tmpdir = tempfile.mkdtemp()
     try:
         # Écrit des BED 3-col pour bedtools
         cnv_bed = f"{tmpdir}/tmp_cnvs.bed"
-        cnvLF.select(["Chr", "Start", "Stop"]).unique().sink_csv(cnv_bed, separator="\t", include_header=False)
+        cnvLF.select(["Chr", "Start", "Stop"]).unique().collect().write_csv(cnv_bed, separator="\t", include_header=False)
 
         preg_bed = f"{tmpdir}/tmp_pRegions.bed"
-        pRegions.select(["Chr", "Start", "Stop"]).sink_csv(preg_bed, separator="\t", include_header=False)
+        pRegions.select(["Chr", "Start", "Stop"]).collect().write_csv(preg_bed, separator="\t", include_header=False)
 
         # bedtools: CNV x Gene
         inter_bed = f"{tmpdir}/tmp_intersect.bed"
-        subprocess.run(
-            f"bedtools intersect -a {cnv_bed} -b {args.gene_resource} -F 0.1 -wao > {inter_bed}",
-            shell=True, check=True
+        result1 = subprocess.run(
+            f"{args.bedtools_path} intersect -a {cnv_bed} -b {args.gene_resource} -F 0.1 -wao > {inter_bed}",
+            shell=True, capture_output=True, text=True
         )
+        if result1.returncode != 0:
+            print(
+                f"\n[MCNV2 ERROR] bedtools intersect failed (CNV x Gene).\n"
+                f"  Command: {args.bedtools_path} intersect -a {cnv_bed} -b {args.gene_resource} -F 0.1 -wao\n"
+                f"  stderr: {result1.stderr.strip()}\n",
+                file=sys.stderr
+            )
+            sys.exit(1)
 
         # bedtools: CNV x prob_regions
         preg_inter_bed = f"{tmpdir}/tmp_pRegion_intersect.bed"
-        subprocess.run(
-            f"bedtools intersect -a {cnv_bed} -b {preg_bed} -wao > {preg_inter_bed}",
-            shell=True, check=True
+        result2 = subprocess.run(
+            f"{args.bedtools_path} intersect -a {cnv_bed} -b {preg_bed} -wao > {preg_inter_bed}",
+            shell=True, capture_output=True, text=True
         )
+        if result2.returncode != 0:
+            print(
+                f"\n[MCNV2 ERROR] bedtools intersect failed (CNV x prob_regions).\n"
+                f"  Command: {args.bedtools_path} intersect -a {cnv_bed} -b {preg_bed} -wao\n"
+                f"  stderr: {result2.stderr.strip()}\n",
+                file=sys.stderr
+            )
+            sys.exit(1)
 
         # Parse intersection CNV x Gene (schéma correspondant à ta ressource actuelle)
         # Colonnes CNV: col1..3 ; Colonnes GENE: ici on suppose attrs=col7, puis colonnes “typiques” comme déjà validé
@@ -270,17 +295,35 @@ def main():
         )
 
         # Joins (lazy → collect)
+        # Note: sink_csv n'est pas compatible avec les plans contenant des joins
         joined_lf = (
             cnvLF.join(gene_lf, on=["Chr", "Start", "Stop"], how="left")
                  .join(preg_lf, on=["Chr", "Start", "Stop"], how="left")
         )
+
+        # Récupère les noms de colonnes sans collecter (pour sort)
+        all_cols = joined_lf.collect_schema().names()
+
+        # Collecte en mémoire
         out_df = joined_lf.collect()
 
-        # Déduplication globale (équivalent | sort | uniq)
-        out_df = out_df.sort(by=out_df.columns).unique(maintain_order=True)
-
-        # Ordre final imposé
+        # Déduplique — tri uniquement sur colonnes clés pour éviter les erreurs
+        # de types mixtes sur colonnes nullables
+        sort_cols = ["Chr", "Start", "Stop", "Type", "SampleID"]
+        sort_cols = [c for c in sort_cols if c in out_df.columns]
+        out_df = out_df.sort(by=sort_cols).unique(maintain_order=True)
         out_df = _finalize_order(out_df, cnv_extras, gene_schema_cols)
+
+        # Add Size column if not already present (neither Size nor Length)
+        existing_cols_lower = [c.lower() for c in out_df.columns]
+        if "size" not in existing_cols_lower and "length" not in existing_cols_lower:
+            out_df = out_df.with_columns(
+                (pl.col("Stop") - pl.col("Start")).alias("Size")
+            )
+        elif "size" not in existing_cols_lower:
+            # Length exists but Size doesn't — create Size as alias
+            length_col = out_df.columns[[c.lower() for c in out_df.columns].index("length")]
+            out_df = out_df.with_columns(pl.col(length_col).alias("Size"))
 
         # Écriture
         out_df.write_csv(args.out, separator="\t")

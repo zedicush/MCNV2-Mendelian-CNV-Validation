@@ -42,23 +42,24 @@ check_input_file <- function(filepath,
   schema_list <- list(
     cnv = list(
       ordered = list(
-        chr   = c("chr", "chrom", "seqnames"),
-        start = c("start", "begin", "pos_start"),
-        end   = c("end", "stop", "pos_end")
+        chr   = c("chr", "chrom", "chromosome", "seqnames", "seq", "contig",
+                  "scaffoldid", "ref", "refseq", "chrid", "chr_id"),
+        start = c("start", "begin", "pos_start", "chromstart", "pos",
+                  "position", "left", "from", "start_pos", "bp_start"),
+        end   = c("end", "stop", "pos_end", "chromend", "right",
+                  "to", "end_pos", "stop_pos", "bp_end", "bp_stop")
       ),
       unordered = list(
-        sample = c("sampleid", "sample_id", "id_sample"),
-        type   = c("type", "svtype", "variant_type")
+        sample = c("sampleid", "sample_id", "id_sample", "sample", "name",
+                   "individual", "subject", "patient", "id", "sample_name",
+                   "ind", "indid", "ind_id", "iid", "sid"),
+        type   = c("type", "svtype", "variant_type", "cnv_type", "sv_type",
+                   "vartype", "class", "category", "cnvtype", "var_type")
       )
     ),
     ped = list(
-      ordered = list(
-        iid = c("iid", "individual", "sampleid", "childid", "id")
-      ),
-      unordered = list(
-        father = c("pid", "father", "dad", "fatherid"),
-        mother = c("mid", "mother", "mom", "motherid")
-      )
+      ordered = list(),
+      unordered = list()
     ),
     prb = list(
       ordered = list(
@@ -93,6 +94,14 @@ check_input_file <- function(filepath,
   )
   
   schema <- schema_list[[file_type]]
+  
+  # --- Special check for ped: exactly 3 columns required ---
+  if (file_type == "ped") {
+    if (length(header) != 3) {
+      return(list(status = FALSE, msg = paste0("\u274c Pedigree file must have exactly 3 columns (child, parent1, parent2). Found: ", length(header), " column(s).")))
+    }
+    return(list(status = TRUE, msg = "\u2705 File check passed!"))
+  }
   
   # --- Check ordered columns ---
   if (length(schema$ordered) > 0) {
@@ -209,13 +218,25 @@ annotate <- function(cnvs_file, prob_regions_file, output_file,
   )
   
   ret <- system2(
-    command = reticulate::py_exe(),  # ex: ~/.virtualenvs/r-MCNV2/bin/python
+    command = reticulate::py_exe(),
     args = args, 
-    stdout = TRUE,  # capture stdout si tu veux l'afficher
+    stdout = TRUE,
     stderr = TRUE
   )
   
-  if(!file.exists(output_file)){
+  # Affiche toujours la sortie Python dans les logs R
+  if (length(ret) > 0) {
+    message(paste(ret, collapse = "\n"))
+  }
+  
+  status <- attr(ret, "status")
+  if (!is.null(status) && status != 0) {
+    message(sprintf("[gene_annotation] Python exited with status %d", status))
+    return(1)
+  }
+  
+  if (!file.exists(output_file)) {
+    message("[gene_annotation] Output file not created despite status 0")
     return(1)
   } else {
     return(0)
@@ -238,17 +259,36 @@ compute_inheritance <- function(cnvs_file, pedigree_file, output_file,
   )
   
   ret <- system2(
-    command = reticulate::py_exe(),  # ex: ~/.virtualenvs/r-MCNV2/bin/python
+    command = reticulate::py_exe(),
     args = args, 
     stdout = TRUE, 
     stderr = TRUE
   )
   
-  if(!file.exists(output_file)){
-    return(1)
-  } else {
-    return(0)
+  # Always surface Python output to R logs
+  if (length(ret) > 0) {
+    message(paste(ret, collapse = "\n"))
   }
+  
+  status <- attr(ret, "status")
+  
+  if (!is.null(status) && status != 0) {
+    # Extract meaningful error from Python output
+    error_lines <- grep("^ERROR:|^WARN:|^INFO:", ret, value = TRUE)
+    if (length(error_lines) > 0) {
+      message(paste("[compute_inheritance]", paste(error_lines, collapse = "\n")))
+    } else {
+      message("[compute_inheritance] Python exited with status ", status)
+    }
+    return(1)
+  }
+  
+  if (!file.exists(output_file)) {
+    message("[compute_inheritance] Output file was not created despite status 0.")
+    return(1)
+  }
+  
+  return(0)
 }
 
 #' @export
@@ -368,7 +408,7 @@ mp_vs_metric_by_size <- function(ds, quality_metric, thresholds,
   
   res <- parallel::mclapply(X = rng_infos$ticks, FUN = function(th) {
     tmp <- ds %>% dplyr::filter(.data[[quality_metric]] >= th) 
-    n <- tmp %>% summarise(n()) %>% pull()
+    n <- tmp %>% dplyr::summarise(n = dplyr::n()) %>% dplyr::collect() %>% dplyr::pull(n)
     
     if (n == 0) return(NULL)
     tmp %>%
@@ -377,8 +417,8 @@ mp_vs_metric_by_size <- function(ds, quality_metric, thresholds,
       dplyr::summarise(n = dplyr::n(),
                        MP = round(mean(trans, na.rm = TRUE), digits = 2),
                        .groups = "drop") %>%
-      dplyr::mutate(threshold = th) %>% collect()
-  }, mc.cores = parallel::detectCores() - 1)
+      dplyr::mutate(threshold = th) %>% dplyr::collect()
+  }, mc.cores = max(1L, parallel::detectCores() - 1L))
   
   dplyr::bind_rows(res)
 }
@@ -392,14 +432,14 @@ mp_vs_metric <- function(ds, quality_metric, thresholds, transmission_col,
   
   res <- parallel::mclapply(X = rng_infos$ticks, FUN = function(th) {
     tmp <- ds %>% dplyr::filter(.data[[quality_metric]] >= th) 
-    n <- tmp %>% summarise(n()) %>% pull()
+    n <- tmp %>% dplyr::summarise(n = dplyr::n()) %>% dplyr::collect() %>% dplyr::pull(n)
     if (n == 0) return(NULL)
     tmp %>%
       mutate(trans = !!sym(transmission_col) == inheritance_flag) %>%
       dplyr::summarise(n = dplyr::n(),
                        MP = round(mean(trans, na.rm = TRUE), digits = 2)) %>%
-      dplyr::mutate(Size_Range = "All", threshold = th) %>% collect()
-  }, mc.cores = parallel::detectCores() - 1)
+      dplyr::mutate(Size_Range = "All", threshold = th) %>% dplyr::collect()
+  }, mc.cores = max(1L, parallel::detectCores() - 1L))
   
   dplyr::bind_rows(res)
 }
@@ -415,7 +455,7 @@ mp_by_size <- function(ds, transmission_col, inheritance_flag = "True") {
       n = dplyr::n(),
       MP = round(mean(trans, na.rm = TRUE), digits = 2),
       .groups = "drop"
-    ) %>% collect
+    ) %>% dplyr::collect()
 }
 
 #' @export
@@ -426,12 +466,11 @@ plot_mp_vs_metric <- function(dt, title, subtitle, y_lab, x_lab){
   
   p <- ggplot(dt, aes(x = threshold, y = MP, color = Size_Range)) +
     geom_line() +
-    geom_point(aes(size = n, shape = Size_Range)) +
+    geom_point(aes(size = n)) +
     scale_y_continuous(limits = c(0, 1), labels = scales::percent) +
     labs(title = title, subtitle = subtitle, x = x_lab, y = y_lab) +
     theme_minimal(base_size = 12) +
-    scale_color_manual(values = cnv_size_colors, name = "CNV Length") +
-    scale_shape_manual(values = cnv_size_shapes, name = "CNV Length")
+    scale_color_manual(values = cnv_size_colors, name = "CNV Length")
   
   return(p)
 }
@@ -489,3 +528,146 @@ clean_plot_for_plotly <- function(p,
 }
 
 
+#' @export
+compute_mp <- function(
+    inheritance_file,
+    output_file       = NULL,
+    transmission_type = c("cnv", "gene"),
+    min_size          = NULL,
+    max_size          = NULL,
+    min_filters       = list(),   # named list of col = val  (>=)
+    max_filters       = list(),   # named list of col = val  (<=)
+    min_loeuf         = NULL,
+    exclusion_genes   = NULL,     # character vector of Ensembl GeneIDs to exclude
+    stratify_by_size  = FALSE,
+    stratify_by_type  = TRUE
+) {
+  transmission_type <- match.arg(transmission_type)
+
+  # --- 1. Load ---
+  if (!file.exists(inheritance_file))
+    stop("File not found: ", inheritance_file)
+
+  dat <- readr::read_tsv(inheritance_file, show_col_types = FALSE)
+
+  # --- 2. Transmission column ---
+  trans_col <- if (transmission_type == "cnv") "transmitted_cnv" else "transmitted_gene"
+  if (!trans_col %in% names(dat))
+    stop("Column '", trans_col, "' not found. Run compute_inheritance() first.")
+
+  # For gene-based: exclude intergenic
+  if (transmission_type == "gene") {
+    dat <- dat %>% dplyr::filter(.data[[trans_col]] != "intergenic")
+  }
+
+  # --- 3. Compute Size if missing ---
+  if (!"Size" %in% names(dat)) {
+    end_col   <- intersect(c("End", "Stop"), names(dat))[1]
+    start_col <- intersect(c("Start"), names(dat))[1]
+    if (!is.na(end_col) && !is.na(start_col)) {
+      dat <- dat %>% dplyr::mutate(Size = .data[[end_col]] - .data[[start_col]])
+    }
+  }
+
+  # --- 4. Filters ---
+  if (!is.null(min_size) && "Size" %in% names(dat))
+    dat <- dat %>% dplyr::filter(Size >= min_size)
+
+  if (!is.null(max_size) && "Size" %in% names(dat))
+    dat <- dat %>% dplyr::filter(Size <= max_size)
+
+  if (!is.null(min_loeuf) && "LOEUF" %in% names(dat)) {
+    ids_remove <- dat %>%
+      dplyr::filter(!is.na(LOEUF) & LOEUF < min_loeuf) %>%
+      dplyr::pull(cnv_id) %>% unique()
+    if (length(ids_remove) > 0)
+      dat <- dat %>% dplyr::filter(!cnv_id %in% ids_remove)
+  }
+
+  if (!is.null(exclusion_genes) && "GeneID" %in% names(dat)) {
+    ids_remove <- dat %>%
+      dplyr::filter(GeneID %in% exclusion_genes) %>%
+      dplyr::pull(cnv_id) %>% unique()
+    if (length(ids_remove) > 0)
+      dat <- dat %>% dplyr::filter(!cnv_id %in% ids_remove)
+  }
+
+  # min_filters (>=)
+  for (col in names(min_filters)) {
+    if (col %in% names(dat)) {
+      val <- min_filters[[col]]
+      dat <- dat %>% dplyr::filter(.data[[col]] >= val)
+    } else {
+      warning("min_filters: column '", col, "' not found in file — skipped.")
+    }
+  }
+
+  # max_filters (<=)
+  for (col in names(max_filters)) {
+    if (col %in% names(dat)) {
+      val <- max_filters[[col]]
+      dat <- dat %>% dplyr::filter(.data[[col]] <= val)
+    } else {
+      warning("max_filters: column '", col, "' not found in file — skipped.")
+    }
+  }
+
+  # --- 5. Size_Range ---
+  if (stratify_by_size && "Size" %in% names(dat)) {
+    dat <- dat %>% dplyr::mutate(Size_Range = dplyr::case_when(
+      Size <   30000  ~ "1-30kb",
+      Size <   50000  ~ "30-50kb",
+      Size <  100000  ~ "50-100kb",
+      Size <  200000  ~ "100-200kb",
+      Size <  500000  ~ "200-500kb",
+      Size < 1000000  ~ "500-1M",
+      TRUE            ~ ">1M"
+    ))
+  } else {
+    dat <- dat %>% dplyr::mutate(Size_Range = "All")
+  }
+
+  # --- 6. Deduplicate at CNV level ---
+  cnv_dat <- dat %>%
+    dplyr::distinct(cnv_id, Type, Size_Range, .data[[trans_col]])
+
+  # --- 7. Compute MP ---
+  group_vars <- c(
+    if (stratify_by_type) "Type",
+    "Size_Range"
+  )
+
+  result <- cnv_dat %>%
+    dplyr::mutate(transmission = as.logical(.data[[trans_col]])) %>%
+    dplyr::group_by(dplyr::across(dplyr::all_of(group_vars))) %>%
+    dplyr::summarise(
+      Total_CNVs         = dplyr::n(),
+      Inherited_CNVs     = sum(transmission, na.rm = TRUE),
+      Non_inherited_CNVs = sum(!transmission, na.rm = TRUE),
+      MP                 = round(mean(transmission, na.rm = TRUE), 4),
+      .groups = "drop"
+    )
+
+  if (!stratify_by_type) {
+    result <- result %>% dplyr::mutate(CNV_type = "All") %>%
+      dplyr::relocate(CNV_type)
+  } else {
+    result <- result %>% dplyr::rename(CNV_type = Type)
+  }
+
+  # Order Size_Range factor
+  size_levels <- c("1-30kb","30-50kb","50-100kb","100-200kb",
+                   "200-500kb","500-1M",">1M","All")
+  result$Size_Range <- factor(result$Size_Range,
+                              levels = intersect(size_levels, result$Size_Range))
+  result <- result %>% dplyr::arrange(CNV_type, Size_Range)
+  result$Size_Range <- as.character(result$Size_Range)
+
+  # --- 8. Write output ---
+  if (!is.null(output_file)) {
+    readr::write_tsv(result, output_file)
+    message("MP summary written to: ", output_file)
+  }
+
+  invisible(result)
+}

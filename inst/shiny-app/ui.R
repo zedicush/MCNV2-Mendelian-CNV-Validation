@@ -83,6 +83,74 @@ body <- dashboardBody(
         padding: 10px 15px;
       }
     ")),
+
+	tags$style(HTML("
+		.preproc-summary {
+			display: flex;
+			flex-wrap: wrap;
+			gap: 12px;
+			margin-bottom: 18px;
+		}
+		.summary-card {
+			background: #fff;
+			border-radius: 8px;
+			box-shadow: 0 1px 4px rgba(0,0,0,0.10);
+			padding: 12px 18px;
+			min-width: 150px;
+			flex: 1 1 150px;
+		}
+		.summary-card-title {
+			font-size: 11px;
+			text-transform: uppercase;
+			letter-spacing: 0.05em;
+			color: #888;
+			margin-bottom: 8px;
+			font-weight: 600;
+		}
+		.summary-card-body {
+			display: flex;
+			gap: 8px;
+			flex-wrap: wrap;
+			align-items: center;
+		}
+		.summary-big {
+			font-size: 22px;
+			font-weight: 700;
+			color: #333;
+		}
+		.badge-del {
+			background: #fde8e8;
+			color: #c0392b;
+			border-radius: 5px;
+			padding: 3px 10px;
+			font-size: 13px;
+			font-weight: 600;
+		}
+		.badge-dup {
+			background: #e8f4fd;
+			color: #2471a3;
+			border-radius: 5px;
+			padding: 3px 10px;
+			font-size: 13px;
+			font-weight: 600;
+		}
+		.badge-inh {
+			background: #e8f8f0;
+			color: #1e8449;
+			border-radius: 5px;
+			padding: 3px 10px;
+			font-size: 13px;
+			font-weight: 600;
+		}
+		.badge-dn {
+			background: #fef9e7;
+			color: #b7950b;
+			border-radius: 5px;
+			padding: 3px 10px;
+			font-size: 13px;
+			font-weight: 600;
+		}
+	")),
 	# Add a spinner in an application each time the server take more 100 milliseconds to respond.
 	add_busy_spinner(spin = "fading-circle", 
 									 position = "top-right", 
@@ -91,7 +159,7 @@ body <- dashboardBody(
 		tabItem(tabName = "prepocessing",
 						h3("Preprocessing"),
 						helpText(
-							"XXXXXXXX. If you have already processed your CNV file, you can go to the ",
+							"If you have already processed your CNV file, you can go to the ",
 							tags$a("MP Exploration", onclick = "openTab('mp_exploration')", href = "#")
 						),
 						br(),
@@ -107,7 +175,7 @@ body <- dashboardBody(
 								hr(),
 								h4("Parameters for inheritance calculation"),
 								selectInput("build", label = "Genome build",
-														choices = list("GRCh38/hg38" = 38, "GRCh37/hg19" = 37),
+														choices = list("GRCh38/hg38" = 38),
 														selected = 38),
 								numericInput("th_cnv", "Inheritance threshold (child CNV proportion)", 0.50, min = 0, max = 1, step = 0.05),
 								hr(),
@@ -119,17 +187,13 @@ body <- dashboardBody(
 							),
 							mainPanel(
 								conditionalPanel(condition = "input.submit_preprocess > 0",
+																 uiOutput("preproc_summary"),
 																 bsCollapse(id = "preprocess_panel",
 																 					 open = c("Annotation table (Preview)","Inheritance table (Preview)"),
 																 					 multiple = TRUE,
 																 					 bsCollapsePanel("Annotation table (Preview)", 
 																 					 								DTOutput("preview_preproc_tbl"),
 																 					 								verbatimTextOutput("annot_tsv_status"),
-																 					 								hr(),
-																 					 								actionButton("submit_inheritance", 
-																 					 														 label = "Proceed to Inheritance calculation",
-																 					 														 icon = icon("gear"), 
-																 					 														 disabled = TRUE), 
 																 					 								style = "info"),
 																 					 bsCollapsePanel("Inheritance table (Preview)", 
 																 					 								DTOutput("preview_inherit_tbl"),
@@ -276,10 +340,14 @@ body <- dashboardBody(
 																 				 							 selected = "intergenic_only"),
 																 				 plotlyOutput("comp_plot2"),
 																 				 br(),
-																 				 actionButton("zoom_after_add_filters", "", icon = icon("search-plus"))
+																 				 actionButton("zoom_plot4", "", icon = icon("search-plus"))
 																 	)
 																 ),
 																 hr(),
+																 downloadButton("ddl_finetuned_tbl",
+																 						 "Download filtered data (CSV)",
+																 						 class = "btn-success"),
+																 br(), br(),
 																 actionButton("goback_mpexploration", 
 																 						 label = "Go back to Mendelian Precision analysis",
 																 						 icon = icon("arrow-left"), 

@@ -4,8 +4,8 @@ Title: MCNV2 – Mendelian CNV Validation
 Version: 0.1.0
 Authors@R: c(
     person(
-      "", "",
-      email = "",
+      "Jacquemont", "Lab",
+      email = "maintainer@jacquemont-lab.org",
       role = c("aut", "cre")
     )
   )
@@ -40,3 +40,24 @@ Imports:
         datamods,
         reticulate
 RoxygenNote: 7.3.3
+RemoteType: local
+RemotePkgRef: local::/Users/MacJacquemont/Downloads/MCNV2_Testing/MCNV2-Mendelian-CNV-Validation
+RemoteUrl: /Users/MacJacquemont/Downloads/MCNV2_Testing/MCNV2-Mendelian-CNV-Validation
+RemoteType: local
+RemotePkgRef: local::/Users/MacJacquemont/Downloads/MCNV2_Testing/MCNV2_backup/MCNV2-Mendelian-CNV-Validation
+RemoteUrl: /Users/MacJacquemont/Downloads/MCNV2_Testing/MCNV2_backup/MCNV2-Mendelian-CNV-Validation
+RemoteType: local
+RemotePkgRef: local::/Users/MacJacquemont/Downloads/MCNV2_Testing/MCNV2-Mendelian-CNV-Validation
+RemoteUrl: /Users/MacJacquemont/Downloads/MCNV2_Testing/MCNV2-Mendelian-CNV-Validation
+RemoteType: local
+RemotePkgRef: local::/Users/MacJacquemont/Downloads/MCNV2_Testing/MCNV2-Mendelian-CNV-Validation
+RemoteUrl: /Users/MacJacquemont/Downloads/MCNV2_Testing/MCNV2-Mendelian-CNV-Validation
+RemoteType: local
+RemotePkgRef: local::/Users/MacJacquemont/Downloads/MCNV2_Testing/MCNV2-Mendelian-CNV-Validation
+RemoteUrl: /Users/MacJacquemont/Downloads/MCNV2_Testing/MCNV2-Mendelian-CNV-Validation
+RemoteType: local
+RemotePkgRef: local::/Users/MacJacquemont/Downloads/MCNV2_Testing/tests/MCNV2-Mendelian-CNV-Validation
+RemoteUrl: /Users/MacJacquemont/Downloads/MCNV2_Testing/tests/MCNV2-Mendelian-CNV-Validation
+RemoteType: local
+RemotePkgRef: local::/Users/MacJacquemont/Downloads/MCNV2_Testing/tests/MCNV2-Mendelian-CNV-Validation
+RemoteUrl: /Users/MacJacquemont/Downloads/MCNV2_Testing/tests/MCNV2-Mendelian-CNV-Validation

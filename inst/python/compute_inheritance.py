@@ -169,26 +169,49 @@ def run_pipeline(
     # --- Pedigree: load, normalize, keep complete trios
     ped_src  = read_table_auto(pedigree_path)
     ped_norm = load_and_normalize_pedigree(ped_src, sep=r"\t")
-    trios    = keep_complete_trios(ped_norm).replace({'': pd.NA})
 
-    # Long format: (TrioKey, SampleID, family_statue)
+    # Guard: check that pedigree columns were recognized
+    all_na = ped_norm[["ChildID", "FatherID", "MotherID"]].isna().all().all()
+    if all_na:
+        raise ValueError(
+            "Pedigree file loaded but no ChildID/FatherID/MotherID columns could be detected. "
+            "Expected column names (case-insensitive): SampleID/Child/Proband for child, "
+            "Father/FatherID/Dad for father, Mother/MotherID/Mom for mother."
+        )
+
+    trios = keep_complete_trios(ped_norm).replace({'': pd.NA})
+
+    # Guard: no complete trios found
+    if trios.empty:
+        raise ValueError(
+            f"No complete trios found in pedigree (rows with non-empty ChildID + FatherID + MotherID). "
+            f"Pedigree has {len(ped_norm)} rows. Check that all three parent columns are filled."
+        )
+    print(f"INFO: {len(trios)} complete trio(s) found.", file=sys.stderr)
+
+    # Long format: (TrioKey, SampleID, family_status)
     role_map = {"ChildID": "child", "FatherID": "father", "MotherID": "mother"}
     trios_reformated = (
         trios.melt(
             id_vars=["TrioKey"],
             value_vars=["ChildID", "FatherID", "MotherID"],
-            var_name="family_statue",
+            var_name="family_status",
             value_name="SampleID",
         )
         .dropna(subset=["SampleID"])
-        .assign(family_statue=lambda d: d["family_statue"].map(role_map))
-        [["TrioKey", "SampleID", "family_statue"]]
-        .drop_duplicates(subset=["TrioKey", "SampleID", "family_statue"])
+        .assign(family_status=lambda d: d["family_status"].map(role_map))
+        [["TrioKey", "SampleID", "family_status"]]
+        .drop_duplicates(subset=["TrioKey", "SampleID", "family_status"])
     )
 
     # --- CNVs: load and harmonize expected columns
     cnv_raw = read_table_auto(cnv_geneannot_path)
     cnv     = canonicalize_cnv_columns(cnv_raw)
+
+    # Guard: CNV file is empty
+    if cnv.empty:
+        raise ValueError("CNV file is empty (no rows after loading).")
+    print(f"INFO: {len(cnv)} CNV row(s) loaded.", file=sys.stderr)
 
     # Join CNVs with trio roles (allow many-to-many to support parents shared across trios)
     merged = pd.merge(
@@ -197,6 +220,17 @@ def run_pipeline(
         on="SampleID",
         how="inner"
     )
+
+    # Guard: no overlap between CNV SampleIDs and pedigree SampleIDs
+    if merged.empty:
+        cnv_ids  = set(cnv["SampleID"].dropna().unique())
+        ped_ids  = set(trios_reformated["SampleID"].dropna().unique())
+        common   = cnv_ids & ped_ids
+        raise ValueError(
+            f"No CNV rows matched any sample in the pedigree (inner join returned 0 rows). "
+            f"CNV file has {len(cnv_ids)} unique SampleIDs, pedigree has {len(ped_ids)}, "
+            f"common IDs: {len(common)}. Check that SampleID values match between both files."
+        )
 
     # ===== CNV-level inheritance (segment-based) =====
     VALID_TYPES = {"DEL", "DUP"}
@@ -208,7 +242,7 @@ def run_pipeline(
         df["Type"].astype(str).str.strip().str.upper()
           .replace({"DELETION": "DEL", "DUPLICATION": "DUP"})
     )
-    df["family_statue"] = df["family_statue"].astype(str).str.strip().str.lower()
+    df["family_status"] = df["family_status"].astype(str).str.strip().str.lower()
 
     # Coordinates as numeric
     df["Start"] = pd.to_numeric(df["Start"], errors="coerce")
@@ -216,7 +250,7 @@ def run_pipeline(
 
     # Basic filtering
     df = df[df["Type"].isin(VALID_TYPES)].copy()
-    df = df.dropna(subset=["TrioKey", "Chr", "Start", "End", "Type", "family_statue"])
+    df = df.dropna(subset=["TrioKey", "Chr", "Start", "End", "Type", "family_status"])
     df = df.query("End > Start").copy()
 
     # Child CNV ID (used to propagate inheritance to all rows)
@@ -228,8 +262,8 @@ def run_pipeline(
         df["Type"]
     )
 
-    is_child  = df["family_statue"].eq("child")
-    is_parent = df["family_statue"].isin(["father", "mother"])
+    is_child  = df["family_status"].eq("child")
+    is_parent = df["family_status"].isin(["father", "mother"])
 
     child_uni = (
         df.loc[is_child, ["TrioKey", "Chr", "Start", "End", "Type", "cnv_id"]]
@@ -278,7 +312,7 @@ def run_pipeline(
     gdf = df.copy()
 
     gdf["Type"]          = gdf["Type"].astype(str).str.strip().str.upper()
-    gdf["family_statue"] = gdf["family_statue"].astype(str).str.strip().str.lower()
+    gdf["family_status"] = gdf["family_status"].astype(str).str.strip().str.lower()
 
     if "gene_name" not in gdf.columns:
         gdf["transmitted_gene"] = pd.NA
@@ -288,8 +322,8 @@ def run_pipeline(
                .replace({'': pd.NA, 'nan': pd.NA, 'NaN': pd.NA, 'None': pd.NA})
         )
 
-        is_child_g  = gdf["family_statue"].eq("child")
-        is_parent_g = gdf["family_statue"].isin(["father", "mother"])
+        is_child_g  = gdf["family_status"].eq("child")
+        is_parent_g = gdf["family_status"].isin(["father", "mother"])
         has_gene    = gdf["gene_name_norm"].notna()
 
         parent_gene_keys = (
@@ -319,7 +353,31 @@ def run_pipeline(
         gdf = gdf.drop(columns=["gene_name_norm"])
 
     # ===== Output: CHILD rows only =====
-    child_df = gdf.loc[gdf["family_statue"].eq("child")].copy()
+    child_df = gdf.loc[gdf["family_status"].eq("child")].copy()
+
+    # Guard: no child rows in output
+    if child_df.empty:
+        raise ValueError(
+            "No child rows found after processing. "
+            "This can happen if: (1) no CNVs belong to child samples, "
+            "(2) all child CNVs were filtered out (invalid Type, missing coordinates), or "
+            "(3) SampleIDs in the CNV file do not match ChildIDs in the pedigree."
+        )
+
+    n_inherited = child_df["transmitted_cnv"].eq(True).sum()
+    n_denovo    = child_df["transmitted_cnv"].eq(False).sum()
+    print(
+        f"INFO: {len(child_df)} child row(s) — "
+        f"{n_inherited} inherited CNV(s), {n_denovo} de novo CNV(s).",
+        file=sys.stderr
+    )
+    if n_inherited == 0:
+        print(
+            "WARN: No inherited CNVs found. All child CNVs are marked de novo. "
+            "Check overlap threshold (--overlap) and that parent CNVs are present in the input file.",
+            file=sys.stderr
+        )
+
     child_df.to_csv(output_path, sep="\t", index=False)
     print(f"OK: {len(child_df)} CHILD rows written -> {output_path}")
 

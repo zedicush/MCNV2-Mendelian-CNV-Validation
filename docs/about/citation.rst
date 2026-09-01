@@ -1,6 +1,13 @@
 Citation
 ========
 
-Please cite: - MCNV2 manuscript / preprint: **[to be added]** - GitHub repository: **[to be added]**
+Please cite MCNV2 as:
 
-.. TODO:You may also cite the annotation sources: - gnomAD v4 LOEUF - UCSC genome browser tracks used for problematic regions
+Diop MS, Lemacon A, Kumar K, Clark B, Huguet G, Benitiere F,
+Martineau JL, Hamel S, Jacquemont S. MCNV2 (Mendelian CNV Validation):
+Mendelian Precision for CNV quality assessment. bioRxiv (2026).
+doi: 10.64898/2026.04.29.721462
+
+GitHub repository:
+
+https://github.com/JacquemontLab/MCNV2-Mendelian-CNV-Validation

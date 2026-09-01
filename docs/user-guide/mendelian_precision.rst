@@ -132,11 +132,11 @@ MP increases with quality score, often plateauing at a certain threshold. This p
 **Example:**
 
 * Score ≥10: MP = 65%
-* Score ≥30: MP  780%
-* Score ≥50: MP= 90%
-* Score ≥200: M = 9 2% (plateau)
+* Score ≥30: MP = 78%
+* Score ≥50: MP = 90%
+* Score ≥200: MP = 92% (plateau)
 
-**Optimal threshold:** 50 (additional filtering beyond this point provides no MP improvement)
+**Optimal threshold:** ≥50 (additional filtering beyond this point provides no MP improvement)
 
 Filtering strategies
 --------------------
@@ -217,11 +217,11 @@ Optimal threshold identification
 
    For deletions 50-100kb:
    - Score ≥30  → MP = 75% (n = 500)
-   - Score ≥50 → MP = 85% (n = 300)
-   - Score ≥70 → MP = 92% (n = 150)  ← Plateau starts
-   - Score ≥70 → MP = 92% (n = 140)  ← No further MP gain
-   
-   Optimal threshold: 150 (plateau reached, retains 150 CNVs)
+   - Score ≥50  → MP = 85% (n = 300)
+   - Score ≥70  → MP = 92% (n = 150)  ← Plateau starts
+   - Score ≥75  → MP = 92% (n = 140)  ← No further MP gain
+
+   Optimal threshold: ≥70 (plateau reached, retains 150 CNVs)
 
 
 Technical vs biological non-inheritance

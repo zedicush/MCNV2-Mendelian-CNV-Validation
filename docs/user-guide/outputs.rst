@@ -153,7 +153,7 @@ All CNVs passing the applied filters (size, transcript overlap, problematic regi
 * **Original CNV columns:** CHR, START, STOP, TYPE, SAMPLE_ID, quality scores
 * **Annotation columns:** GeneName, GeneID, Transcript, LOEUF, problematic_region_overlap
 * **Inheritance columns:** Transmitted_CNV (True/False), Transmitted_gene (True/False/intergenic)
-* **Additional columns:** TrioKey, family_statue, cnv_id, Size_Range, transmission
+* **Additional columns:** TrioKey, family_status, cnv_id, Size_Range, transmission
 
 **Row structure:**
 

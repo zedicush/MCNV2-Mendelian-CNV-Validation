@@ -25,8 +25,10 @@ File extension can be ``.txt``, ``.tsv``, ``.bed``, ``.xls``, or any other exten
 **Optional columns (after the required 5):**
 
 * **Quality score (highly recommended)** — Caller-specific likelihood score (e.g., PennCNV quality score)
-* Number of probes
-* Caller concordance percentage (if CNVs are merged from multiple callers)
+* **Number of probes/SNPs** — Number of probes or SNPs supporting the CNV (array data)
+* **NbreAlgos** — Number of algorithms that detected the CNV (1, 2, 3...)
+* **algos_overlap** — Reciprocal overlap between caller detections (0–1 or 0–100 scale).
+  Used in Fine-tuning to filter by caller concordance.
 * Any other metadata
 
 .. important::
@@ -177,7 +179,7 @@ MCNV2 uses the following reference files (provided with the package):
 
 .. note::
 
-   **Genome build:** hg38 is supported in this release. hg19/GRCh37 support is planned.
+   **Genome build:** GRCh38/hg38 is supported in this release.
 
 File validation
 ---------------
@@ -189,7 +191,7 @@ Before running MCNV2, verify:
 3. ✅ Pedigree file contains **only complete trios** (all 3 IDs present for each trio)
 4. ✅ CNV file is tab-delimited (not comma-separated)
 5. ✅ Chromosome names are consistent (e.g., always ``chr1`` or always ``1``)
-6. ✅ CNV types are ``DEL`` or ``DUP`` (case-insensitive)
+6. ✅ CNV types are ``DEL`` or ``DUP`` — other formats (``del``, ``dup``, ``LOSS``, ``GAIN``) are not supported
 
 .. tip::
 

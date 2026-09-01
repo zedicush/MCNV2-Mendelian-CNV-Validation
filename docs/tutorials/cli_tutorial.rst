@@ -45,11 +45,11 @@ Typical workflow
    # 3. Compute Mendelian Precision
    # Note: MP is stratified by CNV type (DEL vs DUP) by default
    compute_mp(
-     inheritance_file = "results/cnvs_inheritance.tsv",
-     output_file = "results/mp_summary.tsv",
+     inheritance_file  = "results/cnvs_inheritance.tsv",
+     output_file       = "results/mp_summary.tsv",
      transmission_type = "cnv",
-     min_size = 30000,
-     max_prob_regions = 0.5
+     min_size          = 30000,
+     max_filters       = list(cnv_problematic_region_overlap = 0.5)
    )
 
 Function reference
@@ -205,10 +205,10 @@ Calculate Mendelian Precision with optional filtering.
 
 .. important::
 
-   **MP is always stratified by CNV type (DEL vs DUP) by default.** 
-   
-   This is the recommended approach as deletions and duplications have different 
-   quality profiles. Set ``stratify_by_type = FALSE`` only if you specifically need 
+   **MP is always stratified by CNV type (DEL vs DUP) by default.**
+
+   This is the recommended approach as deletions and duplications have different
+   quality profiles. Set ``stratify_by_type = FALSE`` only if you specifically need
    a single global MP value (not recommended).
 
 .. important::
@@ -221,195 +221,181 @@ Calculate Mendelian Precision with optional filtering.
 
    compute_mp(
      inheritance_file,
-     output_file,
+     output_file       = NULL,
      transmission_type = "cnv",
-     min_size = NULL,
-     max_size = NULL,
-     min_score = NULL,
-     max_prob_regions = NULL,
-     min_loeuf = NULL,
-     stratify_by_size = FALSE,
-     stratify_by_type = TRUE
+     min_size          = NULL,
+     max_size          = NULL,
+     min_filters       = list(),   # named list: col = val, applies >=
+     max_filters       = list(),   # named list: col = val, applies <=
+     min_loeuf         = NULL,
+     exclusion_genes   = NULL,     # character vector of Ensembl GeneIDs
+     stratify_by_size  = FALSE,
+     stratify_by_type  = TRUE
    )
 
 **Parameters:**
 
-* **inheritance_file** (character) — Path to inheritance file
+* **inheritance_file** (character) — Path to inheritance file.
+  Must be the output from ``compute_inheritance()``.
+  Required columns: ``transmitted_cnv``, ``transmitted_gene``
 
-  **Must be the output from compute_inheritance()**
-  
-  Required columns: Transmitted_CNV, Transmitted_gene
-
-* **output_file** (character) — Path for MP summary output
+* **output_file** (character, optional) — Path for MP summary output.
+  If ``NULL``, no file is written (data.frame returned only).
 
 * **transmission_type** (character) — Transmission matching type
 
-  * "cnv" — Use Transmitted_CNV (coordinate-based)
-  * "gene" — Use Transmitted_gene (gene-based)
-  
-  Default: "cnv"
+  * ``"cnv"`` — Use ``transmitted_cnv`` (coordinate-based)
+  * ``"gene"`` — Use ``transmitted_gene`` (gene-based)
 
-* **min_size** (numeric) — Minimum CNV size in bp (optional)
+  Default: ``"cnv"``
 
-  Example: 30000 (30 kb)
+* **min_size** (numeric, optional) — Minimum CNV size in bp.
+  Example: ``30000`` (30 kb)
 
-* **max_size** (numeric) — Maximum CNV size in bp (optional)
+* **max_size** (numeric, optional) — Maximum CNV size in bp.
 
-* **min_score** (numeric) — Minimum quality score (optional)
+* **min_filters** (named list) — Quality filters applying ``>=`` to any numeric column.
+  Column names must match columns present in the inheritance file.
+  Example: ``list(Score = 100, NbreAlgos = 2)``
 
-* **max_prob_regions** (numeric) — Maximum problematic regions overlap (0-1, optional)
+  .. note::
 
-  Example: 0.5 (exclude CNVs with >50% overlap)
+     Column names vary by study (e.g., ``Score``, ``Confidence_max``, ``QuantiSNP_Overlap``).
+     If a column is not found, a warning is issued and the filter is skipped.
 
-* **min_loeuf** (numeric) — Minimum LOEUF threshold (optional)
+* **max_filters** (named list) — Quality filters applying ``<=`` to any numeric column.
+  Example: ``list(cnv_problematic_region_overlap = 0.5)``
 
-  Example: 0.6 (exclude constrained genes)
+* **min_loeuf** (numeric, optional) — Exclude CNVs overlapping genes with LOEUF < threshold.
+  Example: ``0.6``
 
-* **stratify_by_size** (logical) — Stratify MP by size ranges
+* **exclusion_genes** (character vector, optional) — Ensembl GeneIDs to exclude from MP calculation.
+  Example: ``c("ENSG00000141510", "ENSG00000012048")``
 
-  Default: FALSE
+* **stratify_by_size** (logical) — Stratify MP by size ranges. Default: ``FALSE``
 
-* **stratify_by_type** (logical) — Stratify MP by CNV type (DEL/DUP)
-
-  Default: TRUE (recommended)
-  
-  **Keep TRUE** unless you specifically need a single global MP value. 
-  Deletions and duplications have different quality profiles and should be 
-  evaluated separately.
+* **stratify_by_type** (logical) — Stratify MP by CNV type (DEL/DUP). Default: ``TRUE`` (recommended)
 
 **Returns:**
 
-* 0 if successful
-* 1 if output file was not created (error)
+The MP data.frame **invisibly**, and writes to ``output_file`` if provided.
 
-**Output:**
+.. code-block:: R
 
-Tab-delimited file with MP statistics:
+   # Write file only (ignore return value)
+   compute_mp(inheritance_file = "...", output_file = "results/mp.tsv")
 
-* CNV_type (DEL/DUP, or All if stratify_by_type=FALSE)
-* Size_range (All, or specific ranges if stratify_by_size=TRUE)
-* Total_CNVs
-* Inherited_CNVs
-* Non_inherited_CNVs
-* MP (Mendelian Precision %)
+   # Capture return value for direct use
+   result <- compute_mp(inheritance_file = "...", output_file = "results/mp.tsv")
+
+**Output columns:**
+
+* ``CNV_type`` — DEL/DUP (or ``All`` if ``stratify_by_type = FALSE``)
+* ``Size_Range`` — ``All``, or specific ranges if ``stratify_by_size = TRUE``
+* ``Total_CNVs``
+* ``Inherited_CNVs``
+* ``Non_inherited_CNVs``
+* ``MP`` — Mendelian Precision as a proportion (0–1)
+
+.. note::
+
+   ``MP`` is returned as a **proportion** (e.g., ``0.85``), not a percentage.
+   To display as percentage: ``result$MP * 100`` or ``scales::percent(result$MP)``.
 
 **Example output (default: stratified by type):**
 
 .. code-block:: text
 
-   CNV_type  Size_range  Total_CNVs  Inherited_CNVs  Non_inherited_CNVs   MP
-   DEL       All         5000        4250            750                  85.0
-   DUP       All         3000        2400            600                  80.0
+   CNV_type  Size_Range  Total_CNVs  Inherited_CNVs  Non_inherited_CNVs  MP
+   DEL       All         5000        4250            750                 0.85
+   DUP       All         3000        2400            600                 0.80
 
-**Example output (stratified by type AND size):**
-
-.. code-block:: text
-
-   CNV_type  Size_range   Total_CNVs  Inherited_CNVs  Non_inherited_CNVs   MP
-   DEL       1-30kb       800         600             200                  75.0
-   DEL       30-50kb      600         540             60                   90.0
-   DEL       50-100kb     900         855             45                   95.0
-   DUP       1-30kb       600         420             180                  70.0
-   DUP       30-50kb      500         425             75                   85.0
-   DUP       50-100kb     700         665             35                   95.0
-
-**Example 1: Basic MP calculation (stratified by type)**
+**Example 1: Basic MP calculation**
 
 .. code-block:: R
 
    library(MCNV2)
-   
-   # Calculate MP (CNV-level, stratified by DEL/DUP, no filters)
-   compute_mp(
-     inheritance_file = "results/cnvs_inheritance.tsv",
-     output_file = "results/mp_summary.tsv",
+
+   result <- compute_mp(
+     inheritance_file  = "results/cnvs_inheritance.tsv",
+     output_file       = "results/mp_summary.tsv",
      transmission_type = "cnv"
    )
-   
-   # Read MP results
-   mp <- read.table("results/mp_summary.tsv", header = TRUE, sep = "\t")
-   print(mp)
-   #   CNV_type  Size_range  Total_CNVs  Inherited_CNVs  Non_inherited_CNVs   MP
-   #   DEL       All         5000        4250            750                  85.0
-   #   DUP       All         3000        2400            600                  80.0
 
-**Example 2: MP with filtering**
+**Example 2: MP with quality filters**
 
 .. code-block:: R
 
-   # Calculate MP with size and quality filters
-   # Still stratified by DEL/DUP (default)
+   # min_filters applies >= to any numeric column
+   # max_filters applies <= to any numeric column
    compute_mp(
-     inheritance_file = "results/cnvs_inheritance.tsv",
-     output_file = "results/mp_filtered.tsv",
+     inheritance_file  = "results/cnvs_inheritance.tsv",
+     output_file       = "results/mp_filtered.tsv",
      transmission_type = "cnv",
-     min_size = 30000,           # ≥30 kb
-     max_prob_regions = 0.5,     # ≤50% prob regions overlap
-     min_score = 100             # Score ≥100
+     min_size          = 30000,
+     min_filters       = list(Score = 100, NbreAlgos = 2),
+     max_filters       = list(cnv_problematic_region_overlap = 0.5)
    )
-   
-   # Output shows DEL and DUP separately after filtering
-   #   CNV_type  Size_range  Total_CNVs  Inherited_CNVs  Non_inherited_CNVs   MP
-   #   DEL       All         3000        2775            225                  92.5
-   #   DUP       All         1800        1620            180                  90.0
 
 **Example 3: Technical MP (excluding constrained genes)**
 
 .. code-block:: R
 
-   # Calculate technical MP (excluding LOEUF < 0.6)
    compute_mp(
-     inheritance_file = "results/cnvs_inheritance.tsv",
-     output_file = "results/mp_technical.tsv",
+     inheritance_file  = "results/cnvs_inheritance.tsv",
+     output_file       = "results/mp_technical.tsv",
      transmission_type = "gene",
-     min_loeuf = 0.6
+     min_loeuf         = 0.6
    )
-   
-   # Output:
-   #   CNV_type  Size_range  Total_CNVs  Inherited_CNVs  Non_inherited_CNVs   MP
-   #   DEL       All         4500        4185            315                  93.0
-   #   DUP       All         2700        2511            189                  93.0
 
 **Example 4: MP stratified by size**
 
 .. code-block:: R
 
-   # Calculate MP for each size range
    compute_mp(
-     inheritance_file = "results/cnvs_inheritance.tsv",
-     output_file = "results/mp_by_size.tsv",
-     transmission_type = "cnv",
-     stratify_by_size = TRUE,
-     stratify_by_type = TRUE
+     inheritance_file  = "results/cnvs_inheritance.tsv",
+     output_file       = "results/mp_by_size.tsv",
+     stratify_by_size  = TRUE,
+     stratify_by_type  = TRUE
    )
-   
-   # Output shows DEL and DUP for each size range
-   #   CNV_type  Size_range   Total_CNVs  Inherited_CNVs  Non_inherited_CNVs   MP
-   #   DEL       1-30kb       800         600             200                  75.0
-   #   DEL       30-50kb      600         540             60                   90.0
-   #   DEL       50-100kb     900         855             45                   95.0
-   #   DEL       100-200kb    700         686             14                   98.0
-   #   DUP       1-30kb       600         420             180                  70.0
-   #   DUP       30-50kb      500         425             75                   85.0
-   #   DUP       50-100kb     700         665             35                   95.0
-   #   DUP       100-200kb    500         490             10                   98.0
 
 **Example 5: Global MP (not recommended)**
 
 .. code-block:: R
 
-   # Calculate single global MP value (not stratified by type)
-   # NOT RECOMMENDED: loses information about DEL vs DUP differences
+   compute_mp(
+     inheritance_file  = "results/cnvs_inheritance.tsv",
+     output_file       = "results/mp_global.tsv",
+     transmission_type = "cnv",
+     stratify_by_type  = FALSE
+   )
+
+**Example 6: With gene exclusion list**
+
+.. code-block:: R
+
+   genes_to_exclude <- c("ENSG00000141510", "ENSG00000012048")
+
    compute_mp(
      inheritance_file = "results/cnvs_inheritance.tsv",
-     output_file = "results/mp_global.tsv",
-     transmission_type = "cnv",
-     stratify_by_type = FALSE
+     output_file      = "results/mp_no_constrained.tsv",
+     exclusion_genes  = genes_to_exclude
    )
-   
-   # Output (single row):
-   #   CNV_type  Size_range  Total_CNVs  Inherited_CNVs  Non_inherited_CNVs   MP
-   #   All       All         8000        6650            1350                 83.1
+
+**Example 7: Direct plot from return value**
+
+.. code-block:: R
+
+   result <- compute_mp(
+     inheritance_file = "results/cnvs_inheritance.tsv",
+     stratify_by_size = TRUE
+   )
+
+   library(ggplot2)
+   ggplot(result, aes(x = Size_Range, y = MP, fill = CNV_type)) +
+     geom_col(position = "dodge") +
+     scale_y_continuous(labels = scales::percent) +
+     theme_minimal()
 
 Batch processing example
 ------------------------
@@ -460,7 +446,7 @@ Process multiple datasets:
        output_file = paste0("results/", dataset, "_mp_filtered.tsv"),
        transmission_type = "cnv",
        min_size = 30000,
-       max_prob_regions = 0.5
+       max_filters = list(cnv_problematic_region_overlap = 0.5)
      )
      
      # 3c. Technical MP

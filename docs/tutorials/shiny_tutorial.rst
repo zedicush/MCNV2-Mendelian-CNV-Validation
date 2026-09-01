@@ -12,9 +12,6 @@ Launching the app
 
 .. code-block:: r
 
-   library(reticulate)
-   use_virtualenv("r-MCNV2", required = TRUE)
-   
    library(MCNV2)
    MCNV2::launch(
      bedtools_path = Sys.which("bedtools"),
@@ -57,7 +54,7 @@ Upload files and set parameters
 **Parameters:**
 
 * **Inheritance threshold:** Minimum overlap for a CNV to be considered inherited (default: 0.5)
-* **Genome build:** GRCh38/hg38 or hg19
+* **Genome build:** GRCh38/hg38
 
 **Upload workflow:**
 
@@ -153,7 +150,7 @@ The inheritance calculation adds transmission status columns:
 **New columns added:**
 
 * **TrioKey** — Trio identifier (father_mother_child sample IDs)
-* **family_statue** — Role in trio (typically "child")
+* **family_status** — Role in trio (typically "child")
 * **cnv_id** — Unique CNV identifier
 * **transmitted_cnv** — Coordinate-based inheritance status:
   

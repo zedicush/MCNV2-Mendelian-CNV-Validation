@@ -25,8 +25,7 @@ Quick Start with Test Data
 
 .. note::
 
-   The problematic regions file (GRCh38) is bundled with the MCNV2 package and
-   does not need to be downloaded separately. It is accessed via
+   The problematic regions file (GRCh38) is bundled with the MCNV2 package, located at
    ``system.file("resources", "problematic_regions_GRCh38.bed", package = "MCNV2")``.
 
 **Step 1 — Run the preprocessing pipeline (CLI)**
@@ -36,7 +35,7 @@ Quick Start with Test Data
    library(MCNV2)
 
    # 1. Annotate simulated CNVs
-   # The problematic regions file is included in the package — no download needed
+   # The problematic regions file is included in the package (see resources/)
    annotate(
      cnvs_file         = "sim_cnvs.tsv",
      prob_regions_file = system.file("resources", "problematic_regions_GRCh38.bed",
@@ -68,9 +67,8 @@ In the **Preprocessing** tab:
 
 - **CNV file** → upload ``sim_cnvs.tsv``
 - **Pedigree file** → upload ``sim_pedigree.tsv``
-- **Problematic regions** → bundled with the package at
+- **Problematic regions** → bundled with the package, located at
   ``system.file("resources", "problematic_regions_GRCh38.bed", package = "MCNV2")``
-  — no download needed, the app loads it automatically
 
 In the **MP Exploration** tab:
 

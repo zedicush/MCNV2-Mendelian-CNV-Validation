@@ -58,7 +58,7 @@ This parameter defines the minimum reciprocal overlap required between a child C
 **Genome build**
 
 * **Default:** GRCh38/hg38
-* **Planned:** GRCh37/hg19 (not yet implemented)
+* GRCh38/hg38 only
 
 Workflow
 --------

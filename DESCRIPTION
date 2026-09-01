@@ -5,7 +5,7 @@ Version: 0.1.0
 Authors@R: c(
     person(
       "Jacquemont", "Lab",
-      email = "maintainer@jacquemont-lab.org",
+      email = "mame.seynabou.diop@umontreal.ca",
       role = c("aut", "cre")
     )
   )

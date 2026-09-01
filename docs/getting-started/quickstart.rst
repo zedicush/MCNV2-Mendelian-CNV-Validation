@@ -16,7 +16,7 @@ Step 1 — Provide input data
 Upload the following files:
 
 -  **CNV file** (tab-delimited): chromosome, start, end, CNV type (DEL/DUP), sample ID
--  **Pedigree file**: parent–offspring relationships (PLINK ``.fam`` or KING ``.kin``)
+-  **Pedigree file**: tab-delimited, 3 columns — child ID, father ID, mother ID (see :doc:`../user-guide/input_formats` for details)
 
 Only complete trios (child + both parents) are retained for analysis.
 
@@ -61,9 +61,12 @@ Running MCNV2 via CLI
 
 MCNV2 can also be run in batch mode using the command-line interface (CLI), making it suitable for large cohorts and reproducible pipelines.
 
-!!! note CLI commands depend on your local installation and wrapper scripts. See the full CLI tutorial for recommended usage patterns and examples.
+.. note::
 
-👉 **Go to:** [CLI tutorial -> (../tutorials/cli_tutorial.md)
+   CLI commands depend on your local installation and wrapper scripts.
+   See the full CLI tutorial for recommended usage patterns and examples.
+
+👉 **Go to:** :doc:`CLI tutorial <../tutorials/cli_tutorial>`
 
 --------------
 
